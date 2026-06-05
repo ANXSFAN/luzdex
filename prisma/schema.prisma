@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  factoryId String?  @map("factory_id") // null = 平台超管；预留工厂自助登录
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+/// A manufacturer / tenant. Each Factory is a separate company whose products
+/// are served under its own brand on the public datasheet pages.
+model Factory {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  name            String
+  brandShort      String?   @map("brand_short")
+  logoUrl         String?   @map("logo_url")
+  contactEmail    String?   @map("contact_email")
+  contactWhatsapp String?   @map("contact_whatsapp")
+  inquiryNote     String?   @map("inquiry_note") @db.Text
+  accentColor     String?   @map("accent_color")
+  defaultLocale   String    @default("zh-CN") @map("default_locale")
+  supportedLocales String[] @default(["zh-CN", "en"]) @map("supported_locales")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  products        Product[]
+
+  @@map("factories")
+}
+
+/// A local mirror of a product owned by a main site. The datasheet never
+/// writes back to the source; it only syncs identity + display fields so its
+/// public pages keep working even if the source site is down.
+model Product {
+  id             String         @id @default(cuid())
+  sourceId       String         @map("source_id")
+  slug           String         @unique
+  modelNumber    String         @map("model_number")
+  name           String
+  description    String?        @db.Text
+  specs          Json?
+  certifications String[]       @default([])
+  coverImage     String?        @map("cover_image")
+  category       String?                                  // strip|channel|power|connector|accessory
+  series         String?                                  // 同系列自动聚合键
+  attributes     Json?                                    // { pcbWidth:"10mm", voltage:"24V", watt:14.4 } 自动匹配用
+  factoryId      String         @map("factory_id")
+  syncedAt       DateTime       @default(now()) @map("synced_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  factory        Factory        @relation(fields: [factoryId], references: [id], onDelete: Restrict)
+  documents      Document[]
+  videos         Video[]
+  images         ProductImage[]
+  scanLogs       ScanLog[]
+  inquiryClicks  InquiryClick[]
+  pdfDownloads   PdfDownload[]
+  linksOut       ProductLink[]  @relation("from")
+  linksIn        ProductLink[]  @relation("to")
+
+  @@unique([factoryId, sourceId])
+  @@index([factoryId])
+  @@index([factoryId, series])
+  @@index([factoryId, category])
+  @@map("products")
+}
+
+/// 产品间关系。手动 / 导入填的"适配型号"为权威，优先于属性自动匹配展示。
+model ProductLink {
+  id        String   @id @default(cuid())
+  factoryId String   @map("factory_id") // 冗余存一份，约束关系不跨租户
+  fromId    String   @map("from_id")
+  toId      String   @map("to_id")
+  relation  String   @default("accessory") // accessory|alternative
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  from      Product  @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
+  to        Product  @relation("to", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, relation])
+  @@index([toId])
+  @@index([factoryId])
+  @@map("product_links")
+}
+
+/// 批量导入任务。驱动"先预览后写库"流程，并为大批量异步化预留结构。
+model ImportJob {
+  id          String   @id @default(cuid())
+  factoryId   String   @map("factory_id")
+  fileName    String   @map("file_name")
+  status      String // uploaded|validating|preview_ready|importing|done|failed
+  totalRows   Int      @default(0) @map("total_rows")
+  createdRows Int      @default(0) @map("created_rows")
+  updatedRows Int      @default(0) @map("updated_rows")
+  errorRows   Int      @default(0) @map("error_rows")
+  report      Json? // 逐行结果 / 错误明细，供预览与下载
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([factoryId, createdAt])
+  @@map("import_jobs")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  url       String
+  alt       String?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+/// One row per public datasheet view. Written non-blocking via Next 16 after().
+model ScanLog {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  scannedAt DateTime @default(now()) @map("scanned_at")
+  userAgent String?  @map("user_agent") @db.Text
+  country   String?
+  locale    String?
+  source    String?  // 渠道归因码（?s=expo2026…）；null = 直接访问 / 未带码
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, scannedAt])
+  @@index([productId, source])
+  @@map("scan_logs")
+}
+
+/// One row per inquiry deep-link click. Written via navigator.sendBeacon.
+model InquiryClick {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  channel   String                                    // "email" | "whatsapp"
+  clickedAt DateTime @default(now()) @map("clicked_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, clickedAt])
+  @@map("inquiry_clicks")
+}
+
+/// One row per datasheet PDF download. Written via navigator.sendBeacon from the
+/// public page (not the PDF route — that route is cached 60s and would undercount).
+model PdfDownload {
+  id           String   @id @default(cuid())
+  productId    String   @map("product_id")
+  source       String?  // 渠道归因码，复用 ScanLog 同一套来源码
+  downloadedAt DateTime @default(now()) @map("downloaded_at")
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, downloadedAt])
+  @@map("pdf_downloads")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  title     String
+  fileUrl   String   @map("file_url")
+  fileName  String   @map("file_name")
+  fileSize  Int      @map("file_size")
+  mimeType  String   @map("mime_type")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("documents")
+}
+
+model Video {
+  id         String   @id @default(cuid())
+  productId  String   @map("product_id")
+  title      String
+  url        String
+  coverImage String?  @map("cover_image")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("videos")
+}

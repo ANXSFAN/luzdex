@@ -1,0 +1,282 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { FileText, Film, Trash2, Upload, Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
+
+interface DocumentItem {
+  id: string;
+  title: string;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+}
+interface VideoItem {
+  id: string;
+  title: string;
+  url: string;
+}
+
+interface Props {
+  productId: string;
+  documents: DocumentItem[];
+  videos: VideoItem[];
+}
+
+async function uploadFile(file: File) {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/upload", { method: "POST", body: fd });
+  if (!res.ok) throw new Error("上传失败");
+  return res.json() as Promise<{
+    url: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+  }>;
+}
+
+function fmtSize(b: number) {
+  return b < 1048576 ? `${Math.round(b / 1024)} KB` : `${(b / 1048576).toFixed(1)} MB`;
+}
+
+export function MaterialManager({ productId, documents, videos }: Props) {
+  return (
+    <div className="mt-10 space-y-10">
+      <VideoSection productId={productId} videos={videos} />
+      <DocumentSection productId={productId} documents={documents} />
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
+      {children}
+    </h2>
+  );
+}
+
+function VideoSection({ productId, videos }: { productId: string; videos: VideoItem[] }) {
+  const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  async function handlePickVideo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const result = await uploadFile(file);
+      setUrl(result.url);
+      if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
+      toast.success("视频已上传");
+    } catch {
+      toast.error("视频上传失败");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function handleAdd() {
+    if (!title.trim() || !url.trim()) {
+      toast.error("请填写标题和视频链接");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, title: title.trim(), url: url.trim() }),
+      });
+      if (!res.ok) {
+        toast.error("添加失败");
+      } else {
+        toast.success("视频已添加");
+        setTitle("");
+        setUrl("");
+        router.refresh();
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/videos/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("已删除");
+      router.refresh();
+    } else {
+      toast.error("删除失败");
+    }
+  }
+
+  return (
+    <section>
+      <SectionTitle>视频 Videos</SectionTitle>
+
+      {videos.length > 0 && (
+        <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
+          {videos.map((v) => (
+            <li key={v.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <Film className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
+                <span className="truncate text-sm text-[var(--color-ink)]">{v.title}</span>
+              </div>
+              <button
+                onClick={() => handleDelete(v.id)}
+                className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="space-y-2 rounded-xl border border-dashed border-[var(--color-rule)] p-4">
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="视频标题"
+          className="form-input"
+        />
+        <div className="flex gap-2">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="视频链接，或点击右侧上传"
+            className="form-input min-w-0 flex-1"
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 text-xs transition hover:bg-[var(--color-surface-sunken)] disabled:opacity-50"
+          >
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            上传
+          </button>
+          <input ref={fileRef} type="file" accept="video/*" hidden onChange={handlePickVideo} />
+        </div>
+        <button
+          onClick={handleAdd}
+          disabled={saving}
+          className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+          添加视频
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DocumentSection({
+  productId,
+  documents,
+}: {
+  productId: string;
+  documents: DocumentItem[];
+}) {
+  const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function handlePickDoc(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const docTitle = title.trim() || file.name.replace(/\.[^.]+$/, "");
+    setBusy(true);
+    try {
+      const uploaded = await uploadFile(file);
+      const res = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          title: docTitle,
+          fileUrl: uploaded.url,
+          fileName: uploaded.fileName,
+          fileSize: uploaded.fileSize,
+          mimeType: uploaded.mimeType,
+        }),
+      });
+      if (!res.ok) {
+        toast.error("添加失败");
+      } else {
+        toast.success("文档已添加");
+        setTitle("");
+        router.refresh();
+      }
+    } catch {
+      toast.error("上传失败");
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("已删除");
+      router.refresh();
+    } else {
+      toast.error("删除失败");
+    }
+  }
+
+  return (
+    <section>
+      <SectionTitle>文档 Documents</SectionTitle>
+
+      {documents.length > 0 && (
+        <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
+          {documents.map((d) => (
+            <li key={d.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <FileText className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
+                <span className="truncate text-sm text-[var(--color-ink)]">{d.title}</span>
+                <span className="shrink-0 font-mono text-xs text-[var(--color-ink-muted)]">
+                  {fmtSize(d.fileSize)}
+                </span>
+              </div>
+              <button
+                onClick={() => handleDelete(d.id)}
+                className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="space-y-2 rounded-xl border border-dashed border-[var(--color-rule)] p-4">
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="文档标题（留空则用文件名）"
+          className="form-input"
+        />
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          选择文件并上传
+        </button>
+        <input ref={fileRef} type="file" hidden onChange={handlePickDoc} />
+      </div>
+    </section>
+  );
+}

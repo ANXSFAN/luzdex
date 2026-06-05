@@ -1,0 +1,88 @@
+{
+  "product": {
+    "header": {
+      "datasheetTag": "· Datasheet",
+      "ref": "Ref · {ref}",
+      "rev": "Rev · {date}"
+    },
+    "identification": {
+      "label": "Identification",
+      "sub": "铭牌信息",
+      "model": "Model",
+      "manufacturer": "Manufacturer",
+      "documents": "Documents",
+      "media": "Media",
+      "certs": "Certs ·"
+    },
+    "figures": {
+      "label": "Figures",
+      "sub": "产品视觉",
+      "captionSingle": "Photography is illustrative; final finishes vary by spec.",
+      "captionMulti": "点击缩略图切换主图。"
+    },
+    "specifications": {
+      "label": "Specifications",
+      "sub": "技术规格"
+    },
+    "documents": {
+      "label": "Documents",
+      "sub": "技术文档",
+      "open": "Open"
+    },
+    "media": {
+      "label": "Media",
+      "sub": "参考视频"
+    },
+    "inquiry": {
+      "label": "Inquiry",
+      "sub": "询盘 / 联系制造商",
+      "directLine": "Direct line to manufacturer",
+      "emailLabel": "Email enquiry",
+      "whatsappLabel": "WhatsApp",
+      "subject": "[询盘] {model} — {name}",
+      "greeting": "您好 {factory}，",
+      "intro": "我对贵司的产品有意向：",
+      "modelLine": "型号：{model}",
+      "refLine": "编号：{ref}",
+      "askHeader": "请提供：",
+      "askPrice": "1. 价格与起订量",
+      "askLead": "2. 交期",
+      "askCustom": "3. 定制选项",
+      "thanks": "感谢。",
+      "waPrefill": "您好，咨询型号 {model} — {name}（编号 {ref}）。",
+      "refNote": "提交时已自动附上编号（{ref}），方便制造商核对。"
+    },
+    "related": {
+      "label": "Related",
+      "sub": "相关产品",
+      "seriesLabel": "同系列",
+      "seriesSub": "Same series",
+      "accessoriesLabel": "适配 / 配件",
+      "accessoriesSub": "Compatible",
+      "cat": {
+        "strip": "灯带",
+        "channel": "铝槽",
+        "power": "电源",
+        "connector": "连接件",
+        "accessory": "配件"
+      }
+    },
+    "empty": {
+      "label": "No resources",
+      "text": "Datasheet in preparation."
+    },
+    "pdf": {
+      "label": "Compiled PDF",
+      "sub": "完整资料 PDF",
+      "title": "Download full datasheet",
+      "meta": "{model} · {ref} · A4 · printable",
+      "open": "Open"
+    },
+    "footer": {
+      "access": "Accessed via QR · {date}",
+      "doc": "Doc · {ref} — {model}",
+      "page": "Page 01 / 01",
+      "end": "— End of datasheet —"
+    }
+  }
+}
