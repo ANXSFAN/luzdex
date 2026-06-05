@@ -37,25 +37,6 @@
       "label": "Media",
       "sub": "Reference video"
     },
-    "inquiry": {
-      "label": "Inquiry",
-      "sub": "Contact the manufacturer",
-      "directLine": "Direct line to manufacturer",
-      "emailLabel": "Email enquiry",
-      "whatsappLabel": "WhatsApp",
-      "subject": "[Inquiry] {model} — {name}",
-      "greeting": "Hello {factory},",
-      "intro": "I'm interested in your product:",
-      "modelLine": "Model: {model}",
-      "refLine": "Ref: {ref}",
-      "askHeader": "Please share:",
-      "askPrice": "1. Pricing & MOQ",
-      "askLead": "2. Lead time",
-      "askCustom": "3. Customisation options",
-      "thanks": "Thank you.",
-      "waPrefill": "Hello, I'm enquiring about {model} — {name} (ref {ref}).",
-      "refNote": "The product reference ({ref}) is quoted automatically so the manufacturer can identify your enquiry."
-    },
     "related": {
       "label": "Related",
       "sub": "Related products",

@@ -145,7 +145,8 @@ model ScanLog {
   @@map("scan_logs")
 }
 
-/// One row per inquiry deep-link click. Written via navigator.sendBeacon.
+/// Legacy: 询盘点击表。前台询盘入口已下线（纯展示定位），保留表与历史数据，
+/// 暂不写入新行。确认无需历史数据后可单独跑 drop migration 清除。
 model InquiryClick {
   id        String   @id @default(cuid())
   productId String   @map("product_id")

@@ -37,25 +37,6 @@
       "label": "Media",
       "sub": "参考视频"
     },
-    "inquiry": {
-      "label": "Inquiry",
-      "sub": "询盘 / 联系制造商",
-      "directLine": "Direct line to manufacturer",
-      "emailLabel": "Email enquiry",
-      "whatsappLabel": "WhatsApp",
-      "subject": "[询盘] {model} — {name}",
-      "greeting": "您好 {factory}，",
-      "intro": "我对贵司的产品有意向：",
-      "modelLine": "型号：{model}",
-      "refLine": "编号：{ref}",
-      "askHeader": "请提供：",
-      "askPrice": "1. 价格与起订量",
-      "askLead": "2. 交期",
-      "askCustom": "3. 定制选项",
-      "thanks": "感谢。",
-      "waPrefill": "您好，咨询型号 {model} — {name}（编号 {ref}）。",
-      "refNote": "提交时已自动附上编号（{ref}），方便制造商核对。"
-    },
     "related": {
       "label": "Related",
       "sub": "相关产品",
