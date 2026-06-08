@@ -16,11 +16,11 @@
   --color-rule: #d2d2d7;
   --color-rule-strong: #86868b;
 
-  /* Accent — defaults to Apple ink. This variable exists ONLY to carry the
-     per-tenant white-label colour (factory.accentColor injected at runtime).
-     It is no longer used as a decorative highlight. */
-  --color-accent: #1d1d1f;
-  --color-accent-soft: #424245;
+  /* Accent — a living Apple-blue default so icons / highlights / spec viz read
+     with depth instead of dead grey. Per-tenant white-label colour
+     (factory.accentColor) overrides --color-accent at runtime when set. */
+  --color-accent: #0071e3;
+  --color-accent-soft: #0058b0;
 
   /* Radius scale — Apple */
   --radius: 10px;
@@ -85,15 +85,17 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-/* ── Kicker — small mono caps section marker (now neutral) ── */
+/* ── Kicker — small sans caps section marker. Sans (not mono) keeps the
+   eyebrow feeling Apple-soft rather than blueprint-technical; mono is now
+   reserved for genuine machine data (model nums, spec values, sizes). ── */
 .kicker {
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
 }
