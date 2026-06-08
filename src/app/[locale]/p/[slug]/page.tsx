@@ -720,38 +720,38 @@ function SectionRail({
     <>
       {/* Mobile compact — single header strip */}
       <div className="lg:hidden">
-        <div className="flex items-baseline justify-between border-b border-[var(--color-rule-strong)] pb-2">
+        <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-2.5">
           <div className="flex items-baseline gap-2.5">
-            <span className="font-mono text-[15px] font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+            <span className="font-mono text-[17px] font-semibold tracking-tight text-[var(--color-accent)] tabular-nums">
               {no}
             </span>
-            <span className="kicker">
-              <span className="kicker-mark">/</span>
-              <span>{label}</span>
+            <span className="text-[15px] font-semibold text-[var(--color-ink)]">
+              {label}
             </span>
           </div>
           {typeof count === "number" && (
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)] tabular-nums">
+            <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-muted)]">
               {String(count).padStart(2, "0")}
             </span>
           )}
         </div>
-        <p className="mt-1.5 text-[12px] text-[var(--color-ink-muted)]">{sub}</p>
+        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">{sub}</p>
       </div>
 
       {/* Desktop vertical rail */}
       <div className="hidden lg:block">
-        <p className="headline-lg text-[34px] leading-none text-[var(--color-ink-faint)]">
+        <p className="headline-lg text-[40px] leading-none text-[var(--color-accent)]">
           {no}
         </p>
-        <p className="kicker mt-4">
-          <span>{label}</span>
+        <p className="mt-4 text-[17px] font-semibold leading-tight text-[var(--color-ink)]">
+          {label}
         </p>
-        <p className="mt-1 text-[13px] text-[var(--color-ink-muted)]">{sub}</p>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--color-ink-muted)]">
+          {sub}
+        </p>
         {typeof count === "number" && (
-          <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-            {String(count).padStart(2, "0")}{" "}
-            {count === 1 ? "item" : "items"}
+          <p className="mt-5 font-mono text-[11px] tabular-nums text-[var(--color-ink-muted)]">
+            {String(count).padStart(2, "0")} {count === 1 ? "item" : "items"}
           </p>
         )}
       </div>
