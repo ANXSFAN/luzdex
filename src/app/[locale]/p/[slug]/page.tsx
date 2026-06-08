@@ -18,7 +18,6 @@ import {
   Circle,
   Plus,
   Check,
-  Package,
 } from "lucide-react";
 import { Fragment } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -542,7 +541,7 @@ export default async function ProductDatasheetPage({
                       <p className="font-sans text-[15px] font-medium text-[var(--color-ink)] sm:text-[16px]">
                         {tr?.docTitles?.[i] ?? doc.title}
                       </p>
-                      <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
+                      <p className="mt-1 truncate font-mono text-[11px] text-[var(--color-ink-muted)]">
                         {doc.fileName}
                       </p>
                     </div>
@@ -773,27 +772,27 @@ function SpecTable({
           className="rounded-2xl bg-[var(--color-surface-sunken)] p-6 sm:p-7"
         >
           {g.name && (
-            <div className="mb-3 flex items-baseline gap-3">
-              <span className="dot-filament" aria-hidden />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-ink)]">
+            <div className="mb-4 flex items-center gap-3">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-accent)]"
+                aria-hidden
+              />
+              <span className="text-[15px] font-semibold text-[var(--color-ink)]">
                 {g.name}
               </span>
               <span className="h-px flex-1 bg-[var(--color-rule)]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-                {String(g.items.length).padStart(2, "0")}
-              </span>
             </div>
           )}
           <dl className="grid grid-cols-1 gap-x-10 gap-y-0 sm:grid-cols-2">
             {g.items.map((s, i) => (
               <div
                 key={`${g.name}-${s.label}-${i}`}
-                className="flex items-baseline justify-between gap-4 border-b border-[var(--color-rule)] py-2.5 last:border-b-0 sm:last:border-b"
+                className="flex items-baseline justify-between gap-4 border-b border-[var(--color-rule)] py-3 last:border-b-0 sm:last:border-b"
               >
-                <dt className="text-[13px] text-[var(--color-ink-soft)]">
+                <dt className="text-[14px] text-[var(--color-ink-soft)]">
                   {s.label}
                 </dt>
-                <dd className="text-right font-mono text-[13px] font-medium tabular-nums text-[var(--color-ink)]">
+                <dd className="text-right font-mono text-[14px] font-medium tabular-nums text-[var(--color-ink)]">
                   {s.value}
                   {s.unit ? (
                     <span className="ml-1 text-[var(--color-ink-muted)]">
@@ -871,7 +870,7 @@ function SpecChips({ items }: { items: ProductHighlight[] }) {
                 {h.value}
               </p>
             )}
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] leading-tight text-[var(--color-ink-muted)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.04em] leading-snug text-[var(--color-ink-muted)]">
               {h.label}
             </p>
           </div>
@@ -1034,7 +1033,7 @@ function CompareTable({
                 <tr className="bg-[var(--color-surface-sunken)]">
                   <td
                     colSpan={variants.length + 1}
-                    className="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-ink)]"
+                    className="px-4 py-2.5 text-[13px] font-semibold text-[var(--color-ink)]"
                   >
                     {g.name}
                   </td>
@@ -1326,15 +1325,6 @@ function InstallContent({ install }: { install: Install }) {
 function BoxList({ items, note }: { items: BoxItem[]; note: string }) {
   return (
     <div className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)] p-6 sm:p-7">
-      <div className="mb-4 flex items-center gap-2.5">
-        <Package
-          className="h-5 w-5 text-[var(--color-accent)]"
-          strokeWidth={1.5}
-        />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-ink)]">
-          In the box
-        </span>
-      </div>
       <ul className="grid grid-cols-1 gap-x-10 gap-y-0 sm:grid-cols-2">
         {items.map((b, i) => (
           <li
