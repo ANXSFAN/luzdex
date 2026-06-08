@@ -3,7 +3,6 @@ import { after } from "next/server";
 import { headers } from "next/headers";
 import Link from "next/link";
 import {
-  ArrowUpRight,
   Download,
   ShieldCheck,
   Droplets,
@@ -278,7 +277,8 @@ export default async function ProductDatasheetPage({
       >
         {/* ── Hero — product-forward catalog layout ─────────── */}
         <section className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12 lg:gap-y-10">
-          <div className="lg:col-span-5">
+          {/* A · identify — kept short so mobile sees the product fast */}
+          <div className="order-1 self-start lg:col-span-5">
             <p className="kicker rise-in" data-step="1">
               <span className="dot-filament" aria-hidden />
               <span>{factory?.name ?? "Manufacturer"}</span>
@@ -353,34 +353,12 @@ export default async function ProductDatasheetPage({
               </div>
             )}
 
-            {description && (
-              <div
-                className="mt-7 space-y-3 text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
-                data-step="3"
-              >
-                {description
-                  .split(/\n\s*\n/)
-                  .filter((s) => s.trim().length > 0)
-                  .map((para, i) => (
-                    <p key={i}>{para.trim()}</p>
-                  ))}
-              </div>
-            )}
-
-            {product.certifications.length > 0 && (
-              <div className="mt-7 rise-in" data-step="5">
-                <CertList
-                  certs={product.certifications}
-                  label={t("identification.certs")}
-                  locale={locale as AppLocale}
-                />
-              </div>
-            )}
           </div>
 
-          {/* Product image — front and centre for catalog scanning */}
+          {/* Product image — on mobile this lands right after the title,
+              so customers see the product before any prose */}
           {galleryImages.length > 0 && (
-            <div className="lg:col-span-7">
+            <div className="order-2 self-start lg:col-span-7 lg:row-span-2">
               <ProductGallery
                 images={galleryImages}
                 modelNumber={product.modelNumber}
@@ -389,17 +367,46 @@ export default async function ProductDatasheetPage({
             </div>
           )}
 
-          {/* Key specs — at-a-glance chip row spanning the hero width */}
+          {/* Key specs — right after the image on mobile; full-width band on desktop */}
           {highlights.length > 0 && (
-            <div className="rise-in lg:col-span-12" data-step="4">
+            <div className="order-3 rise-in lg:order-4 lg:col-span-12" data-step="4">
               <SpecChips items={highlights} />
+            </div>
+          )}
+
+          {/* B · description + certs — pushed below the image on mobile */}
+          {(description || product.certifications.length > 0) && (
+            <div className="order-4 self-start lg:order-3 lg:col-span-5">
+              {description && (
+                <div
+                  className="space-y-3 text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
+                  data-step="3"
+                >
+                  {description
+                    .split(/\n\s*\n/)
+                    .filter((s) => s.trim().length > 0)
+                    .map((para, i) => (
+                      <p key={i}>{para.trim()}</p>
+                    ))}
+                </div>
+              )}
+
+              {product.certifications.length > 0 && (
+                <div className="mt-7 rise-in" data-step="5">
+                  <CertList
+                    certs={product.certifications}
+                    label={t("identification.certs")}
+                    locale={locale as AppLocale}
+                  />
+                </div>
+              )}
             </div>
           )}
 
           {/* Colour-temperature scale — only when the product states a CCT;
               the band marks its real value on the 2700–6500 K reference. */}
           {cct && (
-            <div className="lg:col-span-12">
+            <div className="order-5 lg:col-span-12">
               <CctScale cct={cct} />
             </div>
           )}
@@ -523,6 +530,7 @@ export default async function ProductDatasheetPage({
                 <li key={doc.id}>
                   <a
                     href={doc.fileUrl}
+                    download
                     target="_blank"
                     rel="noopener noreferrer"
                     className="doc-row group flex items-center gap-4 py-4 pr-4 pl-4 sm:gap-6 sm:pl-5"
@@ -544,9 +552,11 @@ export default async function ProductDatasheetPage({
                     <span className="hidden w-20 shrink-0 text-right font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)] sm:inline">
                       {fmtSize(doc.fileSize)}
                     </span>
-                    <span className="doc-action flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em]">
-                      {t("documents.open")}
-                      <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    <span
+                      aria-label={t("documents.open")}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent)] text-white transition group-hover:brightness-110"
+                    >
+                      <Download className="h-4 w-4" strokeWidth={1.75} />
                     </span>
                   </a>
                 </li>
@@ -1159,22 +1169,15 @@ function CertList({
       </span>
       {certs.map((c) => {
         const info = lookupCert(c);
-        // zh 显中文释义，其余语言用英文释义兜底（多语扩展见 Phase 2）
+        // 释义只进 tooltip（避免在非中文页堆一排英文长句），chip 本身只显代码
         const explain = info ? (locale === "zh" ? info.zh : info.en) : null;
         return (
           <span
             key={c}
             title={explain ?? undefined}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-rule-strong)] py-1 pl-3 pr-1 text-[var(--color-ink)]"
+            className="inline-flex items-center rounded-full bg-[var(--color-surface-sunken)] px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--color-ink)]"
           >
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em]">
-              {c}
-            </span>
-            {explain && (
-              <span className="rounded-full bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[11px] font-normal normal-case tracking-normal text-[var(--color-ink-soft)]">
-                {explain}
-              </span>
-            )}
+            {c}
           </span>
         );
       })}
