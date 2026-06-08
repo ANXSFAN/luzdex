@@ -2,8 +2,7 @@
 // 现有的 100W（led-floodlight-100w）+ 这里新增的 50W / 150W 共用同一 series，
 // 三者互为变体。单一数据源：seed.ts 建库、backfill-showcase.ts 补库共用。
 
-const u = (id: string, w = 1600) =>
-  `https://images.unsplash.com/photo-${id}?w=${w}&q=80`;
+import { img } from "./product-images.js";
 
 export const FLOODLIGHT_SERIES = "floodlight-pro";
 export const FLOODLIGHT_MAIN_SLUG = "led-floodlight-100w";
@@ -35,7 +34,7 @@ export const FLOODLIGHT_VARIANTS: VariantProduct[] = [
     description:
       "中小场景户外 LED 投光灯，IP66 全防水 + IK08 抗冲击，130 lm/W 高光效，适用于庭院、招牌、门头与小型广告牌的近距离泛光照明。",
     certifications: ["CE", "RoHS", "IP66", "IK08"],
-    coverImage: u("1542736667-069246bdbc6d"),
+    coverImage: img("floodlightMast"),
     variantLabel: "50W",
     tagline: "IP66 全防水 · IK08 抗冲击 · 130lm/W 高光效",
     highlights: [
@@ -63,7 +62,7 @@ export const FLOODLIGHT_VARIANTS: VariantProduct[] = [
     description:
       "大场景户外 LED 投光灯，IP66 全防水 + IK08 抗冲击，130 lm/W 高光效，适用于体育场、大型广告牌、堆场与建筑立面的远距离大面积投射。",
     certifications: ["CE", "RoHS", "ENEC", "IP66", "IK08"],
-    coverImage: u("1581094794329-c8112a89af12"),
+    coverImage: img("floodlightStadium"),
     variantLabel: "150W",
     tagline: "IP66 全防水 · IK08 抗冲击 · 19,500lm 大光通",
     highlights: [

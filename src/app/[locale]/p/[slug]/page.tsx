@@ -6,6 +6,9 @@ import {
   ArrowUpRight,
   Download,
   ScanLine,
+  Plus,
+  Check,
+  Package,
   ShieldCheck,
   Droplets,
   Zap,
@@ -19,6 +22,7 @@ import {
   BatteryCharging,
   Circle,
 } from "lucide-react";
+import { Fragment } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { Metadata, Viewport } from "next";
 import { hasLocale } from "next-intl";
@@ -29,13 +33,34 @@ import {
   findPublicProductBySlug,
   findRelatedProducts,
   findVariants,
+  findVariantComparison,
+  buildVariantMatrix,
   parseSpecs,
   groupSpecs,
   parseHighlights,
   parseDetailBlocks,
+  parseApplications,
+  parseFaq,
+  parseBoxContents,
+  parseInstall,
+  parseDimensions,
+  parseDimensionsJson,
+  parseContentI18n,
+  buildSpecViz,
+  parseCct,
+  lookupCert,
   type ProductSpec,
   type ProductHighlight,
   type DetailBlock,
+  type Application,
+  type FaqItem,
+  type CompareGroup,
+  type VariantComparison,
+  type BoxItem,
+  type Install,
+  type SpecVizItem,
+  type Dimensions,
+  type Cct,
 } from "@/lib/products";
 import { ProductGallery } from "@/components/product-gallery";
 import { RelatedProducts } from "@/components/related-products";
@@ -138,28 +163,65 @@ export default async function ProductDatasheetPage({
     : undefined;
 
   const specs = parseSpecs(product.specs);
-  const specGroups = groupSpecs(specs);
-  const highlights = parseHighlights(product.highlights);
-  const detailBlocks = parseDetailBlocks(product.detailBlocks);
+  const tr = parseContentI18n(product.contentI18n)[locale];
+  const displaySpecs =
+    tr?.specs && tr.specs.length === specs.length ? tr.specs : specs;
+  const specGroups = groupSpecs(displaySpecs);
+  const specViz = buildSpecViz(
+    specs,
+    displaySpecs === specs ? undefined : displaySpecs
+  );
+  const cct = parseCct(displaySpecs);
+  const name = tr?.name || product.name;
+  const description = tr?.description || product.description;
+  const tagline = tr?.tagline || product.tagline;
+  const highlights = tr?.highlights ?? parseHighlights(product.highlights);
+  const faq = tr?.faq ?? parseFaq(product.faq);
 
-  const [related, variants] = await Promise.all([
-    findRelatedProducts(product),
+  const srcApplications = parseApplications(product.applications);
+  const applications = srcApplications.map((s, i) => {
+    const t = tr?.applications?.[i];
+    return { ...s, title: t?.title || s.title, desc: t?.desc ?? s.desc };
+  });
+  const srcDetailBlocks = parseDetailBlocks(product.detailBlocks);
+  const detailBlocks: DetailBlock[] = srcDetailBlocks.map((s, i) => {
+    const t = tr?.detailBlocks?.[i];
+    if (s.kind === "image") {
+      return {
+        kind: "image",
+        url: s.url,
+        caption:
+          (t && t.kind === "image" ? t.caption : undefined) ?? s.caption,
+      };
+    }
+    const text =
+      t && (t.kind === "heading" || t.kind === "text") ? t.text : s.text;
+    return { kind: s.kind, text };
+  });
+  const boxContents = tr?.boxContents ?? parseBoxContents(product.boxContents);
+  const install = tr?.install ?? parseInstall(product.install);
+  const dimensions =
+    tr?.dimensions ??
+    parseDimensionsJson(product.dimensions) ??
+    parseDimensions(specs);
+
+  const [related, variants, variantCompare] = await Promise.all([
+    findRelatedProducts(product, locale),
     findVariants(product),
+    findVariantComparison(product),
   ]);
+  const compareGroups = buildVariantMatrix(variantCompare);
   const hasRelated =
     related.siblings.length > 0 || related.accessories.length > 0;
 
   const galleryImages = [
     ...(product.coverImage
-      ? [{ url: product.coverImage, alt: product.name }]
+      ? [{ url: product.coverImage, alt: name }]
       : []),
     ...product.images.map((img) => ({ url: img.url, alt: img.alt })),
   ];
 
-  const supportedLocales = (factory?.supportedLocales ?? [...routing.locales])
-    .filter((l): l is AppLocale =>
-      (routing.locales as readonly string[]).includes(l)
-    );
+  const supportedLocales = [...routing.locales];
 
   const pdfHref = getPathname({
     href: `/p/${product.slug}/pdf`,
@@ -193,9 +255,9 @@ export default async function ProductDatasheetPage({
             />
             <ShareButton
               locale={locale}
-              name={product.name}
+              name={name}
               modelNumber={product.modelNumber}
-              tagline={product.tagline ?? ""}
+              tagline={tagline ?? ""}
               brand={brandShort}
               coverImage={product.coverImage ?? galleryImages[0]?.url ?? null}
             />
@@ -227,7 +289,7 @@ export default async function ProductDatasheetPage({
               className="headline-xl mt-4 text-[40px] leading-[1.03] text-[var(--color-ink)] sm:mt-5 sm:text-[64px] lg:text-[88px] rise-in"
               data-step="2"
             >
-              {product.name}
+              {name}
             </h1>
 
             <p
@@ -237,12 +299,12 @@ export default async function ProductDatasheetPage({
               {product.modelNumber}
             </p>
 
-            {product.tagline && (
+            {tagline && (
               <p
                 className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] text-[var(--color-ink-soft)] rise-in"
                 data-step="3"
               >
-                {product.tagline
+                {tagline
                   .split(/[·、,，]/)
                   .map((s) => s.trim())
                   .filter(Boolean)
@@ -292,12 +354,12 @@ export default async function ProductDatasheetPage({
               </div>
             )}
 
-            {product.description && (
+            {description && (
               <div
                 className="mt-7 max-w-[44rem] space-y-3 text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
                 data-step="3"
               >
-                {product.description
+                {description
                   .split(/\n\s*\n/)
                   .filter((s) => s.trim().length > 0)
                   .map((para, i) => (
@@ -400,7 +462,7 @@ export default async function ProductDatasheetPage({
               <ProductGallery
                 images={galleryImages}
                 modelNumber={product.modelNumber}
-                fallbackAlt={product.name}
+                fallbackAlt={name}
               />
             </div>
           </section>

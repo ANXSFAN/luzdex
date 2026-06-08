@@ -7,6 +7,13 @@ import {
   parseAttributes,
   parseHighlights,
   parseDetailBlocks,
+  parseApplications,
+  parseFaq,
+  parseBoxContents,
+  parseInstall,
+  parseDimensionsJson,
+  parseContentI18n,
+  contentSourceHash,
 } from "@/lib/products";
 import { suggestAccessories } from "@/lib/matching";
 import { QrCard } from "@/components/qr-card";
@@ -99,6 +106,69 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       ? { kind: "image" as const, url: b.url, caption: b.caption ?? "" }
       : b
   );
+  const initialApplications = parseApplications(product.applications).map(
+    (a) => ({
+      icon: a.icon,
+      title: a.title,
+      desc: a.desc ?? "",
+      image: a.image ?? "",
+    })
+  );
+  const initialFaq = parseFaq(product.faq);
+  const initialBoxContents = parseBoxContents(product.boxContents).map((b) => ({
+    item: b.item,
+    qty: b.qty ?? "",
+  }));
+  const initialInstall = parseInstall(product.install);
+  const d = parseDimensionsJson(product.dimensions);
+  const initialDim = {
+    w: d ? String(d.w) : "",
+    h: d ? String(d.h) : "",
+    d: d?.d != null ? String(d.d) : "",
+    unit: d?.unit ?? "",
+    cutout: d?.cutout ?? "",
+  };
+  const ci = parseContentI18n(product.contentI18n);
+  const translatedLocales = Object.keys(ci);
+  // 各语言译文 → 编辑器形状，供语言模式编辑器加载
+  const initialTranslations = Object.fromEntries(
+    Object.entries(ci).map(([loc, c]) => [
+      loc,
+      {
+        tagline: c.tagline ?? "",
+        description: c.description ?? "",
+        highlights: (c.highlights ?? []).map((h) => ({
+          icon: h.icon,
+          label: h.label,
+          value: h.value ?? "",
+        })),
+        blocks: (c.detailBlocks ?? []).map((b) =>
+          b.kind === "image"
+            ? { kind: "image" as const, url: b.url, caption: b.caption ?? "" }
+            : b
+        ),
+        applications: (c.applications ?? []).map((a) => ({
+          icon: a.icon,
+          title: a.title,
+          desc: a.desc ?? "",
+          image: a.image ?? "",
+        })),
+        faq: c.faq ?? [],
+        boxContents: (c.boxContents ?? []).map((b) => ({
+          item: b.item,
+          qty: b.qty ?? "",
+        })),
+        installMethod: c.install?.method ?? "",
+        installSteps: c.install?.steps ?? [],
+        dimCutout: c.dimensions?.cutout ?? "",
+      },
+    ])
+  );
+  // 译文是否已过期：有译文 + 有指纹 + 当前源内容指纹与之不符
+  const translationStale =
+    translatedLocales.length > 0 &&
+    !!product.translationStamp &&
+    contentSourceHash(product) !== product.translationStamp;
 
   // 30-day buckets, days[29] = today
   const buckets = new Map<string, number>();
@@ -245,8 +315,20 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         productId={product.id}
         initialTagline={product.tagline ?? ""}
         initialVariantLabel={product.variantLabel ?? ""}
+        initialDescription={product.description ?? ""}
+        initialLuminaireType={product.luminaireType ?? ""}
         initialHighlights={initialHighlights}
         initialBlocks={initialBlocks}
+        initialApplications={initialApplications}
+        initialFaq={initialFaq}
+        initialBoxContents={initialBoxContents}
+        initialInstallMethod={initialInstall?.method ?? ""}
+        initialInstallSteps={initialInstall?.steps ?? []}
+        initialDim={initialDim}
+        initialSourceLocale={product.sourceLocale ?? "zh"}
+        translatedLocales={translatedLocales}
+        translationStale={translationStale}
+        initialTranslations={initialTranslations}
       />
 
       <ProductRelations

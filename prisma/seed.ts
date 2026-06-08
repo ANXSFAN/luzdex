@@ -2,8 +2,9 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
-import { SHOWCASE } from "./showcase-data.js";
+import { SHOWCASE, PRODUCT_EXTRAS } from "./showcase-data.js";
 import { applyFloodlightVariants } from "./variant-demo.js";
+import { img } from "./product-images.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -26,9 +27,6 @@ type SeedProduct = {
   documents: { title: string; fileName: string }[];
   videos: { title: string; url: string; coverImage: string | null }[];
 };
-
-const u = (id: string, w = 1600) =>
-  `https://images.unsplash.com/photo-${id}?w=${w}&q=80`;
 
 const products: SeedProduct[] = [
   {
@@ -54,10 +52,10 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "寿命 L70", value: "50,000", unit: "h" },
       { group: "Lifetime", label: "工作温度", value: "-20 ~ +50", unit: "℃" },
     ],
-    coverImage: u("1558002038-1055907df827"),
+    coverImage: img("stripClose"),
     extraImages: [
-      { url: u("1565814329452-e1efa11c5b89"), alt: "LED 灯带应用 1" },
-      { url: u("1513506003901-1e6a229e2d15"), alt: "LED 灯带应用 2" },
+      { url: img("stripApplication"), alt: "LED 灯带应用 1" },
+      { url: img("stripClose"), alt: "LED 灯带应用 2" },
     ],
     documents: [
       { title: "产品规格书", fileName: "LS-2835-IP65-datasheet.pdf" },
@@ -68,7 +66,7 @@ const products: SeedProduct[] = [
       {
         title: "产品介绍",
         url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        coverImage: u("1565814329452-e1efa11c5b89", 800),
+        coverImage: img("stripApplication", 800),
       },
     ],
   },
@@ -96,10 +94,10 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "寿命 L70", value: "30,000", unit: "h" },
       { group: "Lifetime", label: "工作温度", value: "-10 ~ +45", unit: "℃" },
     ],
-    coverImage: u("1565538810643-b5bdb714032a"),
+    coverImage: img("downlightCeiling"),
     extraImages: [
-      { url: u("1513506003901-1e6a229e2d15"), alt: "筒灯应用场景 1" },
-      { url: u("1497366216548-37526070297c"), alt: "筒灯应用场景 2" },
+      { url: img("downlightCeiling"), alt: "筒灯应用场景 1" },
+      { url: img("downlightInterior"), alt: "筒灯应用场景 2" },
     ],
     documents: [
       { title: "产品规格书", fileName: "DL-9W-datasheet.pdf" },
@@ -109,7 +107,7 @@ const products: SeedProduct[] = [
       {
         title: "安装演示",
         url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        coverImage: u("1513506003901-1e6a229e2d15", 800),
+        coverImage: img("downlightCeiling", 800),
       },
     ],
   },
@@ -138,10 +136,10 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "寿命 L70", value: "50,000", unit: "h" },
       { group: "Lifetime", label: "工作温度", value: "-30 ~ +50", unit: "℃" },
     ],
-    coverImage: u("1542736667-069246bdbc6d"),
+    coverImage: img("floodlightStadium"),
     extraImages: [
-      { url: u("1518837695005-2083093ee35b"), alt: "投光灯户外应用" },
-      { url: u("1581094794329-c8112a89af12"), alt: "投光灯安装现场" },
+      { url: img("floodlightStadium"), alt: "投光灯户外应用" },
+      { url: img("floodlightMast"), alt: "投光灯安装现场" },
     ],
     documents: [
       { title: "产品规格书", fileName: "FL-100W-datasheet.pdf" },
@@ -152,7 +150,7 @@ const products: SeedProduct[] = [
       {
         title: "户外应用案例",
         url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        coverImage: u("1518837695005-2083093ee35b", 800),
+        coverImage: img("floodlightStadium", 800),
       },
       {
         title: "防水测试",
@@ -186,9 +184,9 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "电池循环", value: "≥ 2,000", unit: "次" },
       { group: "Lifetime", label: "雨天续航", value: "3", unit: "天" },
     ],
-    coverImage: u("1518837695005-2083093ee35b"),
+    coverImage: img("solarStreetlight"),
     extraImages: [
-      { url: u("1545063328-c8e3faffa16f"), alt: "太阳能路灯安装" },
+      { url: img("solarStreetlightRoad"), alt: "太阳能路灯安装" },
     ],
     documents: [
       { title: "产品规格书", fileName: "SL-60W-datasheet.pdf" },
@@ -222,10 +220,10 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "LM-80 测试", value: "已通过 6,000h" },
       { group: "Lifetime", label: "工作温度", value: "-30 ~ +50", unit: "℃" },
     ],
-    coverImage: u("1581094794329-c8112a89af12"),
+    coverImage: img("highbayWarehouse"),
     extraImages: [
-      { url: u("1567502352061-a8b8f9d12068"), alt: "工矿灯应用场景" },
-      { url: u("1542736667-069246bdbc6d"), alt: "工矿灯散热细节" },
+      { url: img("highbayWarehouse"), alt: "工矿灯应用场景" },
+      { url: img("highbayFixture"), alt: "工矿灯散热细节" },
     ],
     documents: [
       { title: "产品规格书", fileName: "HB-200W-datasheet.pdf" },
@@ -266,10 +264,10 @@ const products: SeedProduct[] = [
       { group: "Lifetime", label: "寿命 L70", value: "40,000", unit: "h" },
       { group: "Lifetime", label: "工作温度", value: "0 ~ +40", unit: "℃" },
     ],
-    coverImage: u("1497366216548-37526070297c"),
+    coverImage: img("panelCeiling"),
     extraImages: [
-      { url: u("1567502352061-a8b8f9d12068"), alt: "面板灯办公应用" },
-      { url: u("1565538810643-b5bdb714032a"), alt: "面板灯吊顶安装" },
+      { url: img("panelCeiling"), alt: "面板灯办公应用" },
+      { url: img("downlightInterior"), alt: "面板灯吊顶安装" },
     ],
     documents: [
       { title: "产品规格书", fileName: "PL-36W-datasheet.pdf" },
@@ -307,6 +305,7 @@ async function main() {
 
   for (const p of products) {
     const sc = SHOWCASE[p.slug];
+    const ex = PRODUCT_EXTRAS[p.slug];
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
       update: {
@@ -319,6 +318,11 @@ async function main() {
         tagline: sc?.tagline ?? null,
         highlights: sc?.highlights ?? [],
         detailBlocks: sc?.detailBlocks ?? [],
+        applications: sc?.applications ?? [],
+        faq: sc?.faq ?? [],
+        luminaireType: ex?.luminaireType ?? null,
+        boxContents: ex?.boxContents ?? [],
+        install: ex?.install ?? undefined,
       },
       create: {
         slug: p.slug,
@@ -332,6 +336,11 @@ async function main() {
         tagline: sc?.tagline ?? null,
         highlights: sc?.highlights ?? [],
         detailBlocks: sc?.detailBlocks ?? [],
+        applications: sc?.applications ?? [],
+        faq: sc?.faq ?? [],
+        luminaireType: ex?.luminaireType ?? null,
+        boxContents: ex?.boxContents ?? [],
+        install: ex?.install ?? undefined,
         factoryId: factory.id,
       },
     });

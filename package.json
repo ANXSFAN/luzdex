@@ -11,6 +11,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:backfill-showcase": "tsx prisma/backfill-showcase.ts",
+    "db:translate-all": "tsx prisma/translate-all.ts",
     "db:studio": "prisma studio"
   },
   "prisma": {

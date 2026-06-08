@@ -18,7 +18,6 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/p/:path*",
-    "/zh-CN/:path*",
-    "/en/:path*",
+    "/(es|en|fr|de|it|pt|nl|pl|zh)/:path*",
   ],
 };

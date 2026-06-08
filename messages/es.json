@@ -7,7 +7,7 @@
     },
     "identification": {
       "label": "Identification",
-      "sub": "Nameplate",
+      "sub": "Placa de datos",
       "model": "Model",
       "manufacturer": "Manufacturer",
       "documents": "Documents",
@@ -15,93 +15,93 @@
       "certs": "Certs ·"
     },
     "variants": {
-      "label": "Select variant"
+      "label": "Elegir variante"
     },
     "figures": {
       "label": "Figures",
-      "sub": "Product visuals",
-      "captionSingle": "Photography is illustrative; final finishes vary by spec.",
-      "captionMulti": "Tap a thumbnail to switch the main view."
+      "sub": "Imágenes del producto",
+      "captionSingle": "Las fotos son ilustrativas; el acabado final varía según la especificación.",
+      "captionMulti": "Toca una miniatura para cambiar la vista principal."
     },
     "applications": {
       "label": "Applications",
-      "sub": "Where it's used"
+      "sub": "Dónde se usa"
     },
     "performance": {
       "label": "Performance",
-      "sub": "Key metrics"
+      "sub": "Métricas clave"
     },
     "detail": {
       "label": "Detail",
-      "sub": "Product detail"
+      "sub": "Detalle del producto"
     },
     "specifications": {
       "label": "Specifications",
-      "sub": "Technical data"
+      "sub": "Datos técnicos"
     },
     "compare": {
       "label": "Compare",
-      "sub": "Variant comparison"
+      "sub": "Comparación de variantes"
     },
     "install": {
       "label": "Setup",
-      "sub": "Size & install"
+      "sub": "Medidas e instalación"
     },
     "box": {
       "label": "In the Box",
-      "sub": "What's included",
-      "note": "Package contents are indicative; actual packaging prevails."
+      "sub": "Qué incluye",
+      "note": "El contenido es orientativo; prevalece el embalaje real."
     },
     "dim": {
-      "width": "Width",
-      "height": "Height",
-      "depth": "Depth",
-      "cutout": "Cutout"
+      "width": "Ancho",
+      "height": "Alto",
+      "depth": "Fondo",
+      "cutout": "Corte"
     },
     "documents": {
       "label": "Documents",
-      "sub": "Technical files",
+      "sub": "Archivos técnicos",
       "open": "Open"
     },
     "media": {
       "label": "Media",
-      "sub": "Reference video"
+      "sub": "Vídeo de referencia"
     },
     "faq": {
       "label": "FAQ",
-      "sub": "Common questions"
+      "sub": "Preguntas frecuentes"
     },
     "related": {
       "label": "Related",
-      "sub": "Related products",
-      "seriesLabel": "Same series",
+      "sub": "Productos relacionados",
+      "seriesLabel": "Misma serie",
       "seriesSub": "Same series",
-      "accessoriesLabel": "Accessories",
+      "accessoriesLabel": "Accesorios",
       "accessoriesSub": "Compatible",
       "cat": {
-        "strip": "Strip",
-        "channel": "Channel",
-        "power": "Power",
-        "connector": "Connector",
-        "accessory": "Accessory"
+        "strip": "Tira",
+        "channel": "Perfil",
+        "power": "Fuente",
+        "connector": "Conector",
+        "accessory": "Accesorio"
       }
     },
     "empty": {
       "label": "No resources",
-      "text": "Datasheet in preparation."
+      "text": "Ficha técnica en preparación."
     },
     "pdf": {
       "label": "Compiled PDF",
-      "sub": "Full datasheet PDF",
-      "title": "Download full datasheet",
+      "sub": "PDF de la ficha completa",
+      "title": "Descargar ficha completa",
       "meta": "{model} · {ref} · A4 · printable",
       "open": "Open"
     },
     "footer": {
-      "access": "Accessed via QR · {date}",
+      "access": "Accedido por QR · {date}",
       "doc": "Doc · {ref} — {model}",
       "page": "Page 01 / 01",
-      "end": "— End of datasheet —"
+      "end": "— Fin de la ficha —"
     }
   }
 }

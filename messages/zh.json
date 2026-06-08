@@ -20,8 +20,16 @@
     "figures": {
       "label": "Figures",
       "sub": "产品视觉",
-      "captionSingle": "Photography is illustrative; final finishes vary by spec.",
+      "captionSingle": "图片仅供示意，最终成品以规格为准。",
       "captionMulti": "点击缩略图切换主图。"
+    },
+    "applications": {
+      "label": "Applications",
+      "sub": "应用场景"
+    },
+    "performance": {
+      "label": "Performance",
+      "sub": "性能指标"
     },
     "detail": {
       "label": "Detail",
@@ -31,6 +39,25 @@
       "label": "Specifications",
       "sub": "技术规格"
     },
+    "compare": {
+      "label": "Compare",
+      "sub": "规格对比"
+    },
+    "install": {
+      "label": "Setup",
+      "sub": "尺寸 · 安装"
+    },
+    "box": {
+      "label": "In the Box",
+      "sub": "包装清单",
+      "note": "包装清单仅供参考，以实际包装为准。"
+    },
+    "dim": {
+      "width": "宽",
+      "height": "高",
+      "depth": "厚",
+      "cutout": "开孔"
+    },
     "documents": {
       "label": "Documents",
       "sub": "技术文档",
@@ -39,6 +66,10 @@
     "media": {
       "label": "Media",
       "sub": "参考视频"
+    },
+    "faq": {
+      "label": "FAQ",
+      "sub": "常见问题"
     },
     "related": {
       "label": "Related",
@@ -57,20 +88,20 @@
     },
     "empty": {
       "label": "No resources",
-      "text": "Datasheet in preparation."
+      "text": "资料整理中。"
     },
     "pdf": {
       "label": "Compiled PDF",
       "sub": "完整资料 PDF",
-      "title": "Download full datasheet",
+      "title": "下载完整资料",
       "meta": "{model} · {ref} · A4 · printable",
       "open": "Open"
     },
     "footer": {
-      "access": "Accessed via QR · {date}",
+      "access": "扫码访问 · {date}",
       "doc": "Doc · {ref} — {model}",
       "page": "Page 01 / 01",
-      "end": "— End of datasheet —"
+      "end": "— 资料结束 —"
     }
   }
 }

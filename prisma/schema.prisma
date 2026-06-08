@@ -31,8 +31,8 @@ model Factory {
   contactWhatsapp String?   @map("contact_whatsapp")
   inquiryNote     String?   @map("inquiry_note") @db.Text
   accentColor     String?   @map("accent_color")
-  defaultLocale   String    @default("zh-CN") @map("default_locale")
-  supportedLocales String[] @default(["zh-CN", "en"]) @map("supported_locales")
+  defaultLocale   String    @default("es") @map("default_locale")
+  supportedLocales String[] @default(["es", "en", "fr", "de", "it", "pt", "nl", "pl", "zh"]) @map("supported_locales")
   isActive        Boolean   @default(true) @map("is_active")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -61,6 +61,15 @@ model Product {
   variantLabel   String?        @map("variant_label")     // 同系列内的规格标签，如 "100W" / "暖光 3000K"
   highlights     Json?                                    // [{ icon, label, value? }] 亮点图标排
   detailBlocks   Json?          @map("detail_blocks")     // [{ kind:"heading"|"text"|"image", ... }] 京东式图文长详情
+  applications   Json?                                    // [{ icon, title, desc?, image? }] 应用场景「用在哪里」
+  faq            Json?                                    // [{ q, a }] 常见问题（终端顾客·使用向：安装/色温/防护/质保）
+  luminaireType  String?        @map("luminaire_type")    // 灯具类型（手动）：downlight/floodlight/panel/strip… AI 生成上下文 + 尺寸示意形状
+  boxContents    Json?          @map("box_contents")      // [{ item, qty? }] 盒内清单（AI 草稿+人工，标"以实际包装为准"）
+  install        Json?                                    // { method?, steps?[] } 安装方式/步骤（AI 草稿+人工）
+  dimensions     Json?                                    // { w, h, d?, unit, cutout? } 尺寸（AI 抽取/人工，优先于 specs 正则）
+  sourceLocale   String?        @map("source_locale") @default("zh") // 源语言（人工填写的语言）；AI 据此翻译其余语言
+  contentI18n    Json?          @map("content_i18n")     // { [locale]: { name?, description?, tagline?, highlights?, ... } } 各语言译文，缺则回退源字段
+  translationStamp String?      @map("translation_stamp") // 上次翻译时的源内容指纹；与当前源不一致 = 译文已过期
   factoryId      String         @map("factory_id")
   syncedAt       DateTime       @default(now()) @map("synced_at")
   createdAt      DateTime       @default(now()) @map("created_at")

@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Share2, X, Copy, Check, Download, Loader2 } from "lucide-react";
 import QRCode from "qrcode";
 
-type Locale = "zh-CN" | "en";
+type Locale =
+  | "es"
+  | "en"
+  | "fr"
+  | "de"
+  | "it"
+  | "pt"
+  | "nl"
+  | "pl"
+  | "zh";
 
 const T: Record<
   Locale,
@@ -20,16 +30,16 @@ const T: Record<
     longPress: string;
   }
 > = {
-  "zh-CN": {
-    share: "分享",
-    title: "分享产品",
-    generating: "正在生成海报…",
-    save: "保存图片",
-    copy: "复制链接",
-    copied: "已复制",
-    system: "系统分享",
-    scanHint: "扫码查看产品",
-    longPress: "长按图片可保存到相册",
+  es: {
+    share: "Compartir",
+    title: "Compartir producto",
+    generating: "Generando póster…",
+    save: "Guardar imagen",
+    copy: "Copiar enlace",
+    copied: "Copiado",
+    system: "Compartir",
+    scanHint: "Escanea para ver el producto",
+    longPress: "Mantén pulsada la imagen para guardarla",
   },
   en: {
     share: "Share",
@@ -41,6 +51,83 @@ const T: Record<
     system: "Share",
     scanHint: "Scan to view product",
     longPress: "Long-press the image to save it",
+  },
+  fr: {
+    share: "Partager",
+    title: "Partager le produit",
+    generating: "Génération de l'affiche…",
+    save: "Enregistrer l'image",
+    copy: "Copier le lien",
+    copied: "Copié",
+    system: "Partager",
+    scanHint: "Scannez pour voir le produit",
+    longPress: "Appui long sur l'image pour l'enregistrer",
+  },
+  de: {
+    share: "Teilen",
+    title: "Produkt teilen",
+    generating: "Poster wird erstellt…",
+    save: "Bild speichern",
+    copy: "Link kopieren",
+    copied: "Kopiert",
+    system: "Teilen",
+    scanHint: "Scannen, um das Produkt zu sehen",
+    longPress: "Bild lange drücken zum Speichern",
+  },
+  it: {
+    share: "Condividi",
+    title: "Condividi prodotto",
+    generating: "Generazione del poster…",
+    save: "Salva immagine",
+    copy: "Copia link",
+    copied: "Copiato",
+    system: "Condividi",
+    scanHint: "Scansiona per vedere il prodotto",
+    longPress: "Tieni premuta l'immagine per salvarla",
+  },
+  pt: {
+    share: "Partilhar",
+    title: "Partilhar produto",
+    generating: "A gerar o cartaz…",
+    save: "Guardar imagem",
+    copy: "Copiar ligação",
+    copied: "Copiado",
+    system: "Partilhar",
+    scanHint: "Digitalize para ver o produto",
+    longPress: "Mantenha a imagem premida para guardar",
+  },
+  nl: {
+    share: "Delen",
+    title: "Product delen",
+    generating: "Poster genereren…",
+    save: "Afbeelding opslaan",
+    copy: "Link kopiëren",
+    copied: "Gekopieerd",
+    system: "Delen",
+    scanHint: "Scan om het product te bekijken",
+    longPress: "Houd de afbeelding ingedrukt om op te slaan",
+  },
+  pl: {
+    share: "Udostępnij",
+    title: "Udostępnij produkt",
+    generating: "Generowanie plakatu…",
+    save: "Zapisz obraz",
+    copy: "Kopiuj link",
+    copied: "Skopiowano",
+    system: "Udostępnij",
+    scanHint: "Zeskanuj, aby zobaczyć produkt",
+    longPress: "Przytrzymaj obraz, aby zapisać",
+  },
+  zh: {
+    share: "分享",
+    title: "分享产品",
+    generating: "正在生成海报…",
+    save: "保存图片",
+    copy: "复制链接",
+    copied: "已复制",
+    system: "系统分享",
+    scanHint: "扫码查看产品",
+    longPress: "长按图片可保存到相册",
   },
 };
 
@@ -202,7 +289,17 @@ export function ShareButton({
   const [poster, setPoster] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const t = T[(locale as Locale) in T ? (locale as Locale) : "zh-CN"];
+  const t = T[(locale as Locale) in T ? (locale as Locale) : "en"];
+
+  // Esc 关闭
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -270,13 +367,15 @@ export function ShareButton({
         <Share2 className="h-3.5 w-3.5" strokeWidth={1.75} />
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-5 backdrop-blur-sm"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-        >
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-5 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setOpen(false);
+            }}
+          >
           <div className="w-full max-w-[360px] overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--color-rule)] px-5 py-3.5">
               <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-ink)]">
@@ -351,8 +450,9 @@ export function ShareButton({
               )}
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

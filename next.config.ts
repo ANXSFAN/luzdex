@@ -11,9 +11,10 @@ const r2Host = (() => {
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: r2Host
-      ? [{ protocol: "https", hostname: r2Host }]
-      : [],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      ...(r2Host ? [{ protocol: "https" as const, hostname: r2Host }] : []),
+    ],
     unoptimized: true,
   },
 };

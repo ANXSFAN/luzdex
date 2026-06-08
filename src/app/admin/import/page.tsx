@@ -1,10 +1,13 @@
 import { getActiveFactory } from "@/lib/active-factory";
 import { ImportWizard } from "@/components/import-wizard";
+import { AutofillShowcasePanel } from "@/components/autofill-showcase-panel";
+import { countMissingShowcase } from "@/app/admin/products/actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminImportPage() {
   const factory = await getActiveFactory();
+  const missingShowcase = factory ? await countMissingShowcase() : 0;
 
   return (
     <div>
@@ -16,7 +19,10 @@ export default async function AdminImportPage() {
       </div>
 
       {factory ? (
-        <ImportWizard factoryName={factory.name} />
+        <>
+          <ImportWizard factoryName={factory.name} />
+          <AutofillShowcasePanel missingCount={missingShowcase} />
+        </>
       ) : (
         <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-16 text-center">
           <p className="text-sm text-[var(--color-ink-muted)]">
