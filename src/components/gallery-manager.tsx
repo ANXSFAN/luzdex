@@ -20,6 +20,7 @@ import {
   reorderProductImages,
   setProductCover,
 } from "@/app/admin/products/actions";
+import { useFileDrop } from "@/components/use-file-drop";
 
 type GalleryImage = { id: string; url: string; alt: string | null };
 
@@ -74,10 +75,7 @@ export function GalleryManager({
     });
   }
 
-  async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (coverRef.current) coverRef.current.value = "";
-    if (!file) return;
+  async function uploadCoverFile(file: File) {
     setUploading(true);
     try {
       const { url } = await uploadImage(file);
@@ -91,9 +89,7 @@ export function GalleryManager({
     }
   }
 
-  async function handleAddPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    if (addRef.current) addRef.current.value = "";
+  async function addFiles(files: File[]) {
     if (files.length === 0) return;
     setUploading(true);
     try {
@@ -109,6 +105,27 @@ export function GalleryManager({
       setUploading(false);
     }
   }
+
+  function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (coverRef.current) coverRef.current.value = "";
+    if (file) uploadCoverFile(file);
+  }
+
+  function handleAddPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (addRef.current) addRef.current.value = "";
+    addFiles(files);
+  }
+
+  const coverDrop = useFileDrop((files) => uploadCoverFile(files[0]), {
+    accept: "image",
+    disabled: uploading || pending,
+  });
+  const galleryDrop = useFileDrop(addFiles, {
+    accept: "image",
+    disabled: uploading || pending,
+  });
 
   function move(i: number, dir: -1 | 1) {
     const j = i + dir;
@@ -136,7 +153,14 @@ export function GalleryManager({
           {t("prod.cover")}
         </label>
         <div className="mt-2 flex items-center gap-4">
-          <div className="relative h-24 w-32 shrink-0 overflow-hidden rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
+          <div
+            {...coverDrop.dropProps}
+            className={`relative h-24 w-32 shrink-0 overflow-hidden rounded-lg border bg-[var(--color-surface-sunken)] transition ${
+              coverDrop.dragging
+                ? "border-[var(--color-ink)] ring-2 ring-[var(--color-ink)]"
+                : "border-[var(--color-rule)]"
+            }`}
+          >
             {coverImage ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={coverImage} alt="" className="h-full w-full object-cover" />
@@ -183,7 +207,14 @@ export function GalleryManager({
       </div>
 
       {/* 画廊图 */}
-      <div className="mt-6">
+      <div
+        {...galleryDrop.dropProps}
+        className={`mt-6 rounded-lg transition ${
+          galleryDrop.dragging
+            ? "ring-2 ring-[var(--color-ink)] ring-offset-4 ring-offset-[var(--color-surface)]"
+            : ""
+        }`}
+      >
         <div className="flex items-center justify-between">
           <label className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
             {t("prod.galleryImgs")}

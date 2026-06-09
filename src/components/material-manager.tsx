@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FileText, Film, Trash2, Upload, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useFileDrop } from "@/components/use-file-drop";
 
 interface DocumentItem {
   id: string;
@@ -68,9 +69,7 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  async function handlePickVideo(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function uploadVideoFile(file: File) {
     setUploading(true);
     try {
       const result = await uploadFile(file);
@@ -84,6 +83,16 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
+  function handlePickVideo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadVideoFile(file);
+  }
+
+  const { dragging, dropProps } = useFileDrop(
+    (files) => uploadVideoFile(files[0]),
+    { disabled: uploading },
+  );
 
   async function handleAdd() {
     if (!title.trim() || !url.trim()) {
@@ -143,7 +152,14 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
         </ul>
       )}
 
-      <div className="space-y-2 rounded-xl border border-dashed border-[var(--color-rule)] p-4">
+      <div
+        {...dropProps}
+        className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
+          dragging
+            ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
+            : "border-[var(--color-rule)]"
+        }`}
+      >
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -193,9 +209,7 @@ function DocumentSection({
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handlePickDoc(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function uploadDocFile(file: File) {
     const docTitle = title.trim() || file.name.replace(/\.[^.]+$/, "");
     setBusy(true);
     try {
@@ -226,6 +240,16 @@ function DocumentSection({
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
+  function handlePickDoc(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadDocFile(file);
+  }
+
+  const { dragging, dropProps } = useFileDrop(
+    (files) => uploadDocFile(files[0]),
+    { disabled: busy },
+  );
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
@@ -263,7 +287,14 @@ function DocumentSection({
         </ul>
       )}
 
-      <div className="space-y-2 rounded-xl border border-dashed border-[var(--color-rule)] p-4">
+      <div
+        {...dropProps}
+        className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
+          dragging
+            ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
+            : "border-[var(--color-rule)]"
+        }`}
+      >
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}

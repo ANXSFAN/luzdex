@@ -22,6 +22,7 @@ import {
 } from "@/app/admin/products/actions";
 import { LOCALE_LABELS, LOCALE_ORDER } from "@/i18n/routing";
 import { LUMINAIRE_TYPES } from "@/lib/luminaire";
+import { useFileDrop } from "@/components/use-file-drop";
 
 type Highlight = { icon: string; label: string; value: string };
 type Application = { icon: string; title: string; desc: string; image: string };
@@ -110,10 +111,7 @@ function ImageUrlField({
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
-  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (ref.current) ref.current.value = "";
-    if (!file) return;
+  async function uploadOne(file: File) {
     setBusy(true);
     try {
       const url = await uploadImageFile(file);
@@ -126,8 +124,26 @@ function ImageUrlField({
     }
   }
 
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (ref.current) ref.current.value = "";
+    if (file) uploadOne(file);
+  }
+
+  const { dragging, dropProps } = useFileDrop((files) => uploadOne(files[0]), {
+    accept: "image",
+    disabled: busy,
+  });
+
   return (
-    <>
+    <div
+      {...dropProps}
+      className={`space-y-2 rounded-lg transition ${
+        dragging
+          ? "ring-2 ring-[var(--color-ink)] ring-offset-2 ring-offset-[var(--color-surface)]"
+          : ""
+      }`}
+    >
       <div className="flex gap-2">
         <input
           value={value}
@@ -158,7 +174,7 @@ function ImageUrlField({
           className={`${previewMaxH} rounded-md border border-[var(--color-rule)] object-cover`}
         />
       )}
-    </>
+    </div>
   );
 }
 

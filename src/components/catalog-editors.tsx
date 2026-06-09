@@ -6,6 +6,7 @@ import { Loader2, Plus, Trash2, ImageOff, Languages, Globe } from "lucide-react"
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { LOCALE_LABELS, LOCALE_ORDER, type AppLocale } from "@/i18n/routing";
+import { useFileDrop } from "@/components/use-file-drop";
 import {
   updateCategory,
   deleteCategory,
@@ -163,10 +164,7 @@ export function CategoryEditor({
   })();
   const parentOpts = categories.filter((c) => !descendants.has(c.id));
 
-  async function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (!f) return;
+  async function uploadOne(f: File) {
     setUploading(true);
     try {
       setImage(await uploadImage(f));
@@ -177,6 +175,17 @@ export function CategoryEditor({
       setUploading(false);
     }
   }
+
+  function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadOne(f);
+  }
+
+  const { dragging, dropProps } = useFileDrop((files) => uploadOne(files[0]), {
+    accept: "image",
+    disabled: uploading,
+  });
 
   function save() {
     if (!name.trim()) return toast.error("分类名（源语言）不能为空");
@@ -242,7 +251,14 @@ export function CategoryEditor({
 
       <div className="mt-4 flex flex-col gap-4 sm:flex-row">
         <div className="flex flex-col gap-2 sm:w-40 sm:shrink-0">
-          <div className="relative aspect-square overflow-hidden rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
+          <div
+            {...dropProps}
+            className={`relative aspect-square overflow-hidden rounded-lg border bg-[var(--color-surface-sunken)] transition ${
+              dragging
+                ? "border-[var(--color-ink)] ring-2 ring-[var(--color-ink)]"
+                : "border-[var(--color-rule)]"
+            }`}
+          >
             {image ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={image} alt="" className="h-full w-full object-cover" />
@@ -358,10 +374,7 @@ export function SeriesEditor({
   const [pending, start] = useTransition();
   const [translating, startTr] = useTransition();
 
-  async function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (!f) return;
+  async function uploadOne(f: File) {
     setUploading(true);
     try {
       setCover(await uploadImage(f));
@@ -371,6 +384,17 @@ export function SeriesEditor({
     } finally {
       setUploading(false);
     }
+  }
+
+  const { dragging, dropProps } = useFileDrop((files) => uploadOne(files[0]), {
+    accept: "image",
+    disabled: uploading,
+  });
+
+  function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadOne(f);
   }
 
   function save() {
@@ -453,7 +477,14 @@ export function SeriesEditor({
 
       <div className="mt-4 flex flex-col gap-4 sm:flex-row">
         <div className="flex flex-col gap-2 sm:w-44 sm:shrink-0">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
+          <div
+            {...dropProps}
+            className={`relative aspect-[4/3] overflow-hidden rounded-lg border bg-[var(--color-surface-sunken)] transition ${
+              dragging
+                ? "border-[var(--color-ink)] ring-2 ring-[var(--color-ink)]"
+                : "border-[var(--color-rule)]"
+            }`}
+          >
             {cover ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={cover} alt="" className="h-full w-full object-cover" />

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { AccentSwatchPicker } from "@/components/accent-swatch-picker";
 import { ACCENT_SWATCHES } from "@/components/accent-swatches";
+import { FactoryLogoField } from "@/components/factory-logo-field";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,7 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
   const locale = await getAdminLocale();
   const t = await getTranslations({ locale, namespace: "more" });
   const tc = await getTranslations({ locale, namespace: "admin.common" });
+  const tp = await getTranslations({ locale, namespace: "prod" });
 
   return (
     <div className="space-y-8">
@@ -112,15 +114,14 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
             />
           </Field>
           <Field
-            label="Logo URL"
+            label="Logo"
             help={t("facLogoHelp")}
           >
-            <input
+            <FactoryLogoField
               name="logoUrl"
-              type="url"
-              placeholder="https://…/logo.svg"
-              defaultValue={factory.logoUrl ?? ""}
-              className="form-input"
+              initial={factory.logoUrl}
+              uploadLabel={tc("upload")}
+              clearLabel={tp("clearCover")}
             />
           </Field>
         </Section>
