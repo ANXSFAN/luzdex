@@ -90,9 +90,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const product = await findPublicProductBySlug(slug);
   if (!product) return { title: "Product not found" };
-  const brand = product.factory?.brandShort ?? product.factory?.name ?? "Cloud";
+  // 纯展示定位：标题不带任何工厂/品牌信息，只留产品名 + 型号。
   return {
-    title: `${product.name} · ${product.modelNumber} — ${brand}`,
+    title: `${product.name} · ${product.modelNumber}`,
     robots: { index: false, follow: false },
   };
 }
@@ -152,7 +152,6 @@ export default async function ProductDatasheetPage({
   );
 
   const factory = product.factory;
-  const brandShort = factory?.brandShort ?? factory?.name ?? "Manufacturer";
   const ref = docRef(product.slug);
   const updated = fmtDate(product.syncedAt);
   const year = new Date().getFullYear();
@@ -258,15 +257,13 @@ export default async function ProductDatasheetPage({
     <>
       <header className="glass-nav fixed inset-x-0 top-0 z-20 border-b border-[var(--color-rule)]">
         <div className="mx-auto flex h-12 max-w-[1240px] items-center justify-between px-5 sm:px-10">
+          {/* 纯展示定位：头部不展示工厂 logo / 品牌名，只留中性资料标识。 */}
           <Link
             href="/"
             className="flex items-center gap-2.5 transition hover:opacity-70"
           >
-            <FactoryMark logoUrl={factory?.logoUrl ?? null} />
+            <FactoryMark logoUrl={null} />
             <span className="text-[14px] font-semibold tracking-tight text-[var(--color-ink)]">
-              {brandShort}
-            </span>
-            <span className="hidden text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-faint)] sm:inline">
               {t("header.datasheetTag")}
             </span>
           </Link>
@@ -281,7 +278,7 @@ export default async function ProductDatasheetPage({
               name={name}
               modelNumber={product.modelNumber}
               tagline={tagline ?? ""}
-              brand={brandShort}
+              brand=""
               coverImage={product.coverImage ?? galleryImages[0]?.url ?? null}
             />
           </div>
@@ -296,9 +293,10 @@ export default async function ProductDatasheetPage({
         <section className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12 lg:gap-y-10">
           {/* A · identify — kept short so mobile sees the product fast */}
           <div className="order-1 self-start lg:col-span-5">
+            {/* 纯展示定位：不显示工厂名；用系列名作小标，无系列时回退中性资料标识。 */}
             <p className="kicker rise-in" data-step="1">
               <span className="dot-filament" aria-hidden />
-              <span>{factory?.name ?? "Manufacturer"}</span>
+              <span>{product.series || t("header.datasheetTag")}</span>
             </p>
 
             <h1
@@ -705,21 +703,20 @@ export default async function ProductDatasheetPage({
           </div>
         </section>
 
+        {/* 纯展示定位：页脚不展示工厂 logo / 名称 / 版权署名，只留中性资料标识与访问时间。 */}
         <footer className="mt-24 border-t border-[var(--color-rule-strong)] pt-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
             <div className="flex items-center gap-2.5">
-              <FactoryMark logoUrl={factory?.logoUrl ?? null} />
+              <FactoryMark logoUrl={null} />
               <span className="text-[14px] font-semibold tracking-tight text-[var(--color-ink)]">
-                {factory?.name ?? brandShort}
+                {t("header.datasheetTag")}
               </span>
             </div>
             <span className="text-[12px] text-[var(--color-ink-muted)]">
               {t("footer.access", { date: updated })}
             </span>
           </div>
-          <p className="mt-4 text-[11px] text-[var(--color-ink-faint)]">
-            © {year} {factory?.name ?? brandShort}
-          </p>
+          <p className="mt-4 text-[11px] text-[var(--color-ink-faint)]">© {year}</p>
         </footer>
       </main>
     </>

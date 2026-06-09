@@ -215,11 +215,13 @@ async function generatePoster(opts: {
   const pad = 56;
   let y = 648;
 
-  // 品牌
-  ctx.fillStyle = "#86868b";
-  ctx.font = "500 22px sans-serif";
-  ctx.fillText(opts.brand.toUpperCase(), pad, y);
-  y += 50;
+  // 品牌（纯展示定位：无品牌时整行省略，不留空隙）
+  if (opts.brand) {
+    ctx.fillStyle = "#86868b";
+    ctx.font = "500 22px sans-serif";
+    ctx.fillText(opts.brand.toUpperCase(), pad, y);
+    y += 50;
+  }
 
   // 产品名
   ctx.fillStyle = "#1d1d1f";
