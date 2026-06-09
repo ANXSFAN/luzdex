@@ -40,7 +40,7 @@
     "videos": "Filmy", "documents": "Dokumenty", "videoTitle": "Tytuł filmu", "videoUrl": "Link do filmu, lub prześlij po prawej", "addVideo": "Dodaj film", "upload": "Prześlij", "docTitle": "Tytuł dokumentu (puste = nazwa pliku)", "pickUpload": "Wybierz plik i prześlij"
   },
   "more": {
-    "syncBtn": "Synchronizuj produkty z głównej witryny", "syncing": "Synchronizacja…", "syncFail": "Synchronizacja nie powiodła się", "syncOk": "Zsynchronizowano: {created} nowych, {updated} zaktualizowanych",
+       
     "qrTitle": "Skanuj / QR", "copyLink": "Kopiuj link", "downloadQr": "Pobierz QR", "copied": "Skopiowano link",
     "qrExport": "Eksportuj QR", "channelPh": "Etykieta kanału (opcj., np. expo2026)", "generic": "Ogólny", "downloadPdf": "Pobierz PDF", "cancel": "Anuluj",
     "autofillTitle": "Po imporcie · masowe uzupełnianie AI", "autofillDesc": "Dla produktów bez prezentacji AI generuje zalety / sceny / FAQ / zawartość / montaż / szczegóły i tłumaczy na wszystkie języki. Oczekujące", "autofillNote": "Wymaga OPENROUTER_API_KEY. Wygenerowana treść to szkic; sprawdź na stronie produktu przed publikacją.", "autofillBtn": "Generuj i tłumacz AI", "autofilling": "Generowanie…", "autofillNone": "Brak oczekujących produktów",

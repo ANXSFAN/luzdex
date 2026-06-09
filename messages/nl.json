@@ -40,7 +40,7 @@
     "videos": "Video's", "documents": "Documenten", "videoTitle": "Videotitel", "videoUrl": "Videolink, of upload rechts", "addVideo": "Video toevoegen", "upload": "Uploaden", "docTitle": "Documenttitel (leeg = bestandsnaam)", "pickUpload": "Bestand kiezen en uploaden"
   },
   "more": {
-    "syncBtn": "Producten synchroniseren van hoofdsite", "syncing": "Synchroniseren…", "syncFail": "Synchronisatie mislukt", "syncOk": "Gesynchroniseerd: {created} nieuw, {updated} bijgewerkt",
+       
     "qrTitle": "Scannen / QR", "copyLink": "Link kopiëren", "downloadQr": "QR downloaden", "copied": "Link gekopieerd",
     "qrExport": "QR exporteren", "channelPh": "Kanaaltag (optioneel, bv. expo2026)", "generic": "Algemeen", "downloadPdf": "PDF downloaden", "cancel": "Annuleren",
     "autofillTitle": "Na import · AI-bulkvulling", "autofillDesc": "Voor producten zonder showcase genereert AI verkooppunten / scènes / FAQ / inhoud / montage / detail en vertaalt naar alle talen. In behandeling", "autofillNote": "Vereist OPENROUTER_API_KEY. Gegenereerde inhoud is een concept; controleer op de productpagina voor publicatie.", "autofillBtn": "AI genereren & vertalen", "autofilling": "Genereren…", "autofillNone": "Geen producten in behandeling",

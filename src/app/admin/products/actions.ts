@@ -104,7 +104,6 @@ export async function saveProductMeta(input: {
 
 /**
  * 保存产品展示内容：卖点短语带 / 亮点图标排 / 京东式图文长详情。
- * 这些是资料站独有字段，不来自主站同步，不会被 sync 覆盖。
  * highlights / detailBlocks 经 parse 清洗，非法项静默丢弃；空集合存 [] 表示"无"。
  */
 export async function saveProductShowcase(input: {
@@ -156,8 +155,8 @@ export async function saveProductShowcase(input: {
 }
 
 /**
- * 保存产品基本信息：名称 / 型号。这两项原本只来自 sync / 导入，现支持后台直接改。
- * 改名会触发译文过期（name 在 contentSourceHash 内）。sync 不再覆盖本地改动（见 /api/sync）。
+ * 保存产品基本信息：名称 / 型号。支持后台直接改。
+ * 改名会触发译文过期（name 在 contentSourceHash 内）。
  */
 export async function saveProductBasics(input: {
   productId: string;
@@ -751,7 +750,7 @@ export async function deleteProduct(productId: string) {
 }
 
 /**
- * 手动新建产品（不依赖同步/导入）。sourceId = 型号，便于将来导入对账；型号冲突报错。
+ * 手动新建产品（不依赖导入）。sourceId = 型号，便于将来导入对账；型号冲突报错。
  * 可选直接归入分类 / 系列，并同步镜像字符串。返回新产品 id 供前端跳转编辑页。
  */
 export async function createProduct(input: {

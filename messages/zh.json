@@ -40,7 +40,7 @@
     "videos": "视频", "documents": "文档", "videoTitle": "视频标题", "videoUrl": "视频链接，或点击右侧上传", "addVideo": "添加视频", "upload": "上传", "docTitle": "文档标题（留空则用文件名）", "pickUpload": "选择文件并上传"
   },
   "more": {
-    "syncBtn": "从主站同步产品", "syncing": "同步中…", "syncFail": "同步失败", "syncOk": "同步完成：新增 {created}，更新 {updated}",
+       
     "qrTitle": "扫码访问 / QR", "copyLink": "复制链接", "downloadQr": "下载二维码", "copied": "已复制链接",
     "qrExport": "导出二维码", "channelPh": "渠道标签（选填，如 expo2026）", "generic": "通用", "downloadPdf": "下载 PDF", "cancel": "取消",
     "autofillTitle": "导入后 · AI 批量补全", "autofillDesc": "对缺展示内容的产品一键 AI 生成卖点 / 场景 / FAQ / 盒内 / 安装 / 图文，并翻译成全部语言。当前待处理", "autofillNote": "需配置 OPENROUTER_API_KEY。生成内容为草稿，建议到产品页过目后再发布。", "autofillBtn": "AI 生成并翻译", "autofilling": "生成中…", "autofillNone": "无待处理产品",

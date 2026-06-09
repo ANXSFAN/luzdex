@@ -40,7 +40,7 @@
     "videos": "Vídeos", "documents": "Documentos", "videoTitle": "Título del vídeo", "videoUrl": "Enlace de vídeo, o sube a la derecha", "addVideo": "Añadir vídeo", "upload": "Subir", "docTitle": "Título del documento (vacío = nombre de archivo)", "pickUpload": "Elegir archivo y subir"
   },
   "more": {
-    "syncBtn": "Sincronizar productos del sitio principal", "syncing": "Sincronizando…", "syncFail": "Error de sincronización", "syncOk": "Sincronizado: {created} nuevos, {updated} actualizados",
+       
     "qrTitle": "Escanear / QR", "copyLink": "Copiar enlace", "downloadQr": "Descargar QR", "copied": "Enlace copiado",
     "qrExport": "Exportar QR", "channelPh": "Etiqueta de canal (opcional, p. ej. expo2026)", "generic": "Genérico", "downloadPdf": "Descargar PDF", "cancel": "Cancelar",
     "autofillTitle": "Tras importar · relleno IA masivo", "autofillDesc": "Para productos sin escaparate, la IA genera argumentos / escenas / FAQ / caja / instalación / detalle y traduce a todos los idiomas. Pendientes ahora", "autofillNote": "Requiere OPENROUTER_API_KEY. El contenido generado es un borrador; revísalo en la página del producto antes de publicar.", "autofillBtn": "Generar y traducir con IA", "autofilling": "Generando…", "autofillNone": "Sin productos pendientes",

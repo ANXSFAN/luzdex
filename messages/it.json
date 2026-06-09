@@ -40,7 +40,7 @@
     "videos": "Video", "documents": "Documenti", "videoTitle": "Titolo del video", "videoUrl": "Link del video, o carica a destra", "addVideo": "Aggiungi video", "upload": "Carica", "docTitle": "Titolo del documento (vuoto = nome file)", "pickUpload": "Scegli file e carica"
   },
   "more": {
-    "syncBtn": "Sincronizza prodotti dal sito principale", "syncing": "Sincronizzazione…", "syncFail": "Sincronizzazione fallita", "syncOk": "Sincronizzati: {created} nuovi, {updated} aggiornati",
+       
     "qrTitle": "Scansiona / QR", "copyLink": "Copia link", "downloadQr": "Scarica QR", "copied": "Link copiato",
     "qrExport": "Esporta QR", "channelPh": "Etichetta canale (facoltativo, es. expo2026)", "generic": "Generico", "downloadPdf": "Scarica PDF", "cancel": "Annulla",
     "autofillTitle": "Dopo l'import · riempimento IA massivo", "autofillDesc": "Per i prodotti senza vetrina, l'IA genera argomenti / scene / FAQ / contenuto / installazione / dettaglio e traduce in tutte le lingue. In sospeso", "autofillNote": "Richiede OPENROUTER_API_KEY. Il contenuto generato è una bozza; rivedi nella pagina prodotto prima di pubblicare.", "autofillBtn": "Genera e traduci con IA", "autofilling": "Generazione…", "autofillNone": "Nessun prodotto in sospeso",

@@ -40,7 +40,7 @@
     "videos": "Videos", "documents": "Documents", "videoTitle": "Video title", "videoUrl": "Video link, or upload on the right", "addVideo": "Add video", "upload": "Upload", "docTitle": "Document title (blank = filename)", "pickUpload": "Choose file and upload"
   },
   "more": {
-    "syncBtn": "Sync products from main site", "syncing": "Syncing…", "syncFail": "Sync failed", "syncOk": "Synced: {created} new, {updated} updated",
+       
     "qrTitle": "Scan / QR", "copyLink": "Copy link", "downloadQr": "Download QR", "copied": "Link copied",
     "qrExport": "Export QR", "channelPh": "Channel tag (optional, e.g. expo2026)", "generic": "Generic", "downloadPdf": "Download PDF", "cancel": "Cancel",
     "autofillTitle": "Post-import · AI bulk fill", "autofillDesc": "For products missing showcase content, AI-generate selling points / scenes / FAQ / box / install / detail and translate to all languages. Pending now", "autofillNote": "Requires OPENROUTER_API_KEY. Generated content is a draft; review on the product page before publishing.", "autofillBtn": "AI generate & translate", "autofilling": "Generating…", "autofillNone": "No pending products",

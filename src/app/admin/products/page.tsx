@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { productReadiness } from "@/lib/products";
 import { parseNameI18n } from "@/lib/catalog";
 import { getAdminLocale } from "@/lib/admin-locale";
-import { SyncButton } from "@/components/sync-button";
 import { QrExportButton } from "@/components/qr-export-button";
 import { Catalog } from "@/components/catalog";
 
@@ -133,7 +132,6 @@ export default async function AdminCatalogPage({
         </div>
         <div className="flex items-center gap-2">
           {products.length > 0 && <QrExportButton />}
-          <SyncButton />
         </div>
       </div>
 
