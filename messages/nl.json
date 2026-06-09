@@ -35,6 +35,10 @@
     "saveShowcase": "Showcase opslaan", "saveTrans": "Vertaling opslaan",
     "icons": { "shield": "Bescherming / cert.", "droplet": "Waterdicht", "zap": "Vermogen / elektr.", "clock": "Levensduur", "award": "Garantie / prijs", "sun": "Helderheid / efficiëntie", "temp": "Temperatuur", "ruler": "Afmetingen", "gauge": "Prestatie", "bulb": "Bron / CRI", "battery": "Batterij", "dot": "Algemeen" }
   },
+  "misc": {
+    "relTitle": "Categorie & kenmerken", "category": "Categorie", "series": "Serie · groeperingssleutel", "seriesPh": "bv. Starlight-serie", "pcb": "PCB-breedte · past bij profiel", "pcbPh": "bv. 10mm", "voltage": "Spanning · past bij voeding", "voltagePh": "bv. 24V", "watt": "Vermogen W · hint", "wattPh": "bv. 14.4", "saveAttr": "Categorie & kenmerken opslaan", "suggestions": "Automatische suggesties", "suggestEmpty": "Geen suggesties. Het product moet een strip zijn met PCB-breedte / spanning, en er moet een passend profiel / voeding in deze fabriek bestaan.", "adopt": "Overnemen", "linksTitle": "Accessoires · gezaghebbend", "addModelPh": "Compatibel model", "relAccessory": "Accessoire", "relAlternative": "Alternatief", "uncat": "— Geen categorie —",
+    "videos": "Video's", "documents": "Documenten", "videoTitle": "Videotitel", "videoUrl": "Videolink, of upload rechts", "addVideo": "Video toevoegen", "upload": "Uploaden", "docTitle": "Documenttitel (leeg = bestandsnaam)", "pickUpload": "Bestand kiezen en uploaden"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

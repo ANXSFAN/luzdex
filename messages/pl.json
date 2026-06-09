@@ -35,6 +35,10 @@
     "saveShowcase": "Zapisz prezentację", "saveTrans": "Zapisz tłumaczenie",
     "icons": { "shield": "Ochrona / cert.", "droplet": "Wodoodporny", "zap": "Moc / elektr.", "clock": "Żywotność", "award": "Gwarancja / nagroda", "sun": "Jasność / skuteczność", "temp": "Temperatura", "ruler": "Wymiary", "gauge": "Wydajność", "bulb": "Źródło / CRI", "battery": "Bateria", "dot": "Ogólne" }
   },
+  "misc": {
+    "relTitle": "Kategoria i atrybuty", "category": "Kategoria", "series": "Seria · klucz grupowania", "seriesPh": "np. Seria Starlight", "pcb": "Szerokość PCB · pasuje do profilu", "pcbPh": "np. 10mm", "voltage": "Napięcie · pasuje do zasilacza", "voltagePh": "np. 24V", "watt": "Moc W · wskazówka", "wattPh": "np. 14.4", "saveAttr": "Zapisz kategorię i atrybuty", "suggestions": "Sugestie automatyczne", "suggestEmpty": "Brak sugestii. Produkt musi być taśmą z szerokością PCB / napięciem, a w fabryce musi istnieć pasujący profil / zasilacz.", "adopt": "Przyjmij", "linksTitle": "Akcesoria · wiążące", "addModelPh": "Kompatybilny model", "relAccessory": "Akcesorium", "relAlternative": "Alternatywa", "uncat": "— Bez kategorii —",
+    "videos": "Filmy", "documents": "Dokumenty", "videoTitle": "Tytuł filmu", "videoUrl": "Link do filmu, lub prześlij po prawej", "addVideo": "Dodaj film", "upload": "Prześlij", "docTitle": "Tytuł dokumentu (puste = nazwa pliku)", "pickUpload": "Wybierz plik i prześlij"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

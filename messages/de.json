@@ -35,6 +35,10 @@
     "saveShowcase": "Präsentation speichern", "saveTrans": "Übersetzung speichern",
     "icons": { "shield": "Schutz / Zert.", "droplet": "Wasserdicht", "zap": "Leistung / elektr.", "clock": "Lebensdauer", "award": "Garantie / Preis", "sun": "Helligkeit / Effizienz", "temp": "Temperatur", "ruler": "Abmessungen", "gauge": "Leistung", "bulb": "Quelle / CRI", "battery": "Batterie", "dot": "Allgemein" }
   },
+  "misc": {
+    "relTitle": "Kategorie & Attribute", "category": "Kategorie", "series": "Serie · Gruppierungsschlüssel", "seriesPh": "z. B. Starlight-Serie", "pcb": "PCB-Breite · passt zum Profil", "pcbPh": "z. B. 10mm", "voltage": "Spannung · passt zum Netzteil", "voltagePh": "z. B. 24V", "watt": "Leistung W · Hinweis", "wattPh": "z. B. 14.4", "saveAttr": "Kategorie & Attribute speichern", "suggestions": "Automatische Vorschläge", "suggestEmpty": "Keine Vorschläge. Das Produkt muss ein Streifen mit PCB-Breite / Spannung sein, und ein passendes Profil / Netzteil muss im Werk existieren.", "adopt": "Übernehmen", "linksTitle": "Zubehör · maßgeblich", "addModelPh": "Kompatibles Modell", "relAccessory": "Zubehör", "relAlternative": "Alternative", "uncat": "— Ohne Kategorie —",
+    "videos": "Videos", "documents": "Dokumente", "videoTitle": "Videotitel", "videoUrl": "Videolink, oder rechts hochladen", "addVideo": "Video hinzufügen", "upload": "Hochladen", "docTitle": "Dokumenttitel (leer = Dateiname)", "pickUpload": "Datei wählen und hochladen"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

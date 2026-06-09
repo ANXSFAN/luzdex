@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Film, Trash2, Upload, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface DocumentItem {
   id: string;
@@ -60,6 +61,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function VideoSection({ productId, videos }: { productId: string; videos: VideoItem[] }) {
   const router = useRouter();
+  const t = useTranslations("misc");
   const fileRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -120,7 +122,7 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
 
   return (
     <section>
-      <SectionTitle>视频 Videos</SectionTitle>
+      <SectionTitle>{t("videos")}</SectionTitle>
 
       {videos.length > 0 && (
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
@@ -145,14 +147,14 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="视频标题"
+          placeholder={t("videoTitle")}
           className="form-input"
         />
         <div className="flex gap-2">
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="视频链接，或点击右侧上传"
+            placeholder={t("videoUrl")}
             className="form-input min-w-0 flex-1"
           />
           <button
@@ -161,7 +163,7 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
             className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 text-xs transition hover:bg-[var(--color-surface-sunken)] disabled:opacity-50"
           >
             {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            上传
+            {t("upload")}
           </button>
           <input ref={fileRef} type="file" accept="video/*" hidden onChange={handlePickVideo} />
         </div>
@@ -171,7 +173,7 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
           className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-          添加视频
+          {t("addVideo")}
         </button>
       </div>
     </section>
@@ -186,6 +188,7 @@ function DocumentSection({
   documents: DocumentItem[];
 }) {
   const router = useRouter();
+  const t = useTranslations("misc");
   const fileRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -236,7 +239,7 @@ function DocumentSection({
 
   return (
     <section>
-      <SectionTitle>文档 Documents</SectionTitle>
+      <SectionTitle>{t("documents")}</SectionTitle>
 
       {documents.length > 0 && (
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
@@ -264,7 +267,7 @@ function DocumentSection({
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="文档标题（留空则用文件名）"
+          placeholder={t("docTitle")}
           className="form-input"
         />
         <button
@@ -273,7 +276,7 @@ function DocumentSection({
           className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-          选择文件并上传
+          {t("pickUpload")}
         </button>
         <input ref={fileRef} type="file" hidden onChange={handlePickDoc} />
       </div>

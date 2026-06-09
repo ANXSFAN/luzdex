@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Plus, Save, Sparkles, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   saveProductMeta,
   adoptSuggestion,
@@ -79,6 +80,7 @@ export function ProductRelations({
   candidateModels,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("misc");
   const [pending, startTransition] = useTransition();
 
   // 属性表单
@@ -110,11 +112,11 @@ export function ProductRelations({
       {/* 属性 & 分类 */}
       <section>
         <h2 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          分类与属性 Attributes
+          {t("relTitle")}
         </h2>
         <div className="space-y-4 rounded-xl border border-[var(--color-rule)] p-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="类目 Category">
+            <Field label={t("category")}>
               <select
                 value={cat}
                 onChange={(e) => setCat(e.target.value)}
@@ -127,37 +129,37 @@ export function ProductRelations({
                 ))}
               </select>
             </Field>
-            <Field label="系列 Series · 同系列聚合键">
+            <Field label={t("series")}>
               <input
                 value={ser}
                 onChange={(e) => setSer(e.target.value)}
-                placeholder="如 星光系列"
+                placeholder={t("seriesPh")}
                 className="form-input"
               />
             </Field>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field label="PCB 宽度 · 匹配铝槽">
+            <Field label={t("pcb")}>
               <input
                 value={pcb}
                 onChange={(e) => setPcb(e.target.value)}
-                placeholder="如 10mm"
+                placeholder={t("pcbPh")}
                 className="form-input font-mono"
               />
             </Field>
-            <Field label="电压 · 匹配电源">
+            <Field label={t("voltage")}>
               <input
                 value={volt}
                 onChange={(e) => setVolt(e.target.value)}
-                placeholder="如 24V"
+                placeholder={t("voltagePh")}
                 className="form-input font-mono"
               />
             </Field>
-            <Field label="功率 W · 提示用">
+            <Field label={t("watt")}>
               <input
                 value={watt}
                 onChange={(e) => setWatt(e.target.value)}
-                placeholder="如 14.4"
+                placeholder={t("wattPh")}
                 inputMode="decimal"
                 className="form-input font-mono"
               />
@@ -175,14 +177,14 @@ export function ProductRelations({
                     voltage: volt,
                     watt,
                   }),
-                "已保存",
+                t("saveAttr"),
               )
             }
             disabled={pending}
             className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
           >
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-            保存分类与属性
+            {t("saveAttr")}
           </button>
         </div>
       </section>
@@ -191,11 +193,11 @@ export function ProductRelations({
       <section>
         <h2 className="mb-3 flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
           <Sparkles className="h-3.5 w-3.5" />
-          自动匹配建议 Suggestions
+          {t("suggestions")}
         </h2>
         {suggestions.length === 0 ? (
           <p className="rounded-xl border border-dashed border-[var(--color-rule)] p-5 text-xs leading-relaxed text-[var(--color-ink-muted)]">
-            暂无建议。需当前产品为「灯带」且填好 PCB 宽度 / 电压，且同工厂存在属性匹配的铝槽 / 电源。建议不会自动写库，确认后才生效。
+            {t("suggestEmpty")}
           </p>
         ) : (
           <ul className="divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
@@ -211,13 +213,13 @@ export function ProductRelations({
                 </div>
                 <button
                   onClick={() =>
-                    run(() => adoptSuggestion(productId, s.toId, s.relation), "已采纳，写入配件关系")
+                    run(() => adoptSuggestion(productId, s.toId, s.relation), t("adopt"))
                   }
                   disabled={pending}
                   className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-rule)] px-3 py-1.5 text-xs text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)] disabled:opacity-50"
                 >
                   <Check className="h-3.5 w-3.5" />
-                  采纳
+                  {t("adopt")}
                 </button>
               </li>
             ))}
@@ -228,7 +230,7 @@ export function ProductRelations({
       {/* 现有配件关系 */}
       <section>
         <h2 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          配件关系 Links · 权威
+          {t("linksTitle")}
         </h2>
 
         {links.length > 0 && (
@@ -244,7 +246,7 @@ export function ProductRelations({
                   </span>
                 </div>
                 <button
-                  onClick={() => run(() => removeLink(l.linkId, productId), "已删除")}
+                  onClick={() => run(() => removeLink(l.linkId, productId), t("relTitle"))}
                   disabled={pending}
                   className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600 disabled:opacity-50"
                 >
@@ -259,7 +261,7 @@ export function ProductRelations({
           <input
             value={addModel}
             onChange={(e) => setAddModel(e.target.value)}
-            placeholder="适配型号"
+            placeholder={t("addModelPh")}
             list="candidate-models"
             className="form-input min-w-0 flex-1 font-mono"
           />
@@ -273,16 +275,16 @@ export function ProductRelations({
             onChange={(e) => setAddRel(e.target.value)}
             className="form-input w-auto"
           >
-            <option value="accessory">配件</option>
-            <option value="alternative">替代</option>
+            <option value="accessory">{t("relAccessory")}</option>
+            <option value="alternative">{t("relAlternative")}</option>
           </select>
           <button
             onClick={() => {
               if (!addModel.trim()) {
-                toast.error("请输入型号");
+                toast.error(t("addModelPh"));
                 return;
               }
-              run(() => addAccessoryByModel(productId, addModel, addRel), "已关联", () =>
+              run(() => addAccessoryByModel(productId, addModel, addRel), t("adopt"), () =>
                 setAddModel(""),
               );
             }}
@@ -290,7 +292,7 @@ export function ProductRelations({
             className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
-            关联
+            {t("addModelPh")}
           </button>
         </div>
       </section>

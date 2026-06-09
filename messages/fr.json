@@ -35,6 +35,10 @@
     "saveShowcase": "Enregistrer la vitrine", "saveTrans": "Enregistrer la traduction",
     "icons": { "shield": "Protection / cert.", "droplet": "Étanche", "zap": "Puissance / élec.", "clock": "Durée de vie", "award": "Garantie / prix", "sun": "Luminosité / efficacité", "temp": "Température", "ruler": "Dimensions", "gauge": "Performance", "bulb": "Source / IRC", "battery": "Batterie", "dot": "Générique" }
   },
+  "misc": {
+    "relTitle": "Catégorie et attributs", "category": "Catégorie", "series": "Série · clé de regroupement", "seriesPh": "ex. Série Starlight", "pcb": "Largeur PCB · correspond au profilé", "pcbPh": "ex. 10mm", "voltage": "Tension · correspond à l'alim.", "voltagePh": "ex. 24V", "watt": "Puissance W · indice", "wattPh": "ex. 14.4", "saveAttr": "Enregistrer catégorie et attributs", "suggestions": "Suggestions automatiques", "suggestEmpty": "Aucune suggestion. Le produit doit être un ruban avec largeur PCB / tension, et un profilé / une alim. compatible doit exister dans cette usine.", "adopt": "Adopter", "linksTitle": "Accessoires · faisant foi", "addModelPh": "Modèle compatible", "relAccessory": "Accessoire", "relAlternative": "Alternative", "uncat": "— Sans catégorie —",
+    "videos": "Vidéos", "documents": "Documents", "videoTitle": "Titre de la vidéo", "videoUrl": "Lien vidéo, ou téléversez à droite", "addVideo": "Ajouter une vidéo", "upload": "Téléverser", "docTitle": "Titre du document (vide = nom de fichier)", "pickUpload": "Choisir un fichier et téléverser"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

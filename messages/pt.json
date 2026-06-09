@@ -35,6 +35,10 @@
     "saveShowcase": "Guardar vitrine", "saveTrans": "Guardar tradução",
     "icons": { "shield": "Proteção / cert.", "droplet": "À prova de água", "zap": "Potência / elétrico", "clock": "Vida útil", "award": "Garantia / prémio", "sun": "Brilho / eficácia", "temp": "Temperatura", "ruler": "Dimensões", "gauge": "Desempenho", "bulb": "Fonte / IRC", "battery": "Bateria", "dot": "Genérico" }
   },
+  "misc": {
+    "relTitle": "Categoria e atributos", "category": "Categoria", "series": "Série · chave de agrupamento", "seriesPh": "ex. Série Starlight", "pcb": "Largura PCB · combina com perfil", "pcbPh": "ex. 10mm", "voltage": "Tensão · combina com fonte", "voltagePh": "ex. 24V", "watt": "Potência W · dica", "wattPh": "ex. 14.4", "saveAttr": "Guardar categoria e atributos", "suggestions": "Sugestões automáticas", "suggestEmpty": "Sem sugestões. O produto deve ser uma fita com largura PCB / tensão, e deve existir perfil / fonte compatível nesta fábrica.", "adopt": "Adotar", "linksTitle": "Acessórios · autoritativo", "addModelPh": "Modelo compatível", "relAccessory": "Acessório", "relAlternative": "Alternativa", "uncat": "— Sem categoria —",
+    "videos": "Vídeos", "documents": "Documentos", "videoTitle": "Título do vídeo", "videoUrl": "Link do vídeo, ou envie à direita", "addVideo": "Adicionar vídeo", "upload": "Enviar", "docTitle": "Título do documento (vazio = nome do ficheiro)", "pickUpload": "Escolher ficheiro e enviar"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

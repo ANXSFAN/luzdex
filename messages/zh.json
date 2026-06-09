@@ -35,6 +35,10 @@
     "saveShowcase": "保存展示内容", "saveTrans": "保存译文",
     "icons": { "shield": "防护 / 认证", "droplet": "防水", "zap": "功率 / 电气", "clock": "寿命", "award": "质保 / 奖项", "sun": "亮度 / 光效", "temp": "温度", "ruler": "尺寸", "gauge": "性能指标", "bulb": "光源 / 显色", "battery": "电池 / 续航", "dot": "通用" }
   },
+  "misc": {
+    "relTitle": "分类与属性", "category": "类目", "series": "系列 · 同系列聚合键", "seriesPh": "如 星光系列", "pcb": "PCB 宽度 · 匹配铝槽", "pcbPh": "如 10mm", "voltage": "电压 · 匹配电源", "voltagePh": "如 24V", "watt": "功率 W · 提示用", "wattPh": "如 14.4", "saveAttr": "保存分类与属性", "suggestions": "自动匹配建议", "suggestEmpty": "暂无建议。需当前产品为灯带且填好 PCB 宽度 / 电压，且同工厂存在属性匹配的铝槽 / 电源。", "adopt": "采纳", "linksTitle": "配件关系 · 权威", "addModelPh": "适配型号", "relAccessory": "配件", "relAlternative": "替代", "uncat": "— 未分类 —",
+    "videos": "视频", "documents": "文档", "videoTitle": "视频标题", "videoUrl": "视频链接，或点击右侧上传", "addVideo": "添加视频", "upload": "上传", "docTitle": "文档标题（留空则用文件名）", "pickUpload": "选择文件并上传"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

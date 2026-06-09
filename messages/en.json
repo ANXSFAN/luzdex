@@ -35,6 +35,10 @@
     "saveShowcase": "Save showcase", "saveTrans": "Save translation",
     "icons": { "shield": "Protection / cert", "droplet": "Waterproof", "zap": "Power / electrical", "clock": "Lifespan", "award": "Warranty / award", "sun": "Brightness / efficacy", "temp": "Temperature", "ruler": "Dimensions", "gauge": "Performance", "bulb": "Source / CRI", "battery": "Battery", "dot": "Generic" }
   },
+  "misc": {
+    "relTitle": "Category & attributes", "category": "Category", "series": "Series · grouping key", "seriesPh": "e.g. Starlight series", "pcb": "PCB width · matches channel", "pcbPh": "e.g. 10mm", "voltage": "Voltage · matches power", "voltagePh": "e.g. 24V", "watt": "Power W · hint", "wattPh": "e.g. 14.4", "saveAttr": "Save category & attributes", "suggestions": "Auto-match suggestions", "suggestEmpty": "No suggestions. The product must be a strip with PCB width / voltage filled, and matching channel / power must exist in this factory.", "adopt": "Adopt", "linksTitle": "Accessory links · authoritative", "addModelPh": "Compatible model", "relAccessory": "Accessory", "relAlternative": "Alternative", "uncat": "— Uncategorized —",
+    "videos": "Videos", "documents": "Documents", "videoTitle": "Video title", "videoUrl": "Video link, or upload on the right", "addVideo": "Add video", "upload": "Upload", "docTitle": "Document title (blank = filename)", "pickUpload": "Choose file and upload"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",
