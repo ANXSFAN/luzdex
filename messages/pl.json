@@ -16,6 +16,25 @@
     "specsTitle": "Specyfikacje / certyfikaty", "specsSub": "Tabela parametrów + odznaki", "params": "Specyfikacje (grupa opcjonalna · kolejność = wyświetlanie)", "addParam": "Dodaj parametr", "group": "Grupa", "paramName": "Parametr", "paramValue": "Wartość", "unit": "Jednostka", "certs": "Certyfikaty", "certPh": "Wpisz i Enter, np. CE / RoHS / IP65", "saveSpecs": "Zapisz specyfikacje / certyfikaty",
     "showcaseTitle": "Prezentacja", "relTitle": "Relacje / atrybuty", "deleteTitle": "Usuń produkt", "deleteSub": "Usuwa też zdjęcia / dokumenty / filmy / powiązania / statystyki. Nieodwracalne.", "deleteBtn": "Usuń ten produkt"
   },
+  "show": {
+    "sub": "Zalety · wyróżnienia · zastosowania · szczegóły · FAQ", "editLang": "Język edycji", "src": "źródło",
+    "auditNote": "Przeglądanie tłumaczenia — nazwę i specyfikacje utrzymuje tu AI; etykieta wariantu / typ oprawy / wymiary są tylko w języku źródłowym, edytuj w „źródle”.",
+    "aiGenTitle": "Wygeneruj szkic tekstów przez AI", "aiGenHint": "Z typu oprawy + specyfikacji generuje zalety / wyróżnienia / sceny / FAQ / zawartość / montaż / szczegóły. Tylko szkic, sprawdź przed zapisem.", "aiGenBtn": "Szkic AI", "aiGenning": "Generowanie…",
+    "aiTransTitle": "Wielojęzycznie: wypełnij jeden, AI uzupełni pozostałe 8", "aiTransHint": "Wybierz język źródłowy poniżej, najpierw zapisz, potem tłumacz. Zapis bezpośredni, powtarzalny.", "aiTransBtn": "Tłumacz AI", "aiTransing": "Tłumaczenie…", "sourceLang": "Język źródłowy", "translated": "Przetłumaczone:", "staleWarn": "⚠ Treść źródłowa zmieniona — tłumaczenia mogą być nieaktualne. Przetłumacz ponownie.",
+    "tagline": "Pasek zalet (oddziel · lub 、)", "taglinePh": "np. IP65 wodoodporny · 5 lat gwarancji · Ra90",
+    "variant": "Etykieta wariantu", "variantPh": "np. 100W / Ciepły 3000K", "variantHint": "Publiczny „wybór wariantu” pojawia się tylko, gdy produkt dzieli serię z innymi.",
+    "luminaire": "Typ oprawy (kontekst dla AI)", "unset": "(Nie ustawiono)", "custom": "(Własny)", "luminaireHint": "Wybierz typ standardowy. AI użyje go do dokładniejszej zawartości i montażu.",
+    "description": "Opis produktu (akapit pod publicznym H1)", "descriptionPh": "1–2 akapity dla klienta końcowego…",
+    "highlights": "Rząd ikon wyróżnień", "addHighlight": "Dodaj wyróżnienie", "highlightsEmpty": "Brak wyróżnień. Dodaj 3–4, np. „Wodoodporny IP65”, „5 lat gwarancji”.", "hlValuePh": "Wartość (opcj.) np. IP65", "hlLabelPh": "Etykieta, np. Wodoodporny",
+    "applications": "Zastosowania (gdzie się używa)", "addApp": "Dodaj scenę", "appsEmpty": "Brak scen. Dodaj 3–6, np. „Handel”, „Zewnętrzne”, „Przemysł”, ze zdjęciami.", "appTitlePh": "Nazwa sceny, np. Oświetlenie handlowe", "appDescPh": "Jedna linia (opcj.)", "appImgPh": "Zdjęcie sceny (opcj.) URL, lub prześlij",
+    "detailBlocks": "Długi szczegół (od góry do dołu)", "heading": "Nagłówek", "para": "Akapit", "image": "Obraz", "blocksEmpty": "Brak szczegółów. Przeplataj nagłówek / akapit / obraz, by zbudować długą stronę.", "imgUrlPh": "URL obrazu, lub prześlij", "captionPh": "Podpis (opcj.)", "headingPh": "Tekst podtytułu", "paraPh": "Akapit…", "moveUp": "W górę", "moveDown": "W dół",
+    "boxContents": "Zawartość opakowania (wg rzeczywistego opakowania)", "addItem": "Dodaj pozycję", "boxEmpty": "Pusto. np. Oprawa ×1, akcesoria ×1, instrukcja ×1, karta gwarancyjna ×1.", "itemPh": "Pozycja, np. Oprawa", "qtyPh": "Ilość (opcj.) np. ×1",
+    "dimensions": "Wymiary", "dimHintSrc": "Do schematu wymiarów; puste = powrót do tabeli specyfikacji", "dimHintTr": "Wartości są tylko ze źródła; tu tłumaczy się tylko notatkę o otworze", "dimW": "Szer. W", "dimH": "Wys. H", "dimD": "Głęb. D (opcj.)", "dimUnit": "Jedn. mm", "cutoutPh": "Notatka o otworze (opcj.) np. Ø75",
+    "install": "Metoda / kroki montażu", "installPh": "Metoda w jednej linii, np. wpuszczany + klipsy sprężynowe", "installSteps": "Kroki montażu", "addStep": "Dodaj krok", "stepPh": "Krok",
+    "faq": "FAQ", "addFaq": "Dodaj P/O", "faqEmpty": "Brak P/O. Klient końcowy, użytkowo: montaż, wybór CCT, użycie na zewnątrz, gwarancja, zawartość.", "faqQPh": "Pytanie, np. Łatwy montaż?", "faqAPh": "Odpowiedź…",
+    "saveShowcase": "Zapisz prezentację", "saveTrans": "Zapisz tłumaczenie",
+    "icons": { "shield": "Ochrona / cert.", "droplet": "Wodoodporny", "zap": "Moc / elektr.", "clock": "Żywotność", "award": "Gwarancja / nagroda", "sun": "Jasność / skuteczność", "temp": "Temperatura", "ruler": "Wymiary", "gauge": "Wydajność", "bulb": "Źródło / CRI", "battery": "Bateria", "dot": "Ogólne" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

@@ -16,6 +16,25 @@
     "specsTitle": "Specs / certs", "specsSub": "Spec table + certification badges", "params": "Specifications (group optional · order = display order)", "addParam": "Add parameter", "group": "Group", "paramName": "Parameter", "paramValue": "Value", "unit": "Unit", "certs": "Certifications", "certPh": "Type and press Enter, e.g. CE / RoHS / IP65", "saveSpecs": "Save specs / certs",
     "showcaseTitle": "Showcase", "relTitle": "Relations / attributes", "deleteTitle": "Delete product", "deleteSub": "Also removes this product's images / documents / videos / links / stats. Irreversible.", "deleteBtn": "Delete this product"
   },
+  "show": {
+    "sub": "Selling points · highlights · applications · long detail · FAQ", "editLang": "Editing language", "src": "source",
+    "auditNote": "Reviewing a translation — name & spec translations are AI-maintained here; variant label / luminaire type / dimension values are source-only, edited under “source”.",
+    "aiGenTitle": "AI-generate showcase copy draft", "aiGenHint": "From luminaire type + specs, generate selling points / highlights / scenes / FAQ / box contents / install / long detail. Draft only, review before saving.", "aiGenBtn": "AI draft", "aiGenning": "Generating…",
+    "aiTransTitle": "Multilingual: fill one, AI completes the other 8", "aiTransHint": "Pick the source language below, save first, then translate. Saved directly, re-runnable.", "aiTransBtn": "AI translate", "aiTransing": "Translating…", "sourceLang": "Source language", "translated": "Translated:", "staleWarn": "⚠ Source content changed — translations may be stale. Re-run AI translate.",
+    "tagline": "Selling-point strip (separate phrases with · or 、)", "taglinePh": "e.g. IP65 waterproof · 5-year warranty · Ra90",
+    "variant": "Spec variant label", "variantPh": "e.g. 100W / Warm 3000K", "variantHint": "The public “spec selector” only appears when this product shares a series with others.",
+    "luminaire": "Luminaire type (context for AI)", "unset": "(Not set)", "custom": "(Custom)", "luminaireHint": "Pick a standard type. AI uses it for more accurate box contents and install.",
+    "description": "Product description (paragraph under the public H1)", "descriptionPh": "1–2 paragraphs for end customers…",
+    "highlights": "Highlight icon row", "addHighlight": "Add highlight", "highlightsEmpty": "No highlights yet. Add 3–4, e.g. “Waterproof IP65”, “5-year warranty”.", "hlValuePh": "Value (optional) e.g. IP65", "hlLabelPh": "Label, e.g. Waterproof",
+    "applications": "Applications (where it's used)", "addApp": "Add scene", "appsEmpty": "No scenes yet. Add 3–6, e.g. “Retail”, “Outdoor”, “Industrial”, with photos.", "appTitlePh": "Scene name, e.g. Retail lighting", "appDescPh": "One-line note (optional)", "appImgPh": "Scene image (optional) URL, or upload",
+    "detailBlocks": "Long detail (top-to-bottom)", "heading": "Heading", "para": "Paragraph", "image": "Image", "blocksEmpty": "No detail yet. Alternate heading / paragraph / image to build a long page.", "imgUrlPh": "Image URL, or upload", "captionPh": "Caption (optional)", "headingPh": "Subheading text", "paraPh": "Paragraph…", "moveUp": "Move up", "moveDown": "Move down",
+    "boxContents": "Box contents (per actual packaging)", "addItem": "Add item", "boxEmpty": "Empty. e.g. Fixture ×1, accessories ×1, manual ×1, warranty card ×1.", "itemPh": "Item, e.g. Fixture", "qtyPh": "Qty (optional) e.g. ×1",
+    "dimensions": "Dimensions", "dimHintSrc": "Used for the dimension diagram; empty falls back to the spec table", "dimHintTr": "Values are source-only; only the cutout note is translated here", "dimW": "Width W", "dimH": "Height H", "dimD": "Depth D (optional)", "dimUnit": "Unit mm", "cutoutPh": "Cutout note (optional) e.g. Ø75",
+    "install": "Install method / steps", "installPh": "Install method in one line, e.g. recessed + spring clips", "installSteps": "Install steps", "addStep": "Add step", "stepPh": "Step",
+    "faq": "FAQ", "addFaq": "Add Q&A", "faqEmpty": "No Q&A yet. End-customer, usage-oriented: how to install, choosing CCT, outdoor use, warranty, what's in the box.", "faqQPh": "Question, e.g. Easy to install?", "faqAPh": "Answer…",
+    "saveShowcase": "Save showcase", "saveTrans": "Save translation",
+    "icons": { "shield": "Protection / cert", "droplet": "Waterproof", "zap": "Power / electrical", "clock": "Lifespan", "award": "Warranty / award", "sun": "Brightness / efficacy", "temp": "Temperature", "ruler": "Dimensions", "gauge": "Performance", "bulb": "Source / CRI", "battery": "Battery", "dot": "Generic" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

@@ -16,6 +16,25 @@
     "specsTitle": "Specifiche / certificazioni", "specsSub": "Tabella parametri + badge", "params": "Specifiche (gruppo facoltativo · ordine = visualizzazione)", "addParam": "Aggiungi parametro", "group": "Gruppo", "paramName": "Parametro", "paramValue": "Valore", "unit": "Unità", "certs": "Certificazioni", "certPh": "Scrivi e premi Invio, es. CE / RoHS / IP65", "saveSpecs": "Salva specifiche / certificazioni",
     "showcaseTitle": "Vetrina", "relTitle": "Relazioni / attributi", "deleteTitle": "Elimina prodotto", "deleteSub": "Elimina anche immagini / documenti / video / relazioni / statistiche. Irreversibile.", "deleteBtn": "Elimina questo prodotto"
   },
+  "show": {
+    "sub": "Punti di forza · highlight · applicazioni · dettaglio · FAQ", "editLang": "Lingua di modifica", "src": "origine",
+    "auditNote": "Revisione di una traduzione: nome e specifiche gestiti qui dall'IA; etichetta variante / tipo di apparecchio / dimensioni sono solo dell'origine, si modificano in «origine».",
+    "aiGenTitle": "Genera bozza testi con IA", "aiGenHint": "Da tipo di apparecchio + specifiche genera punti di forza / highlight / scene / FAQ / contenuto / installazione / dettaglio. Solo bozza, da rivedere prima di salvare.", "aiGenBtn": "Bozza IA", "aiGenning": "Generazione…",
+    "aiTransTitle": "Multilingua: compila una, l'IA completa le altre 8", "aiTransHint": "Scegli la lingua di origine sotto, salva prima, poi traduci. Salvato direttamente, ripetibile.", "aiTransBtn": "Traduci IA", "aiTransing": "Traduzione…", "sourceLang": "Lingua di origine", "translated": "Tradotte:", "staleWarn": "⚠ Il contenuto di origine è cambiato; le traduzioni potrebbero essere obsolete. Ritraduci.",
+    "tagline": "Striscia di argomenti (separa con · o 、)", "taglinePh": "es. IP65 impermeabile · garanzia 5 anni · Ra90",
+    "variant": "Etichetta variante", "variantPh": "es. 100W / Caldo 3000K", "variantHint": "Il «selettore variante» pubblico appare solo se questo prodotto condivide una serie con altri.",
+    "luminaire": "Tipo di apparecchio (contesto per IA)", "unset": "(Non impostato)", "custom": "(Personalizzato)", "luminaireHint": "Scegli un tipo standard. L'IA lo usa per contenuto e installazione più precisi.",
+    "description": "Descrizione prodotto (paragrafo sotto l'H1 pubblico)", "descriptionPh": "1–2 paragrafi per il cliente finale…",
+    "highlights": "Riga icone highlight", "addHighlight": "Aggiungi highlight", "highlightsEmpty": "Ancora nessun highlight. Aggiungine 3–4, es. «Impermeabile IP65», «Garanzia 5 anni».", "hlValuePh": "Valore (facoltativo) es. IP65", "hlLabelPh": "Etichetta, es. Impermeabile",
+    "applications": "Applicazioni (dove si usa)", "addApp": "Aggiungi scena", "appsEmpty": "Ancora nessuna scena. Aggiungine 3–6, es. «Retail», «Esterni», «Industria», con foto.", "appTitlePh": "Nome scena, es. Illuminazione retail", "appDescPh": "Nota di una riga (facoltativo)", "appImgPh": "Immagine scena (facoltativo) URL, o carica",
+    "detailBlocks": "Dettaglio lungo (dall'alto in basso)", "heading": "Titolo", "para": "Paragrafo", "image": "Immagine", "blocksEmpty": "Ancora nessun dettaglio. Alterna titolo / paragrafo / immagine per una pagina lunga.", "imgUrlPh": "URL immagine, o carica", "captionPh": "Didascalia (facoltativo)", "headingPh": "Testo del sottotitolo", "paraPh": "Paragrafo…", "moveUp": "Su", "moveDown": "Giù",
+    "boxContents": "Contenuto confezione (secondo l'imballo reale)", "addItem": "Aggiungi articolo", "boxEmpty": "Vuoto. es. Apparecchio ×1, accessori ×1, manuale ×1, garanzia ×1.", "itemPh": "Articolo, es. Apparecchio", "qtyPh": "Qtà (facoltativo) es. ×1",
+    "dimensions": "Dimensioni", "dimHintSrc": "Per lo schema dimensioni; se vuoto usa la tabella specifiche", "dimHintTr": "I valori sono solo dell'origine; qui si traduce solo la nota di foratura", "dimW": "Largh. W", "dimH": "Alt. H", "dimD": "Prof. D (facoltativo)", "dimUnit": "Unità mm", "cutoutPh": "Nota di foratura (facoltativo) es. Ø75",
+    "install": "Metodo / passi di installazione", "installPh": "Metodo in una riga, es. incasso + clip a molla", "installSteps": "Passi di installazione", "addStep": "Aggiungi passo", "stepPh": "Passo",
+    "faq": "FAQ", "addFaq": "Aggiungi Q/R", "faqEmpty": "Ancora nessuna Q/R. Cliente finale, orientato all'uso: installazione, scelta CCT, uso esterno, garanzia, contenuto.", "faqQPh": "Domanda, es. Facile da installare?", "faqAPh": "Risposta…",
+    "saveShowcase": "Salva vetrina", "saveTrans": "Salva traduzione",
+    "icons": { "shield": "Protezione / cert.", "droplet": "Impermeabile", "zap": "Potenza / elettrico", "clock": "Durata", "award": "Garanzia / premio", "sun": "Luminosità / efficienza", "temp": "Temperatura", "ruler": "Dimensioni", "gauge": "Prestazioni", "bulb": "Sorgente / CRI", "battery": "Batteria", "dot": "Generico" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

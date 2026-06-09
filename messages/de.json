@@ -16,6 +16,25 @@
     "specsTitle": "Spezifikationen / Zertifikate", "specsSub": "Parametertabelle + Abzeichen", "params": "Spezifikationen (Gruppe optional · Reihenfolge = Anzeige)", "addParam": "Parameter hinzufügen", "group": "Gruppe", "paramName": "Parameter", "paramValue": "Wert", "unit": "Einheit", "certs": "Zertifizierungen", "certPh": "Eingeben und Enter, z. B. CE / RoHS / IP65", "saveSpecs": "Spezifikationen / Zertifikate speichern",
     "showcaseTitle": "Präsentation", "relTitle": "Beziehungen / Attribute", "deleteTitle": "Produkt löschen", "deleteSub": "Entfernt auch Bilder / Dokumente / Videos / Verknüpfungen / Statistiken. Unwiderruflich.", "deleteBtn": "Dieses Produkt löschen"
   },
+  "show": {
+    "sub": "Verkaufsargumente · Highlights · Anwendungen · Detail · FAQ", "editLang": "Bearbeitungssprache", "src": "Quelle",
+    "auditNote": "Übersetzung wird geprüft — Name & Spezifikationen werden hier von der KI gepflegt; Variantenlabel / Leuchtentyp / Maße sind quellsprachlich, nur unter „Quelle“ bearbeitbar.",
+    "aiGenTitle": "KI-Entwurf für Präsentationstexte", "aiGenHint": "Aus Leuchtentyp + Spezifikationen: Argumente / Highlights / Szenen / FAQ / Lieferumfang / Montage / Detail. Nur Entwurf, vor dem Speichern prüfen.", "aiGenBtn": "KI-Entwurf", "aiGenning": "Wird erstellt…",
+    "aiTransTitle": "Mehrsprachig: eine ausfüllen, KI ergänzt die anderen 8", "aiTransHint": "Quellsprache unten wählen, erst speichern, dann übersetzen. Direkt gespeichert, wiederholbar.", "aiTransBtn": "KI übersetzen", "aiTransing": "Wird übersetzt…", "sourceLang": "Quellsprache", "translated": "Übersetzt:", "staleWarn": "⚠ Quellinhalt geändert — Übersetzungen evtl. veraltet. Erneut übersetzen.",
+    "tagline": "Argumentleiste (mit · oder 、 trennen)", "taglinePh": "z. B. IP65 wasserdicht · 5 Jahre Garantie · Ra90",
+    "variant": "Varianten-Label", "variantPh": "z. B. 100W / Warmweiß 3000K", "variantHint": "Der öffentliche „Varianten-Wähler“ erscheint nur, wenn dieses Produkt eine Serie mit anderen teilt.",
+    "luminaire": "Leuchtentyp (Kontext für KI)", "unset": "(Nicht gesetzt)", "custom": "(Benutzerdef.)", "luminaireHint": "Standardtyp wählen. Die KI erzeugt damit genaueren Lieferumfang und Montage.",
+    "description": "Produktbeschreibung (Absatz unter der öffentlichen H1)", "descriptionPh": "1–2 Absätze für Endkunden…",
+    "highlights": "Highlight-Iconreihe", "addHighlight": "Highlight hinzufügen", "highlightsEmpty": "Noch keine Highlights. Füge 3–4 hinzu, z. B. „Wasserdicht IP65“, „5 Jahre Garantie“.", "hlValuePh": "Wert (optional) z. B. IP65", "hlLabelPh": "Bezeichnung, z. B. Wasserdicht",
+    "applications": "Anwendungen (wo es verwendet wird)", "addApp": "Szene hinzufügen", "appsEmpty": "Noch keine Szenen. Füge 3–6 hinzu, z. B. „Handel“, „Außen“, „Industrie“, mit Fotos.", "appTitlePh": "Szenenname, z. B. Handelsbeleuchtung", "appDescPh": "Einzeiler (optional)", "appImgPh": "Szenenbild (optional) URL, oder hochladen",
+    "detailBlocks": "Langes Detail (von oben nach unten)", "heading": "Überschrift", "para": "Absatz", "image": "Bild", "blocksEmpty": "Noch kein Detail. Überschrift / Absatz / Bild abwechseln für eine lange Seite.", "imgUrlPh": "Bild-URL, oder hochladen", "captionPh": "Bildunterschrift (optional)", "headingPh": "Zwischentitel", "paraPh": "Absatz…", "moveUp": "Nach oben", "moveDown": "Nach unten",
+    "boxContents": "Lieferumfang (laut tatsächlicher Verpackung)", "addItem": "Artikel hinzufügen", "boxEmpty": "Leer. z. B. Leuchte ×1, Zubehör ×1, Anleitung ×1, Garantiekarte ×1.", "itemPh": "Artikel, z. B. Leuchte", "qtyPh": "Menge (optional) z. B. ×1",
+    "dimensions": "Abmessungen", "dimHintSrc": "Für die Maßzeichnung; leer = Rückgriff auf die Spezifikationstabelle", "dimHintTr": "Werte sind quellsprachlich; hier wird nur der Ausschnitt-Hinweis übersetzt", "dimW": "Breite W", "dimH": "Höhe H", "dimD": "Tiefe D (optional)", "dimUnit": "Einheit mm", "cutoutPh": "Ausschnitt-Hinweis (optional) z. B. Ø75",
+    "install": "Montageart / -schritte", "installPh": "Montage in einem Satz, z. B. Einbau + Federclips", "installSteps": "Montageschritte", "addStep": "Schritt hinzufügen", "stepPh": "Schritt",
+    "faq": "FAQ", "addFaq": "Frage/Antwort hinzufügen", "faqEmpty": "Noch keine FAQ. Endkunden- und nutzungsorientiert: Montage, CCT-Wahl, Außeneinsatz, Garantie, Lieferumfang.", "faqQPh": "Frage, z. B. Einfach zu montieren?", "faqAPh": "Antwort…",
+    "saveShowcase": "Präsentation speichern", "saveTrans": "Übersetzung speichern",
+    "icons": { "shield": "Schutz / Zert.", "droplet": "Wasserdicht", "zap": "Leistung / elektr.", "clock": "Lebensdauer", "award": "Garantie / Preis", "sun": "Helligkeit / Effizienz", "temp": "Temperatur", "ruler": "Abmessungen", "gauge": "Leistung", "bulb": "Quelle / CRI", "battery": "Batterie", "dot": "Allgemein" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

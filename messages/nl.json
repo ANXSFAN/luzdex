@@ -16,6 +16,25 @@
     "specsTitle": "Specs / certificaten", "specsSub": "Parametertabel + badges", "params": "Specificaties (groep optioneel · volgorde = weergave)", "addParam": "Parameter toevoegen", "group": "Groep", "paramName": "Parameter", "paramValue": "Waarde", "unit": "Eenheid", "certs": "Certificeringen", "certPh": "Typ en druk op Enter, bv. CE / RoHS / IP65", "saveSpecs": "Specs / certificaten opslaan",
     "showcaseTitle": "Showcase", "relTitle": "Relaties / kenmerken", "deleteTitle": "Product verwijderen", "deleteSub": "Verwijdert ook afbeeldingen / documenten / video's / koppelingen / statistieken. Onomkeerbaar.", "deleteBtn": "Dit product verwijderen"
   },
+  "show": {
+    "sub": "Verkooppunten · highlights · toepassingen · detail · FAQ", "editLang": "Bewerkingstaal", "src": "bron",
+    "auditNote": "Een vertaling nakijken — naam & specificaties worden hier door AI beheerd; variantlabel / armatuurtype / afmetingen zijn brontaal-specifiek, bewerk onder “bron”.",
+    "aiGenTitle": "AI-concept voor showcase-tekst", "aiGenHint": "Op basis van armatuurtype + specs: verkooppunten / highlights / scènes / FAQ / inhoud / montage / detail. Alleen concept, controleer voor opslaan.", "aiGenBtn": "AI-concept", "aiGenning": "Bezig…",
+    "aiTransTitle": "Meertalig: vul er één in, AI vult de andere 8 aan", "aiTransHint": "Kies hieronder de brontaal, sla eerst op en vertaal daarna. Direct opgeslagen, herhaalbaar.", "aiTransBtn": "AI vertalen", "aiTransing": "Vertalen…", "sourceLang": "Brontaal", "translated": "Vertaald:", "staleWarn": "⚠ Broninhoud gewijzigd — vertalingen kunnen verouderd zijn. Vertaal opnieuw.",
+    "tagline": "Verkooppuntenbalk (scheid met · of 、)", "taglinePh": "bv. IP65 waterdicht · 5 jaar garantie · Ra90",
+    "variant": "Variantlabel", "variantPh": "bv. 100W / Warm 3000K", "variantHint": "De publieke “variantkiezer” verschijnt alleen als dit product een serie deelt met andere.",
+    "luminaire": "Armatuurtype (context voor AI)", "unset": "(Niet ingesteld)", "custom": "(Aangepast)", "luminaireHint": "Kies een standaardtype. AI gebruikt dit voor nauwkeurigere inhoud en montage.",
+    "description": "Productbeschrijving (alinea onder de publieke H1)", "descriptionPh": "1–2 alinea's voor de eindklant…",
+    "highlights": "Highlight-iconenrij", "addHighlight": "Highlight toevoegen", "highlightsEmpty": "Nog geen highlights. Voeg er 3–4 toe, bv. “Waterdicht IP65”, “5 jaar garantie”.", "hlValuePh": "Waarde (optioneel) bv. IP65", "hlLabelPh": "Label, bv. Waterdicht",
+    "applications": "Toepassingen (waar het gebruikt wordt)", "addApp": "Scène toevoegen", "appsEmpty": "Nog geen scènes. Voeg er 3–6 toe, bv. “Retail”, “Buiten”, “Industrie”, met foto's.", "appTitlePh": "Scènenaam, bv. Retailverlichting", "appDescPh": "Eén regel (optioneel)", "appImgPh": "Scèneafbeelding (optioneel) URL, of uploaden",
+    "detailBlocks": "Lang detail (van boven naar beneden)", "heading": "Kop", "para": "Alinea", "image": "Afbeelding", "blocksEmpty": "Nog geen detail. Wissel kop / alinea / afbeelding af voor een lange pagina.", "imgUrlPh": "Afbeeldings-URL, of uploaden", "captionPh": "Bijschrift (optioneel)", "headingPh": "Subkoptekst", "paraPh": "Alinea…", "moveUp": "Omhoog", "moveDown": "Omlaag",
+    "boxContents": "Doosinhoud (volgens werkelijke verpakking)", "addItem": "Item toevoegen", "boxEmpty": "Leeg. bv. Armatuur ×1, accessoires ×1, handleiding ×1, garantiekaart ×1.", "itemPh": "Item, bv. Armatuur", "qtyPh": "Aantal (optioneel) bv. ×1",
+    "dimensions": "Afmetingen", "dimHintSrc": "Voor het maatschema; leeg = terugval op de spec-tabel", "dimHintTr": "Waarden zijn brontaal-specifiek; alleen de uitsparingsnotitie wordt hier vertaald", "dimW": "Breedte W", "dimH": "Hoogte H", "dimD": "Diepte D (optioneel)", "dimUnit": "Eenheid mm", "cutoutPh": "Uitsparingsnotitie (optioneel) bv. Ø75",
+    "install": "Montagemethode / -stappen", "installPh": "Methode in één regel, bv. inbouw + veerclips", "installSteps": "Montagestappen", "addStep": "Stap toevoegen", "stepPh": "Stap",
+    "faq": "FAQ", "addFaq": "V&A toevoegen", "faqEmpty": "Nog geen V&A. Eindklant, gebruiksgericht: montage, CCT kiezen, buitengebruik, garantie, inhoud.", "faqQPh": "Vraag, bv. Makkelijk te monteren?", "faqAPh": "Antwoord…",
+    "saveShowcase": "Showcase opslaan", "saveTrans": "Vertaling opslaan",
+    "icons": { "shield": "Bescherming / cert.", "droplet": "Waterdicht", "zap": "Vermogen / elektr.", "clock": "Levensduur", "award": "Garantie / prijs", "sun": "Helderheid / efficiëntie", "temp": "Temperatuur", "ruler": "Afmetingen", "gauge": "Prestatie", "bulb": "Bron / CRI", "battery": "Batterij", "dot": "Algemeen" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

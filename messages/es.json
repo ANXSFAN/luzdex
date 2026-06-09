@@ -16,6 +16,25 @@
     "specsTitle": "Especificaciones / certificados", "specsSub": "Tabla de parámetros + insignias", "params": "Especificaciones (grupo opcional · orden = visualización)", "addParam": "Añadir parámetro", "group": "Grupo", "paramName": "Parámetro", "paramValue": "Valor", "unit": "Unidad", "certs": "Certificaciones", "certPh": "Escribe y pulsa Enter, p. ej. CE / RoHS / IP65", "saveSpecs": "Guardar especificaciones / certificados",
     "showcaseTitle": "Escaparate", "relTitle": "Relaciones / atributos", "deleteTitle": "Eliminar producto", "deleteSub": "También elimina imágenes / documentos / vídeos / relaciones / estadísticas. Irreversible.", "deleteBtn": "Eliminar este producto"
   },
+  "show": {
+    "sub": "Argumentos · destacados · aplicaciones · detalle · FAQ", "editLang": "Idioma de edición", "src": "origen",
+    "auditNote": "Revisando una traducción: nombre y especificaciones los mantiene la IA; etiqueta de variante / tipo de luminaria / dimensiones son solo del origen, se editan en «origen».",
+    "aiGenTitle": "Generar borrador de textos con IA", "aiGenHint": "A partir del tipo de luminaria + especificaciones, genera argumentos / destacados / escenas / FAQ / contenido de caja / instalación / detalle. Solo borrador, revisar antes de guardar.", "aiGenBtn": "Borrador IA", "aiGenning": "Generando…",
+    "aiTransTitle": "Multilingüe: rellena uno, la IA completa los otros 8", "aiTransHint": "Elige el idioma de origen abajo, guarda primero y luego traduce. Se guarda directamente, repetible.", "aiTransBtn": "Traducir IA", "aiTransing": "Traduciendo…", "sourceLang": "Idioma de origen", "translated": "Traducidos:", "staleWarn": "⚠ El contenido de origen cambió; las traducciones pueden estar desactualizadas. Vuelve a traducir.",
+    "tagline": "Banda de argumentos (separa con · o 、)", "taglinePh": "p. ej. IP65 impermeable · 5 años de garantía · Ra90",
+    "variant": "Etiqueta de variante", "variantPh": "p. ej. 100W / Cálido 3000K", "variantHint": "El «selector de variante» público solo aparece si este producto comparte serie con otros.",
+    "luminaire": "Tipo de luminaria (contexto para IA)", "unset": "(Sin definir)", "custom": "(Personalizado)", "luminaireHint": "Elige un tipo estándar. La IA lo usa para un contenido de caja e instalación más precisos.",
+    "description": "Descripción del producto (párrafo bajo el H1 público)", "descriptionPh": "1–2 párrafos para el cliente final…",
+    "highlights": "Fila de iconos destacados", "addHighlight": "Añadir destacado", "highlightsEmpty": "Aún sin destacados. Añade 3–4, p. ej. «Impermeable IP65», «5 años de garantía».", "hlValuePh": "Valor (opcional) p. ej. IP65", "hlLabelPh": "Etiqueta, p. ej. Impermeable",
+    "applications": "Aplicaciones (dónde se usa)", "addApp": "Añadir escena", "appsEmpty": "Aún sin escenas. Añade 3–6, p. ej. «Comercio», «Exterior», «Industrial», con fotos.", "appTitlePh": "Nombre de escena, p. ej. Iluminación comercial", "appDescPh": "Nota de una línea (opcional)", "appImgPh": "Imagen de escena (opcional) URL, o subir",
+    "detailBlocks": "Detalle largo (de arriba abajo)", "heading": "Título", "para": "Párrafo", "image": "Imagen", "blocksEmpty": "Aún sin detalle. Alterna título / párrafo / imagen para una página larga.", "imgUrlPh": "URL de imagen, o subir", "captionPh": "Pie (opcional)", "headingPh": "Texto del subtítulo", "paraPh": "Párrafo…", "moveUp": "Subir", "moveDown": "Bajar",
+    "boxContents": "Contenido de la caja (según embalaje real)", "addItem": "Añadir artículo", "boxEmpty": "Vacío. p. ej. Luminaria ×1, accesorios ×1, manual ×1, garantía ×1.", "itemPh": "Artículo, p. ej. Luminaria", "qtyPh": "Cant. (opcional) p. ej. ×1",
+    "dimensions": "Dimensiones", "dimHintSrc": "Para el diagrama de dimensiones; si está vacío usa la tabla de especificaciones", "dimHintTr": "Los valores son solo del origen; aquí solo se traduce la nota de corte", "dimW": "Ancho W", "dimH": "Alto H", "dimD": "Fondo D (opcional)", "dimUnit": "Unidad mm", "cutoutPh": "Nota de corte (opcional) p. ej. Ø75",
+    "install": "Método / pasos de instalación", "installPh": "Método en una línea, p. ej. empotrado + clips de resorte", "installSteps": "Pasos de instalación", "addStep": "Añadir paso", "stepPh": "Paso",
+    "faq": "Preguntas frecuentes", "addFaq": "Añadir P/R", "faqEmpty": "Aún sin P/R. Cliente final, orientado al uso: cómo instalar, elegir CCT, uso exterior, garantía, contenido de la caja.", "faqQPh": "Pregunta, p. ej. ¿Fácil de instalar?", "faqAPh": "Respuesta…",
+    "saveShowcase": "Guardar escaparate", "saveTrans": "Guardar traducción",
+    "icons": { "shield": "Protección / cert.", "droplet": "Impermeable", "zap": "Potencia / eléctrico", "clock": "Vida útil", "award": "Garantía / premio", "sun": "Brillo / eficacia", "temp": "Temperatura", "ruler": "Dimensiones", "gauge": "Rendimiento", "bulb": "Fuente / IRC", "battery": "Batería", "dot": "Genérico" }
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",
