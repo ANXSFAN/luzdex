@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   CONDITION_KINDS,
   type CompatCondition,
@@ -40,6 +41,17 @@ type Rule = {
   priority: number;
 };
 
+const REL_KEY: Record<string, string> = {
+  accessory: "relAccessory",
+  alternative: "relAlternative",
+  required: "relRequired",
+};
+const COND_KEY: Record<string, string> = {
+  attr_eq: "eq",
+  attr_approx: "approx",
+  attr_gte: "gte",
+  attr_lte: "lte",
+};
 const RELATIONS = [
   { v: "accessory", l: "配件" },
   { v: "alternative", l: "替代" },
@@ -95,6 +107,7 @@ export function RuleManager({
   catNames: Record<string, string>;
 }) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const [editing, setEditing] = useState<Rule | "new" | null>(null);
   const [pending, start] = useTransition();
   const opts = useCatOptions(categories);
@@ -103,7 +116,7 @@ export function RuleManager({
     start(async () => {
       try {
         const r = await applyAutoLinkRules();
-        toast.success(`已扫描 ${r.scanned} 个产品，新建 ${r.created} 条配件关系`);
+        toast.success(t("rule.applied", { scanned: r.scanned, created: r.created }));
         router.refresh();
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "执行失败");
@@ -151,23 +164,22 @@ export function RuleManager({
     <div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[var(--color-ink-muted)]">
-          共 {rules.length} 条规则。规则定义「哪类产品配哪类」，自动跨分类推荐配件。
+          {t("rule.count", { n: rules.length })}
         </p>
         <div className="flex items-center gap-2">
           <button
             onClick={apply}
             disabled={pending}
             className="flex items-center gap-1.5 rounded-lg border border-[var(--color-ink)] px-3.5 py-2 text-sm text-[var(--color-ink)] transition hover:bg-[var(--color-ink)] hover:text-[var(--color-surface)] disabled:opacity-50"
-            title="对全工厂产品跑一遍自动建链规则"
           >
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-            按规则自动建链
+            {t("rule.autoLinkBtn")}
           </button>
           <button
             onClick={() => setEditing("new")}
             className="flex items-center gap-1.5 rounded-lg bg-[var(--color-ink)] px-3.5 py-2 text-sm text-[var(--color-surface)] transition hover:opacity-90"
           >
-            <Plus className="h-4 w-4" /> 新建规则
+            <Plus className="h-4 w-4" /> {t("rule.newRule")}
           </button>
         </div>
       </div>
@@ -183,7 +195,7 @@ export function RuleManager({
 
       {rules.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-[var(--color-rule)] py-14 text-center text-sm text-[var(--color-ink-muted)]">
-          还没有规则。点「新建规则」，例如：主品「灯带」→ 配件「铝槽」，条件 pcbWidth 相等。
+          {t("rule.empty")}
         </div>
       ) : (
         <ul className="mt-5 space-y-2">
@@ -205,7 +217,7 @@ export function RuleManager({
                     {catNames[r.fromCategoryId] ?? "?"}
                     <ArrowRight className="h-3.5 w-3.5" />
                     {catNames[r.toCategoryId] ?? "?"}
-                    {r.bidirectional && <span className="text-[var(--color-ink-faint)]">（双向）</span>}
+                    {r.bidirectional && <span className="text-[var(--color-ink-faint)]">⇄</span>}
                   </span>
                   {r.conditions.length > 0 && (
                     <span className="font-mono text-[13px] text-[var(--color-ink-faint)]">
@@ -214,28 +226,28 @@ export function RuleManager({
                   )}
                   {r.autoLink && (
                     <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">
-                      自动建链
+                      {t("rule.autoLinkTag")}
                     </span>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={() => onToggle(r)}
-                    title={r.enabled ? "停用" : "启用"}
+                    title={t("rule.enabled")}
                     className={`p-1.5 transition ${r.enabled ? "text-[var(--color-ink)]" : "text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]"}`}
                   >
                     <Power className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setEditing(r)}
-                    title="编辑"
+                    title={t("common.edit")}
                     className="p-1.5 text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => onDelete(r)}
-                    title="删除"
+                    title={t("common.delete")}
                     className="p-1.5 text-[var(--color-ink-muted)] transition hover:text-red-600"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -260,6 +272,7 @@ function RuleEditor({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const isNew = !initial.id;
   const [f, setF] = useState<Rule>(initial);
   const [pending, start] = useTransition();
@@ -308,7 +321,7 @@ function RuleEditor({
       try {
         if (isNew) await createRule(payload);
         else await updateRule(initial.id, payload);
-        toast.success("规则已保存");
+        toast.success(t("rule.savedOk"));
         onClose();
         router.refresh();
       } catch (e) {
@@ -321,10 +334,10 @@ function RuleEditor({
     <section className="mt-5 rounded-2xl border border-[var(--color-ink)] bg-[var(--color-surface)] p-5">
       <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-2">
         <p className="font-mono text-[13px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-          {isNew ? "新建规则" : "编辑规则"}
+          {isNew ? t("rule.newTitle") : t("rule.editTitle")}
         </p>
         <button onClick={onClose} className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]">
-          取消
+          {t("common.cancel")}
         </button>
       </div>
 
@@ -337,16 +350,16 @@ function RuleEditor({
       <div className="mt-4 space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>规则名</label>
+            <label className={labelCls}>{t("rule.name")}</label>
             <input
               value={f.label}
               onChange={(e) => set("label", e.target.value)}
-              placeholder="如：灯带配铝槽"
+              placeholder={t("rule.namePh")}
               className={`${inputCls} mt-1.5 w-full`}
             />
           </div>
           <div>
-            <label className={labelCls}>关系类型</label>
+            <label className={labelCls}>{t("rule.relation")}</label>
             <select
               value={f.relation}
               onChange={(e) => set("relation", e.target.value)}
@@ -354,7 +367,7 @@ function RuleEditor({
             >
               {RELATIONS.map((r) => (
                 <option key={r.v} value={r.v}>
-                  {r.l}
+                  {t(`rule.${REL_KEY[r.v]}`)}
                 </option>
               ))}
             </select>
@@ -363,13 +376,13 @@ function RuleEditor({
 
         <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto_1fr]">
           <div>
-            <label className={labelCls}>主品分类</label>
+            <label className={labelCls}>{t("rule.from")}</label>
             <select
               value={f.fromCategoryId}
               onChange={(e) => set("fromCategoryId", e.target.value)}
               className={`${inputCls} mt-1.5 w-full`}
             >
-              <option value="">选择…</option>
+              <option value="">{t("rule.pick")}</option>
               {opts.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
@@ -379,13 +392,13 @@ function RuleEditor({
           </div>
           <ArrowRight className="mb-2.5 h-5 w-5 text-[var(--color-ink-muted)]" />
           <div>
-            <label className={labelCls}>配件分类</label>
+            <label className={labelCls}>{t("rule.to")}</label>
             <select
               value={f.toCategoryId}
               onChange={(e) => set("toCategoryId", e.target.value)}
               className={`${inputCls} mt-1.5 w-full`}
             >
-              <option value="">选择…</option>
+              <option value="">{t("rule.pick")}</option>
               {opts.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
@@ -398,12 +411,12 @@ function RuleEditor({
         {/* 条件构建器 */}
         <div>
           <div className="flex items-center justify-between">
-            <label className={labelCls}>匹配条件（全部满足 · 留空则同类目即配）</label>
+            <label className={labelCls}>{t("rule.conditions")}</label>
             <button
               onClick={addCond}
               className="flex items-center gap-1 text-sm text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
             >
-              <Plus className="h-3.5 w-3.5" /> 加条件
+              <Plus className="h-3.5 w-3.5" /> {t("rule.addCond")}
             </button>
           </div>
           <div className="mt-2 space-y-2">
@@ -413,7 +426,7 @@ function RuleEditor({
                   list="attr-hints"
                   value={c.fromKey}
                   onChange={(e) => updCond(i, { fromKey: e.target.value })}
-                  placeholder="主品属性"
+                  placeholder={t("rule.mainAttr")}
                   className={`${inputCls} w-32`}
                 />
                 <select
@@ -423,7 +436,7 @@ function RuleEditor({
                 >
                   {CONDITION_KINDS.map((k) => (
                     <option key={k.kind} value={k.kind}>
-                      {k.label}
+                      {t(`rule.${COND_KEY[k.kind]}`)}
                     </option>
                   ))}
                 </select>
@@ -431,7 +444,7 @@ function RuleEditor({
                   list="attr-hints"
                   value={c.toKey}
                   onChange={(e) => updCond(i, { toKey: e.target.value })}
-                  placeholder="配件属性"
+                  placeholder={t("rule.accAttr")}
                   className={`${inputCls} w-32`}
                 />
                 {c.kind === "attr_approx" && (
@@ -439,7 +452,7 @@ function RuleEditor({
                     type="number"
                     value={c.tolerance ?? 0}
                     onChange={(e) => updCond(i, { tolerance: Number(e.target.value) })}
-                    placeholder="容差"
+                    placeholder={t("rule.tolerance")}
                     className={`${inputCls} w-20`}
                   />
                 )}
@@ -453,7 +466,7 @@ function RuleEditor({
             ))}
             {f.conditions.length === 0 && (
               <p className="text-sm text-[var(--color-ink-faint)]">
-                无条件：主品分类下的产品会推荐配件分类下的全部产品。
+                {t("rule.noCond")}
               </p>
             )}
           </div>
@@ -467,7 +480,7 @@ function RuleEditor({
               onChange={(e) => set("bidirectional", e.target.checked)}
               className="h-4 w-4 accent-[var(--color-ink)]"
             />
-            双向（配件页也推荐主品）
+            {t("rule.bidir")}
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
             <input
@@ -476,7 +489,7 @@ function RuleEditor({
               onChange={(e) => set("autoLink", e.target.checked)}
               className="h-4 w-4 accent-[var(--color-ink)]"
             />
-            自动建链（否则仅在产品页出建议）
+            {t("rule.autoLinkOpt")}
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
             <input
@@ -485,10 +498,10 @@ function RuleEditor({
               onChange={(e) => set("enabled", e.target.checked)}
               className="h-4 w-4 accent-[var(--color-ink)]"
             />
-            启用
+            {t("rule.enabled")}
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--color-ink-muted)]">
-            优先级
+            {t("rule.priority")}
             <input
               type="number"
               value={f.priority}
@@ -504,7 +517,7 @@ function RuleEditor({
             disabled={pending}
             className="rounded-lg bg-[var(--color-ink)] px-5 py-2 text-sm font-medium text-[var(--color-surface)] transition hover:opacity-90 disabled:opacity-50"
           >
-            {pending ? "保存中…" : "保存规则"}
+            {pending ? t("common.saving") : t("common.save")}
           </button>
         </div>
       </div>

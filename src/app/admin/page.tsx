@@ -10,15 +10,15 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin" });
 
   if (!factory) {
     return (
       <div>
-        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("dashboard")}</h1>
+        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("page.dashboard")}</h1>
         <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-16 text-center">
           <p className="text-sm text-[var(--color-ink-muted)]">
-            未选择工厂，请先在顶栏切换「当前工厂」
+            {t("common.noFactory")}
           </p>
         </div>
       </div>
@@ -92,17 +92,18 @@ export default async function AdminDashboardPage() {
     <div>
       <div className="flex items-baseline justify-between">
         <div>
-          <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("dashboard")}</h1>
+          <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("page.dashboard")}</h1>
           <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
             <span className="font-medium text-[var(--color-ink)]">{factory.name}</span>
-            {" · 近 30 天"}
+            {" · "}
+            {t("dashboard.last30")}
           </p>
         </div>
         <Link
           href="/admin/products"
           className="flex items-center gap-1 text-sm text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
         >
-          管理产品 <ChevronRight className="h-3.5 w-3.5" />
+          {t("dashboard.manageProducts")} <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
@@ -110,25 +111,25 @@ export default async function AdminDashboardPage() {
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi
           icon={<Package className="h-4 w-4" />}
-          label="产品"
+          label={t("dashboard.kpiProducts")}
           value={products.length}
           href="/admin/products"
         />
         <Kpi
           icon={<ScanLine className="h-4 w-4" />}
-          label="今日扫码"
+          label={t("dashboard.kpiToday")}
           value={scansToday}
           href="/admin/analytics"
         />
         <Kpi
           icon={<ScanLine className="h-4 w-4" />}
-          label="30 天扫码"
+          label={t("dashboard.kpiScans30")}
           value={scans30d}
           href="/admin/analytics"
         />
         <Kpi
           icon={<FileDown className="h-4 w-4" />}
-          label="30 天 PDF"
+          label={t("dashboard.kpiPdf30")}
           value={pdf30d}
           href="/admin/analytics"
         />
@@ -138,20 +139,20 @@ export default async function AdminDashboardPage() {
       <section className="mt-8">
         <div className="flex items-baseline justify-between">
           <h2 className="font-mono text-sm font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-            内容就绪 · 待补
+            {t("dashboard.readyTitle")}
           </h2>
           <Link
             href="/admin/products"
             className="text-sm text-[var(--color-ink-muted)] underline-offset-2 hover:underline"
           >
-            去处理
+            {t("dashboard.goFix")}
           </Link>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Ready label="无产品图" value={noImage} tone="red" need="noimage" />
-          <Ready label="缺展示内容" value={lacksShowcase} tone="amber" need="noshowcase" />
-          <Ready label="未翻译" value={untranslated} tone="amber" need="untranslated" />
-          <Ready label="译文过期" value={stale} tone="amber" need="stale" />
+          <Ready label={t("dashboard.noImage")} value={noImage} tone="red" need="noimage" />
+          <Ready label={t("dashboard.noShowcase")} value={lacksShowcase} tone="amber" need="noshowcase" />
+          <Ready label={t("dashboard.untranslated")} value={untranslated} tone="amber" need="untranslated" />
+          <Ready label={t("dashboard.stale")} value={stale} tone="amber" need="stale" />
         </div>
       </section>
 
@@ -159,23 +160,23 @@ export default async function AdminDashboardPage() {
       <section className="mt-8">
         <div className="flex items-baseline justify-between">
           <h2 className="font-mono text-sm font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-            热门产品 · 30 天扫码
+            {t("dashboard.hotTitle")}
           </h2>
           <Link
             href="/admin/analytics"
             className="text-sm text-[var(--color-ink-muted)] underline-offset-2 hover:underline"
           >
-            完整数据
+            {t("dashboard.fullData")}
           </Link>
         </div>
         {top.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--color-ink-faint)]">近 30 天还没有扫码记录</p>
+          <p className="mt-3 text-sm text-[var(--color-ink-faint)]">{t("dashboard.noScans")}</p>
         ) : (
           <ul className="mt-3 space-y-1">
-            {top.map((t, i) => (
-              <li key={t.id}>
+            {top.map((tp, i) => (
+              <li key={tp.id}>
                 <Link
-                  href={`/admin/products/${t.id}`}
+                  href={`/admin/products/${tp.id}`}
                   className="doc-row flex items-center justify-between gap-4 px-4 py-3"
                 >
                   <div className="flex min-w-0 items-center gap-3">
@@ -183,12 +184,12 @@ export default async function AdminDashboardPage() {
                       {i + 1}
                     </span>
                     <span className="truncate text-sm font-medium text-[var(--color-ink)]">
-                      {t.name}
+                      {tp.name}
                     </span>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <span className="font-mono text-sm text-[var(--color-ink-muted)]">
-                      {t.scans} 扫
+                      {tp.scans} {t("dashboard.scans")}
                     </span>
                     <ChevronRight className="h-4 w-4 text-[var(--color-ink-muted)]" />
                   </div>
@@ -203,11 +204,11 @@ export default async function AdminDashboardPage() {
       <section className="mt-8 flex items-center gap-2 rounded-xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-ink-muted)]">
         <Languages className="h-4 w-4 shrink-0" />
         <span>
-          全语言就绪{" "}
+          {t("dashboard.langReady")}{" "}
           <span className="font-medium text-[var(--color-ink)]">
             {products.length - untranslated - stale}
           </span>{" "}
-          / {products.length} · 待补译文{" "}
+          / {products.length} · {t("dashboard.langPending")}{" "}
           <span className="font-medium text-[var(--color-ink)]">{untranslated + stale}</span>
         </span>
       </section>

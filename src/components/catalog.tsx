@@ -19,6 +19,7 @@ import {
   Tag,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { bulkDeleteProducts, createProduct } from "@/app/admin/products/actions";
 import {
   assignProductsToCategory,
@@ -67,20 +68,18 @@ type Node =
   | { type: "series"; id: string };
 
 const NEEDS = [
-  { key: "all", label: "全部" },
-  { key: "noimage", label: "无图" },
-  { key: "noshowcase", label: "缺展示" },
-  { key: "untranslated", label: "未译" },
-  { key: "stale", label: "译文过期" },
+  { key: "all", tk: "fAll" },
+  { key: "noimage", tk: "fNoImage" },
+  { key: "noshowcase", tk: "fNoShowcase" },
+  { key: "untranslated", tk: "fUntranslated" },
+  { key: "stale", tk: "fStale" },
 ] as const;
 
-function relTime(iso: string) {
+function relTime(iso: string, today: string, yesterday: string) {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (d <= 0) return "今天";
-  if (d === 1) return "昨天";
-  if (d < 30) return `${d} 天前`;
-  if (d < 365) return `${Math.floor(d / 30)} 月前`;
-  return `${Math.floor(d / 365)} 年前`;
+  if (d <= 0) return today;
+  if (d === 1) return yesterday;
+  return new Date(iso).toISOString().slice(0, 10);
 }
 
 export function Catalog({
@@ -95,6 +94,7 @@ export function Catalog({
   initialNeed?: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const [node, setNode] = useState<Node>({ type: "all" });
   const [q, setQ] = useState("");
   const [need, setNeed] = useState<string>(
@@ -208,12 +208,12 @@ export function Catalog({
   const ids = [...selected];
   const nodeTitle =
     node.type === "all"
-      ? "全部产品"
+      ? t("catalog.allProducts")
       : node.type === "uncat"
-        ? "未分类"
+        ? t("catalog.uncat")
         : node.type === "cat"
-          ? categories.find((c) => c.id === node.id)?.name ?? "分类"
-          : activeSeries?.name ?? "系列";
+          ? categories.find((c) => c.id === node.id)?.name ?? t("nav.categories")
+          : activeSeries?.name ?? t("nav.series");
   const currentCatId = node.type === "cat" ? node.id : null;
   const currentSeriesId = node.type === "series" ? node.id : null;
 
@@ -302,14 +302,14 @@ export function Catalog({
       <aside className="lg:sticky lg:top-6 lg:self-start">
         <div className="flex items-center justify-between px-1 pb-2">
           <span className="flex items-center gap-1.5 font-mono text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
-            <FolderTree className="h-3.5 w-3.5" /> 目录
+            <FolderTree className="h-3.5 w-3.5" /> {t("catalog.catalogLabel")}
           </span>
           <Link
             href="/admin/categories"
             className="flex items-center gap-0.5 text-sm text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-            title="去分类管理"
+            title={t("nav.categories")}
           >
-            管理 <ChevronRight className="h-3.5 w-3.5" />
+            {t("common.manage")} <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -324,7 +324,7 @@ export function Catalog({
               }`}
             >
               <Layers className="ml-4 h-3.5 w-3.5 shrink-0 opacity-70" />
-              <span>全部产品</span>
+              <span>{t("catalog.allProducts")}</span>
               <span className="ml-auto font-mono text-sm opacity-70">
                 {products.length}
               </span>
@@ -344,7 +344,7 @@ export function Catalog({
                 }`}
               >
                 <Layers className="ml-4 h-3.5 w-3.5 shrink-0 opacity-40" />
-                <span>未分类</span>
+                <span>{t("catalog.uncat")}</span>
                 <span className="ml-auto font-mono text-sm opacity-70">
                   {uncatCount}
                 </span>
@@ -356,7 +356,7 @@ export function Catalog({
         {seriesByCat(null).length > 0 && (
           <div className="mt-3 px-1">
             <span className="font-mono text-sm uppercase tracking-[0.18em] text-[var(--color-ink-faint)]">
-              未归分类的系列
+              {t("catalog.otherSeries")}
             </span>
             <ul className="mt-1 space-y-0.5">
               {seriesByCat(null).map((s) => (
@@ -385,7 +385,7 @@ export function Catalog({
           href="/admin/series"
           className="mt-2 flex w-full items-center gap-1 rounded-lg border border-dashed border-[var(--color-rule)] px-2 py-1.5 text-sm text-[var(--color-ink-muted)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
         >
-          <ChevronRight className="h-3.5 w-3.5" /> 去系列管理
+          <ChevronRight className="h-3.5 w-3.5" /> {t("catalog.toSeries")}
         </Link>
       </aside>
 
@@ -402,7 +402,7 @@ export function Catalog({
             onClick={() => setNewProdOpen((o) => !o)}
             className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--color-ink)] px-3 py-1.5 text-sm text-white transition hover:bg-[#424245]"
           >
-            <Plus className="h-3.5 w-3.5" /> 新建产品
+            <Plus className="h-3.5 w-3.5" /> {t("catalog.newProduct")}
           </button>
         </div>
 
@@ -421,7 +421,7 @@ export function Catalog({
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="搜索名称 / 型号"
+              placeholder={t("catalog.search")}
               className="w-full rounded-full border border-[var(--color-rule)] bg-[var(--color-surface)] py-1.5 pl-9 pr-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-ink)]"
             />
           </div>
@@ -436,7 +436,7 @@ export function Catalog({
                     : "border-[var(--color-rule)] text-[var(--color-ink-soft)] hover:border-[var(--color-ink)]"
                 }`}
               >
-                {n.label}
+                {t(`catalog.${n.tk}`)}
               </button>
             ))}
           </div>
@@ -446,19 +446,19 @@ export function Catalog({
         {ids.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--color-ink)] bg-[var(--color-surface)] px-3 py-2.5">
             <span className="font-mono text-sm font-medium text-[var(--color-ink)]">
-              已选 {ids.length}
+              {t("catalog.selected")} {ids.length}
             </span>
             <button
               onClick={() => setSelected(new Set(panelProducts.map((p) => p.id)))}
               className="text-sm text-[var(--color-ink-muted)] hover:underline"
             >
-              选当前 {panelProducts.length}
+              {t("catalog.selectCur")} {panelProducts.length}
             </button>
             <button
               onClick={() => setSelected(new Set())}
               className="flex items-center gap-0.5 text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
             >
-              <X className="h-3 w-3" /> 清空
+              <X className="h-3 w-3" /> {t("catalog.clear")}
             </button>
             <span className="mx-1 h-4 w-px bg-[var(--color-rule)]" />
             <select
@@ -470,18 +470,18 @@ export function Catalog({
                 if (!v) return;
                 run(
                   () => assignProductsToCategory(ids, v === "__none" ? null : v),
-                  "已归类",
+                  t("category.cardTitle"),
                 );
               }}
               className="rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-ink)]"
             >
-              <option value="">归入分类…</option>
+              <option value="">{t("catalog.assignCat")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
-              <option value="__none">（移出分类）</option>
+              <option value="__none">{t("catalog.assignCatNone")}</option>
             </select>
             <select
               defaultValue=""
@@ -492,24 +492,24 @@ export function Catalog({
                 if (!v) return;
                 run(
                   () => assignProductsToSeries(ids, v === "__none" ? null : v),
-                  "已归系列",
+                  t("series.cardTitle"),
                 );
               }}
               className="rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-ink)]"
             >
-              <option value="">归入系列…</option>
+              <option value="">{t("catalog.assignSeries")}</option>
               {series.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>
               ))}
-              <option value="__none">（移出系列）</option>
+              <option value="__none">{t("catalog.assignSeriesNone")}</option>
             </select>
             <span className="mx-1 h-4 w-px bg-[var(--color-rule)]" />
             <button
               onClick={() => {
-                if (window.confirm(`删除选中的 ${ids.length} 个产品？不可恢复。`))
-                  run(() => bulkDeleteProducts(ids), "已删除");
+                if (window.confirm(`${t("common.delete")} (${ids.length})?`))
+                  run(() => bulkDeleteProducts(ids), t("common.delete"));
               }}
               disabled={pending}
               className="flex items-center gap-1 rounded-lg border border-red-300 px-2.5 py-1 text-sm text-red-700 transition hover:bg-red-600 hover:text-white disabled:opacity-40"
@@ -519,7 +519,7 @@ export function Catalog({
               ) : (
                 <Trash2 className="h-3.5 w-3.5" />
               )}
-              删除
+              {t("common.delete")}
             </button>
           </div>
         )}
@@ -556,13 +556,14 @@ function NewProductForm({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const [name, setName] = useState("");
   const [model, setModel] = useState("");
   const [pending, start] = useTransition();
 
   function submit() {
     if (!name.trim() || !model.trim()) {
-      toast.error("请填写名称和型号");
+      toast.error(t("catalog.needFill"));
       return;
     }
     start(async () => {
@@ -573,10 +574,10 @@ function NewProductForm({
           categoryId,
           seriesId,
         });
-        toast.success("已创建，进入编辑");
+        toast.success(t("catalog.createdOk"));
         router.push(`/admin/products/${id}`);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "创建失败");
+        toast.error(e instanceof Error ? e.message : t("catalog.needFill"));
       }
     });
   }
@@ -586,13 +587,13 @@ function NewProductForm({
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="产品名称"
+        placeholder={t("catalog.prodName")}
         className="min-w-0 flex-1 rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-1.5 text-sm outline-none focus:border-[var(--color-ink)]"
       />
       <input
         value={model}
         onChange={(e) => setModel(e.target.value)}
-        placeholder="型号"
+        placeholder={t("catalog.prodModel")}
         className="w-40 rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-1.5 font-mono text-sm outline-none focus:border-[var(--color-ink)]"
       />
       <button
@@ -601,13 +602,13 @@ function NewProductForm({
         className="flex items-center gap-1 rounded-lg bg-[var(--color-ink)] px-3 py-1.5 text-sm text-white transition hover:opacity-90 disabled:opacity-50"
       >
         {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-        创建并编辑
+        {t("catalog.create")}
       </button>
       <button
         onClick={onClose}
         className="rounded-lg px-2 py-1.5 text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
       >
-        取消
+        {t("common.cancel")}
       </button>
     </div>
   );
@@ -622,6 +623,7 @@ function Row({
   selected: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations("admin");
   return (
     <li
       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
@@ -659,20 +661,20 @@ function Row({
             <span className="font-mono text-sm text-[var(--color-ink-muted)]">
               {p.modelNumber}
             </span>
-            {p.noImage && <Badge tone="red">无图</Badge>}
-            {p.lacksShowcase && <Badge tone="amber">缺展示</Badge>}
+            {p.noImage && <Badge tone="red">{t("catalog.fNoImage")}</Badge>}
+            {p.lacksShowcase && <Badge tone="amber">{t("catalog.fNoShowcase")}</Badge>}
             {p.translatedCount === 0 ? (
-              <Badge tone="amber">未译</Badge>
+              <Badge tone="amber">{t("catalog.fUntranslated")}</Badge>
             ) : p.stale ? (
-              <Badge tone="amber">译文过期</Badge>
+              <Badge tone="amber">{t("catalog.fStale")}</Badge>
             ) : (
-              <Badge tone="muted">译 {p.translatedCount}</Badge>
+              <Badge tone="muted">{t("catalog.badgeTrans")} {p.translatedCount}</Badge>
             )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3 text-sm text-[var(--color-ink-muted)]">
-          <span className="hidden font-mono sm:inline" title="近 30 天扫码">
-            {p.scans30d} 扫
+          <span className="hidden font-mono sm:inline">
+            {p.scans30d} {t("catalog.scans")}
           </span>
           <span className="hidden items-center gap-1 sm:flex">
             <Film className="h-3.5 w-3.5" />
@@ -683,7 +685,7 @@ function Row({
             {p.documents}
           </span>
           <span className="hidden w-14 text-right font-mono text-sm text-[var(--color-ink-faint)] md:inline">
-            {relTime(p.updatedAt)}
+            {relTime(p.updatedAt, t("catalog.today"), t("catalog.yesterday"))}
           </span>
           <ChevronRight className="h-4 w-4" />
         </div>
