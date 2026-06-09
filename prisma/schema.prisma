@@ -22,73 +22,168 @@ model AdminUser {
 /// A manufacturer / tenant. Each Factory is a separate company whose products
 /// are served under its own brand on the public datasheet pages.
 model Factory {
-  id              String    @id @default(cuid())
-  slug            String    @unique
-  name            String
-  brandShort      String?   @map("brand_short")
-  logoUrl         String?   @map("logo_url")
-  contactEmail    String?   @map("contact_email")
-  contactWhatsapp String?   @map("contact_whatsapp")
-  inquiryNote     String?   @map("inquiry_note") @db.Text
-  accentColor     String?   @map("accent_color")
-  defaultLocale   String    @default("es") @map("default_locale")
-  supportedLocales String[] @default(["es", "en", "fr", "de", "it", "pt", "nl", "pl", "zh"]) @map("supported_locales")
-  isActive        Boolean   @default(true) @map("is_active")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  products        Product[]
+  id               String       @id @default(cuid())
+  slug             String       @unique
+  name             String
+  brandShort       String?      @map("brand_short")
+  logoUrl          String?      @map("logo_url")
+  contactEmail     String?      @map("contact_email")
+  contactWhatsapp  String?      @map("contact_whatsapp")
+  inquiryNote      String?      @map("inquiry_note") @db.Text
+  accentColor      String?      @map("accent_color")
+  defaultLocale    String       @default("es") @map("default_locale")
+  supportedLocales String[]     @default(["es", "en", "fr", "de", "it", "pt", "nl", "pl", "zh"]) @map("supported_locales")
+  isActive         Boolean      @default(true) @map("is_active")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  products         Product[]
+  categories       Category[]
+  series           Series[]
+  compatRules      CompatRule[]
 
   @@map("factories")
 }
 
-/// A local mirror of a product owned by a main site. The datasheet never
-/// writes back to the source; it only syncs identity + display fields so its
-/// public pages keep working even if the source site is down.
+/// A product owned by this app's own database. Fully editable in the admin.
+/// `sync` only seeds the FIRST batch from a main site (create-only); after that
+/// local edits are authoritative and are never overwritten by re-sync.
 model Product {
-  id             String         @id @default(cuid())
-  sourceId       String         @map("source_id")
-  slug           String         @unique
-  modelNumber    String         @map("model_number")
-  name           String
-  description    String?        @db.Text
-  specs          Json?
-  certifications String[]       @default([])
-  coverImage     String?        @map("cover_image")
-  category       String?                                  // strip|channel|power|connector|accessory
-  series         String?                                  // 同系列自动聚合键
-  attributes     Json?                                    // { pcbWidth:"10mm", voltage:"24V", watt:14.4 } 自动匹配用
-  tagline        String?                                  // 标题下卖点短语带（"·" 分隔几个短语）
-  variantLabel   String?        @map("variant_label")     // 同系列内的规格标签，如 "100W" / "暖光 3000K"
-  highlights     Json?                                    // [{ icon, label, value? }] 亮点图标排
-  detailBlocks   Json?          @map("detail_blocks")     // [{ kind:"heading"|"text"|"image", ... }] 京东式图文长详情
-  applications   Json?                                    // [{ icon, title, desc?, image? }] 应用场景「用在哪里」
-  faq            Json?                                    // [{ q, a }] 常见问题（终端顾客·使用向：安装/色温/防护/质保）
-  luminaireType  String?        @map("luminaire_type")    // 灯具类型（手动）：downlight/floodlight/panel/strip… AI 生成上下文 + 尺寸示意形状
-  boxContents    Json?          @map("box_contents")      // [{ item, qty? }] 盒内清单（AI 草稿+人工，标"以实际包装为准"）
-  install        Json?                                    // { method?, steps?[] } 安装方式/步骤（AI 草稿+人工）
-  dimensions     Json?                                    // { w, h, d?, unit, cutout? } 尺寸（AI 抽取/人工，优先于 specs 正则）
-  sourceLocale   String?        @map("source_locale") @default("zh") // 源语言（人工填写的语言）；AI 据此翻译其余语言
-  contentI18n    Json?          @map("content_i18n")     // { [locale]: { name?, description?, tagline?, highlights?, ... } } 各语言译文，缺则回退源字段
-  translationStamp String?      @map("translation_stamp") // 上次翻译时的源内容指纹；与当前源不一致 = 译文已过期
-  factoryId      String         @map("factory_id")
-  syncedAt       DateTime       @default(now()) @map("synced_at")
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
-  factory        Factory        @relation(fields: [factoryId], references: [id], onDelete: Restrict)
-  documents      Document[]
-  videos         Video[]
-  images         ProductImage[]
-  scanLogs       ScanLog[]
-  inquiryClicks  InquiryClick[]
-  pdfDownloads   PdfDownload[]
-  linksOut       ProductLink[]  @relation("from")
-  linksIn        ProductLink[]  @relation("to")
+  id               String         @id @default(cuid())
+  sourceId         String         @map("source_id")
+  slug             String         @unique
+  modelNumber      String         @map("model_number")
+  name             String
+  description      String?        @db.Text
+  specs            Json?
+  certifications   String[]       @default([])
+  coverImage       String?        @map("cover_image")
+  category         String? // 镜像 Category.kind（strip|channel|…），供自动配件匹配/相关产品；权威是 categoryId
+  series           String? // 镜像 Series.name，供同系列聚合/变体；权威是 seriesId
+  categoryId       String?        @map("category_id") // 归属分类（管理实体）
+  seriesId         String?        @map("series_id") // 归属系列（管理实体）
+  attributes       Json? // { pcbWidth:"10mm", voltage:"24V", watt:14.4 } 自动匹配用
+  tagline          String? // 标题下卖点短语带（"·" 分隔几个短语）
+  variantLabel     String?        @map("variant_label") // 同系列内的规格标签，如 "100W" / "暖光 3000K"
+  highlights       Json? // [{ icon, label, value? }] 亮点图标排
+  detailBlocks     Json?          @map("detail_blocks") // [{ kind:"heading"|"text"|"image", ... }] 京东式图文长详情
+  applications     Json? // [{ icon, title, desc?, image? }] 应用场景「用在哪里」
+  faq              Json? // [{ q, a }] 常见问题（终端顾客·使用向：安装/色温/防护/质保）
+  luminaireType    String?        @map("luminaire_type") // 灯具类型（手动）：downlight/floodlight/panel/strip… AI 生成上下文 + 尺寸示意形状
+  boxContents      Json?          @map("box_contents") // [{ item, qty? }] 盒内清单（AI 草稿+人工，标"以实际包装为准"）
+  install          Json? // { method?, steps?[] } 安装方式/步骤（AI 草稿+人工）
+  dimensions       Json? // { w, h, d?, unit, cutout? } 尺寸（AI 抽取/人工，优先于 specs 正则）
+  sourceLocale     String?        @default("es") @map("source_locale") // 源语言（人工填写的语言）；AI 据此翻译其余语言
+  contentI18n      Json?          @map("content_i18n") // { [locale]: { name?, description?, tagline?, highlights?, ... } } 各语言译文，缺则回退源字段
+  translationStamp String?        @map("translation_stamp") // 上次翻译时的源内容指纹；与当前源不一致 = 译文已过期
+  factoryId        String         @map("factory_id")
+  syncedAt         DateTime       @default(now()) @map("synced_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  factory          Factory        @relation(fields: [factoryId], references: [id], onDelete: Restrict)
+  categoryRef      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  seriesRef        Series?        @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  documents        Document[]
+  videos           Video[]
+  images           ProductImage[]
+  scanLogs         ScanLog[]
+  inquiryClicks    InquiryClick[]
+  pdfDownloads     PdfDownload[]
+  linksOut         ProductLink[]  @relation("from")
+  linksIn          ProductLink[]  @relation("to")
 
   @@unique([factoryId, sourceId])
   @@index([factoryId])
   @@index([factoryId, series])
   @@index([factoryId, category])
+  @@index([seriesId])
+  @@index([categoryId])
   @@map("products")
+}
+
+/// 产品分类（管理实体）。kind 对齐自动配件匹配的类型键（strip|channel|power|connector|accessory），
+/// 可空；name 为后台/前台展示名，可自由编辑。Product.category 字符串镜像 kind。
+model Category {
+  id        String       @id @default(cuid())
+  factoryId String       @map("factory_id")
+  parentId  String?      @map("parent_id") // 父分类；null = 一级分类。支持多级目录树
+  name      String // 源语言（es）名称，后台主显示 + 多语言回退
+  nameI18n  Json?        @map("name_i18n") // { en, zh, fr, ... } 其余语言译名，缺则回退 name
+  slug      String
+  image     String? // 分类图（前台目录/系列页用）
+  icon      String? // 图标名或 URL
+  kind      String? // 可选：用于自动配件匹配的类型 strip|channel|power|connector|accessory
+  sortOrder Int          @default(0) @map("sort_order")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  factory   Factory      @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  parent    Category?    @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]   @relation("CategoryTree")
+  products  Product[]
+  series    Series[]
+  rulesFrom CompatRule[] @relation("RuleFrom")
+  rulesTo   CompatRule[] @relation("RuleTo")
+
+  @@unique([factoryId, slug])
+  @@index([factoryId])
+  @@index([parentId])
+  @@map("categories")
+}
+
+/// 兼容规则引擎：跨分类的配件匹配规则。一条规则 = 从[分类]的产品 → 配[分类]的产品，
+/// 满足全部条件(AND)即视为兼容。支持父分类覆盖子类、多算子条件、双向、自动建链/仅建议。
+/// conditions: [{ kind: "attr_eq"|"attr_approx"|"attr_gte"|"attr_lte", fromKey, toKey, tolerance? }]
+///   - attr_eq:     from.attributes[fromKey] 数值/文本 == to.attributes[toKey]
+///   - attr_approx: |from - to| <= tolerance（数值）
+///   - attr_gte:    to.attributes[toKey] >= from.attributes[fromKey]（如 电源功率 ≥ 灯带功率）
+///   - attr_lte:    to.attributes[toKey] <= from.attributes[fromKey]
+model CompatRule {
+  id             String   @id @default(cuid())
+  factoryId      String   @map("factory_id")
+  label          String // 规则名，如 "灯带配铝槽"
+  description    String?
+  fromCategoryId String   @map("from_category_id")
+  toCategoryId   String   @map("to_category_id")
+  relation       String   @default("accessory") // accessory|alternative|required
+  bidirectional  Boolean  @default(false) // 反向也成立（配B的也推荐A）
+  conditions     Json     @default("[]") // 见上方说明
+  autoLink       Boolean  @default(false) @map("auto_link") // true=命中即建 ProductLink；false=仅建议待确认
+  enabled        Boolean  @default(true)
+  priority       Int      @default(0) // 越大越靠前
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  factory        Factory  @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  fromCategory   Category @relation("RuleFrom", fields: [fromCategoryId], references: [id], onDelete: Cascade)
+  toCategory     Category @relation("RuleTo", fields: [toCategoryId], references: [id], onDelete: Cascade)
+
+  @@index([factoryId])
+  @@index([fromCategoryId])
+  @@index([toCategoryId])
+  @@map("compat_rules")
+}
+
+/// 产品系列（管理实体）。带简介 / 主视觉 / 排序，既驱动后台目录，也驱动前台「了解更多·XX系列」页。
+/// 可选归属某 Category。Product.series 字符串镜像 name。
+model Series {
+  id         String    @id @default(cuid())
+  factoryId  String    @map("factory_id")
+  categoryId String?   @map("category_id")
+  name       String // 源语言（es）名称，多语言回退
+  nameI18n   Json?     @map("name_i18n") // { en, zh, ... } 其余语言译名
+  slug       String
+  intro      String?   @db.Text
+  introI18n  Json?     @map("intro_i18n") // 系列简介各语言译文
+  coverImage String?   @map("cover_image")
+  sortOrder  Int       @default(0) @map("sort_order")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  factory    Factory   @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  products   Product[]
+
+  @@unique([factoryId, slug])
+  @@index([factoryId])
+  @@index([categoryId])
+  @@map("series")
 }
 
 /// 产品间关系。手动 / 导入填的"适配型号"为权威，优先于属性自动匹配展示。
@@ -147,7 +242,7 @@ model ScanLog {
   userAgent String?  @map("user_agent") @db.Text
   country   String?
   locale    String?
-  source    String?  // 渠道归因码（?s=expo2026…）；null = 直接访问 / 未带码
+  source    String? // 渠道归因码（?s=expo2026…）；null = 直接访问 / 未带码
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, scannedAt])
@@ -160,7 +255,7 @@ model ScanLog {
 model InquiryClick {
   id        String   @id @default(cuid())
   productId String   @map("product_id")
-  channel   String                                    // "email" | "whatsapp"
+  channel   String // "email" | "whatsapp"
   clickedAt DateTime @default(now()) @map("clicked_at")
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -173,7 +268,7 @@ model InquiryClick {
 model PdfDownload {
   id           String   @id @default(cuid())
   productId    String   @map("product_id")
-  source       String?  // 渠道归因码，复用 ScanLog 同一套来源码
+  source       String? // 渠道归因码，复用 ScanLog 同一套来源码
   downloadedAt DateTime @default(now()) @map("downloaded_at")
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 

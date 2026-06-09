@@ -592,6 +592,7 @@ export function contentSourceHash(p: {
   install: unknown;
   dimensions: unknown;
   detailBlocks: unknown;
+  specs: unknown;
   sourceLocale: string | null;
 }): string {
   const s = JSON.stringify([
@@ -605,11 +606,55 @@ export function contentSourceHash(p: {
     p.install,
     p.dimensions,
     p.detailBlocks,
+    p.specs,
     p.sourceLocale,
   ]);
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
   return h.toString(16);
+}
+
+/**
+ * 产品「内容就绪度」体检：供后台 Dashboard 与产品列表统一计算各类待补标记。
+ * - noImage：无封面且无画廊图
+ * - lacksShowcase：卖点/场景/图文都空
+ * - translatedCount：已翻译语言数（contentI18n 的 key 数，源语言不计）
+ * - stale：有译文且源内容指纹与上次翻译不一致（译文过期）
+ */
+export function productReadiness(p: {
+  coverImage: string | null;
+  imageCount: number;
+  highlights: unknown;
+  applications: unknown;
+  detailBlocks: unknown;
+  contentI18n: unknown;
+  translationStamp: string | null;
+  name: string;
+  description: string | null;
+  tagline: string | null;
+  faq: unknown;
+  boxContents: unknown;
+  install: unknown;
+  dimensions: unknown;
+  specs: unknown;
+  sourceLocale: string | null;
+}): {
+  noImage: boolean;
+  lacksShowcase: boolean;
+  translatedCount: number;
+  stale: boolean;
+} {
+  const noImage = !p.coverImage && p.imageCount === 0;
+  const lacksShowcase =
+    parseHighlights(p.highlights).length === 0 &&
+    parseApplications(p.applications).length === 0 &&
+    parseDetailBlocks(p.detailBlocks).length === 0;
+  const translatedCount = Object.keys(parseContentI18n(p.contentI18n)).length;
+  const stale =
+    translatedCount > 0 &&
+    !!p.translationStamp &&
+    contentSourceHash(p) !== p.translationStamp;
+  return { noImage, lacksShowcase, translatedCount, stale };
 }
 
 /** 解析整个 `contentI18n` 列：{ [locale]: LocalizedContent }。 */

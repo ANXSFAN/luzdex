@@ -1,75 +1,69 @@
 import Link from "next/link";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
+import { getAdminLocale } from "@/lib/admin-locale";
 import { SignOutButton } from "@/components/sign-out-button";
 import { FactorySwitcher } from "@/components/factory-switcher";
+import { AdminNav } from "@/components/admin-nav";
+import { AdminLanguageSwitcher } from "@/components/admin-language-switcher";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  const [factories, activeFactory] = await Promise.all([
+  const locale = await getAdminLocale();
+  const [session, factories, activeFactory, messages, t] = await Promise.all([
+    auth(),
     prisma.factory.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, brandShort: true },
     }),
     getActiveFactory(),
+    import(`../../../messages/${locale}.json`).then((m) => m.default),
+    getTranslations({ locale, namespace: "admin" }),
   ]);
 
   return (
-    <div className="min-h-screen">
-      <header className="glass-nav sticky top-0 z-20 border-b border-[var(--color-rule)]">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-3 sm:px-8">
-          <div className="flex items-center gap-6">
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        {/* 侧边栏 */}
+        <aside className="border-b border-[var(--color-rule)] bg-[var(--color-surface)] lg:sticky lg:top-0 lg:h-screen lg:w-56 lg:shrink-0 lg:border-b-0 lg:border-r">
+          <div className="flex h-full flex-col gap-4 px-4 py-4 lg:px-5 lg:py-6">
             <Link
               href="/admin"
-              className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink)] transition hover:opacity-70"
+              className="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-ink)] transition hover:opacity-70"
             >
-              Datasheet Admin
+              {t("brand")}
             </Link>
-            <nav className="flex items-center gap-4">
-              <Link
-                href="/admin"
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-              >
-                Products
-              </Link>
-              <Link
-                href="/admin/analytics"
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-              >
-                Analytics
-              </Link>
-              <Link
-                href="/admin/import"
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-              >
-                Import
-              </Link>
-              <Link
-                href="/admin/factory"
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-              >
-                Factories
-              </Link>
-            </nav>
+
+            <AdminNav />
+
+            {/* 底部：语言 + 当前工厂 + 账号 + 退出 */}
+            <div className="mt-auto space-y-3 border-t border-[var(--color-rule)] pt-4">
+              <AdminLanguageSwitcher current={locale} />
+              <FactorySwitcher
+                factories={factories}
+                activeId={activeFactory?.id ?? null}
+              />
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm text-[var(--color-ink-muted)]">
+                  {session?.user?.name}
+                </span>
+                <SignOutButton />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <FactorySwitcher
-              factories={factories}
-              activeId={activeFactory?.id ?? null}
-            />
-            <span className="hidden text-xs text-[var(--color-ink-muted)] sm:inline">
-              {session?.user?.name}
-            </span>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
-      <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8">{children}</div>
-    </div>
+        </aside>
+
+        {/* 主内容：流式铺满主区域，不固定宽度 */}
+        <main className="min-w-0 flex-1">
+          <div className="px-5 py-8 sm:px-8 lg:px-10">{children}</div>
+        </main>
+      </div>
+    </NextIntlClientProvider>
   );
 }

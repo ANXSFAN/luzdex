@@ -14,12 +14,17 @@ import {
   parseDimensionsJson,
   parseContentI18n,
   contentSourceHash,
+  parseSpecs,
 } from "@/lib/products";
-import { suggestAccessories } from "@/lib/matching";
+import { suggestByRules, parseConditions, type CompatRuleData } from "@/lib/compat";
 import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
 import { ProductRelations } from "@/components/product-relations";
 import { ShowcaseEditor } from "@/components/showcase-editor";
+import { GalleryManager } from "@/components/gallery-manager";
+import { SpecsEditor } from "@/components/specs-editor";
+import { DeleteProductButton } from "@/components/delete-product-button";
+import { BasicInfoEditor } from "@/components/basic-info-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +51,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       include: {
         documents: { orderBy: { sortOrder: "asc" } },
         videos: { orderBy: { sortOrder: "asc" } },
+        images: { orderBy: { sortOrder: "asc" } },
         linksOut: {
           orderBy: { sortOrder: "asc" },
           include: {
@@ -66,12 +72,29 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   ]);
   if (!product) notFound();
 
-  // 配件关系 + 自动匹配建议（同工厂候选池）
-  const candidates = await prisma.product.findMany({
-    where: { factoryId: product.factoryId, id: { not: product.id } },
-    select: { id: true, modelNumber: true, name: true, category: true, attributes: true },
-    orderBy: { name: "asc" },
-  });
+  // 配件关系 + 规则引擎建议（同工厂候选池）
+  const [candidates, ruleCats, rawRules] = await Promise.all([
+    prisma.product.findMany({
+      where: { factoryId: product.factoryId, id: { not: product.id } },
+      select: {
+        id: true,
+        modelNumber: true,
+        name: true,
+        category: true,
+        categoryId: true,
+        attributes: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.category.findMany({
+      where: { factoryId: product.factoryId },
+      select: { id: true, parentId: true },
+    }),
+    prisma.compatRule.findMany({
+      where: { factoryId: product.factoryId, enabled: true },
+      orderBy: { priority: "desc" },
+    }),
+  ]);
   const attrs = parseAttributes(product.attributes);
   const links = product.linksOut.map((l) => ({
     linkId: l.id,
@@ -82,17 +105,46 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     category: l.to.category,
   }));
   const excludeIds = new Set<string>([product.id, ...links.map((l) => l.toId)]);
-  const suggestions = suggestAccessories(
-    { category: product.category, attributes: attrs },
-    candidates.map((c) => ({
+
+  const rules: CompatRuleData[] = rawRules.map((r) => ({
+    id: r.id,
+    label: r.label,
+    fromCategoryId: r.fromCategoryId,
+    toCategoryId: r.toCategoryId,
+    relation: r.relation,
+    bidirectional: r.bidirectional,
+    conditions: parseConditions(r.conditions),
+    enabled: r.enabled,
+    priority: r.priority,
+  }));
+  const catById = new Map(candidates.map((c) => [c.id, c.category]));
+  const ruleSuggestions = suggestByRules({
+    product: {
+      id: product.id,
+      modelNumber: product.modelNumber,
+      name: product.name,
+      categoryId: product.categoryId,
+      attributes: attrs as Record<string, unknown>,
+    },
+    candidates: candidates.map((c) => ({
       id: c.id,
       modelNumber: c.modelNumber,
       name: c.name,
-      category: c.category,
-      attributes: parseAttributes(c.attributes),
+      categoryId: c.categoryId,
+      attributes: parseAttributes(c.attributes) as Record<string, unknown>,
     })),
+    rules,
+    categories: ruleCats,
     excludeIds,
-  );
+  });
+  const suggestions = ruleSuggestions.map((s) => ({
+    toId: s.toId,
+    modelNumber: s.modelNumber,
+    name: s.name,
+    category: catById.get(s.toId) ?? null,
+    relation: s.relation === "alternative" ? "alternative" : "accessory",
+    reason: `${s.ruleLabel}：${s.reasons.join(" · ")}`,
+  }));
 
   const datasheetUrl = `${siteUrl()}/p/${product.slug}`;
 
@@ -128,6 +180,12 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     unit: d?.unit ?? "",
     cutout: d?.cutout ?? "",
   };
+  const initialSpecs = parseSpecs(product.specs).map((s) => ({
+    group: s.group ?? "",
+    label: s.label,
+    value: s.value,
+    unit: s.unit ?? "",
+  }));
   const ci = parseContentI18n(product.contentI18n);
   const translatedLocales = Object.keys(ci);
   // 各语言译文 → 编辑器形状，供语言模式编辑器加载
@@ -199,7 +257,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   return (
     <div>
       <Link
-        href="/admin"
+        href="/admin/products"
         className="flex w-fit items-center gap-1 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
@@ -311,6 +369,28 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         <QrCard url={datasheetUrl} fileBase={product.modelNumber} />
       </div>
 
+      <BasicInfoEditor
+        productId={product.id}
+        initialName={product.name}
+        initialModelNumber={product.modelNumber}
+      />
+
+      <GalleryManager
+        productId={product.id}
+        coverImage={product.coverImage}
+        images={product.images.map((img) => ({
+          id: img.id,
+          url: img.url,
+          alt: img.alt,
+        }))}
+      />
+
+      <SpecsEditor
+        productId={product.id}
+        initialSpecs={initialSpecs}
+        initialCerts={product.certifications}
+      />
+
       <ShowcaseEditor
         productId={product.id}
         initialTagline={product.tagline ?? ""}
@@ -325,7 +405,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         initialInstallMethod={initialInstall?.method ?? ""}
         initialInstallSteps={initialInstall?.steps ?? []}
         initialDim={initialDim}
-        initialSourceLocale={product.sourceLocale ?? "zh"}
+        initialSourceLocale={product.sourceLocale ?? "es"}
         translatedLocales={translatedLocales}
         translationStale={translationStale}
         initialTranslations={initialTranslations}
@@ -346,6 +426,8 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         documents={product.documents}
         videos={product.videos}
       />
+
+      <DeleteProductButton productId={product.id} productName={product.name} />
     </div>
   );
 }

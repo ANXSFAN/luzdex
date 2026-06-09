@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import {
   Plus,
   Trash2,
@@ -9,6 +9,8 @@ import {
   GripVertical,
   Sparkles,
   Languages,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -78,6 +80,87 @@ const inputBase = inputCls.replace("w-full ", "");
 const labelCls =
   "font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]";
 
+/** 上传图片到 R2（kind=image，后端拒绝非图片），返回公开 URL。 */
+async function uploadImageFile(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("kind", "image");
+  const res = await fetch("/api/upload", { method: "POST", body: fd });
+  if (!res.ok) {
+    const msg = await res.json().catch(() => null);
+    throw new Error(msg?.error ?? "上传失败");
+  }
+  const data = (await res.json()) as { url: string };
+  return data.url;
+}
+
+/** 图片字段：URL 输入 + 上传按钮 + 缩略图预览。上传成功即回填 URL。 */
+function ImageUrlField({
+  value,
+  onChange,
+  placeholder,
+  previewMaxH = "max-h-32",
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  placeholder: string;
+  previewMaxH?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (ref.current) ref.current.value = "";
+    if (!file) return;
+    setBusy(true);
+    try {
+      const url = await uploadImageFile(file);
+      onChange(url);
+      toast.success("图片已上传");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "上传失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={inputCls}
+        />
+        <button
+          type="button"
+          onClick={() => ref.current?.click()}
+          disabled={busy}
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--color-rule)] px-3 text-xs text-[var(--color-ink-muted)] transition hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)] disabled:opacity-50"
+        >
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Upload className="h-3.5 w-3.5" />
+          )}
+          上传
+        </button>
+        <input ref={ref} type="file" accept="image/*" hidden onChange={pick} />
+      </div>
+      {value && (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={value}
+          alt=""
+          className={`${previewMaxH} rounded-md border border-[var(--color-rule)] object-cover`}
+        />
+      )}
+    </>
+  );
+}
+
 export function ShowcaseEditor({
   productId,
   initialTagline,
@@ -139,8 +222,8 @@ export function ShowcaseEditor({
   const [dimD, setDimD] = useState(initialDim.d);
   const [dimUnit, setDimUnit] = useState(initialDim.unit);
   const [dimCutout, setDimCutout] = useState(initialDim.cutout);
-  const [sourceLocale, setSourceLocale] = useState(initialSourceLocale || "zh");
-  const baseLocale = initialSourceLocale || "zh";
+  const [sourceLocale, setSourceLocale] = useState(initialSourceLocale || "es");
+  const baseLocale = initialSourceLocale || "es";
   const [editingLocale, setEditingLocale] = useState(baseLocale);
   const isSource = editingLocale === baseLocale;
   const [pending, start] = useTransition();
@@ -717,22 +800,12 @@ export function ShowcaseEditor({
                   placeholder="一句话说明（可选）"
                   className={inputCls}
                 />
-                <input
+                <ImageUrlField
                   value={a.image}
-                  onChange={(e) =>
-                    updateApplication(i, { image: e.target.value })
-                  }
-                  placeholder="实景图 URL（可选，https://…）"
-                  className={inputCls}
+                  onChange={(url) => updateApplication(i, { image: url })}
+                  placeholder="实景图（可选）URL，或点上传"
+                  previewMaxH="max-h-28"
                 />
-                {a.image && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={a.image}
-                    alt=""
-                    className="max-h-28 rounded-md border border-[var(--color-rule)] object-cover"
-                  />
-                )}
               </div>
               <button
                 type="button"
@@ -799,11 +872,10 @@ export function ShowcaseEditor({
               <div className="min-w-0 flex-1 space-y-2">
                 {b.kind === "image" ? (
                   <>
-                    <input
+                    <ImageUrlField
                       value={b.url}
-                      onChange={(e) => updateBlock(i, { url: e.target.value })}
-                      placeholder="图片 URL（https://…）"
-                      className={inputCls}
+                      onChange={(url) => updateBlock(i, { url })}
+                      placeholder="图片 URL，或点上传"
                     />
                     <input
                       value={b.caption}
@@ -813,14 +885,6 @@ export function ShowcaseEditor({
                       placeholder="图注（可选）"
                       className={inputCls}
                     />
-                    {b.url && (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={b.url}
-                        alt=""
-                        className="max-h-32 rounded-md border border-[var(--color-rule)] object-cover"
-                      />
-                    )}
                   </>
                 ) : (
                   <textarea

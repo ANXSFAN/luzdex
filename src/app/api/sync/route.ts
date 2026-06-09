@@ -39,9 +39,11 @@ export async function POST() {
     });
 
     if (existing) {
+      // 本地编辑为准：已建档的产品，同步只更新 syncedAt，不回写 name/型号/封面，
+      // 避免覆盖后台对名称 / 型号 / 封面的手动修改。主站只负责「第一批建档」。
       await prisma.product.update({
         where: { id: existing.id },
-        data: { slug: p.slug, modelNumber: p.modelNumber, name, coverImage, syncedAt: new Date() },
+        data: { syncedAt: new Date() },
       });
       updated++;
     } else {

@@ -36,8 +36,8 @@ export function FactorySwitcher({
   }
 
   return (
-    <div className="relative flex items-center">
-      <span className="pointer-events-none absolute left-3 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--color-ink-faint)]">
+    <div className="relative flex w-full min-w-0 items-center">
+      <span className="pointer-events-none absolute left-3 text-[11px] text-[var(--color-ink-faint)]">
         厂
       </span>
       <select
@@ -45,7 +45,7 @@ export function FactorySwitcher({
         onChange={onChange}
         disabled={pending}
         aria-label="当前工厂"
-        className="appearance-none rounded-full border border-[var(--color-rule)] bg-transparent py-1.5 pl-9 pr-8 font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50"
+        className="w-full min-w-0 appearance-none truncate rounded-lg border border-[var(--color-rule)] bg-transparent py-2 pl-8 pr-8 text-sm text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50"
       >
         {factories.map((f) => (
           <option key={f.id} value={f.id}>
@@ -54,7 +54,7 @@ export function FactorySwitcher({
           </option>
         ))}
       </select>
-      <ChevronsUpDown className="pointer-events-none absolute right-3 h-3 w-3 text-[var(--color-ink-muted)]" />
+      <ChevronsUpDown className="pointer-events-none absolute right-2.5 h-4 w-4 text-[var(--color-ink-muted)]" />
     </div>
   );
 }

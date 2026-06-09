@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `导入失败：${msg}` }, { status: 500 });
   }
 
+  revalidatePath("/admin/products");
   revalidatePath("/admin");
   return NextResponse.json(result);
 }

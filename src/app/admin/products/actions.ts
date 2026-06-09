@@ -24,6 +24,8 @@ import {
 import { openRouterJSON, type ChatMessage } from "@/lib/ai";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { luminaireLabel } from "@/lib/luminaire";
+import { deleteFromR2 } from "@/lib/r2";
+import { categoryIdByKind, seriesIdByName, catalogSlug } from "@/lib/catalog";
 
 type Relation = "accessory" | "alternative";
 
@@ -77,17 +79,27 @@ export async function saveProductMeta(input: {
     attrs.watt = Number(input.watt);
   }
 
+  // 字符串与实体外键同步：category→categoryId(按 kind)、series→seriesId(按名,缺则建)
+  const seriesName = input.series.trim() || null;
+  const [categoryId, seriesId] = await Promise.all([
+    categoryIdByKind(factory.id, category),
+    seriesIdByName(factory.id, seriesName),
+  ]);
+
   await prisma.product.update({
     where: { id: input.productId },
     data: {
       category,
-      series: input.series.trim() || null,
+      categoryId,
+      series: seriesName,
+      seriesId,
       // 空对象代表"无属性"，parseAttributes 一致回退到 {}
       attributes: attrs,
     },
   });
 
   revalidatePath(`/admin/products/${input.productId}`);
+  revalidatePath("/admin/products");
 }
 
 /**
@@ -136,11 +148,105 @@ export async function saveProductShowcase(input: {
       // 空安装/尺寸存 {}（parser 读回为 null），保证"清空"能落库
       install: install ?? {},
       dimensions: dimensions ?? {},
-      sourceLocale: normalizeLocale(input.sourceLocale) ?? "zh",
+      sourceLocale: normalizeLocale(input.sourceLocale) ?? "es",
     },
   });
 
   revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 保存产品基本信息：名称 / 型号。这两项原本只来自 sync / 导入，现支持后台直接改。
+ * 改名会触发译文过期（name 在 contentSourceHash 内）。sync 不再覆盖本地改动（见 /api/sync）。
+ */
+export async function saveProductBasics(input: {
+  productId: string;
+  name: string;
+  modelNumber: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  const name = input.name.trim();
+  const modelNumber = input.modelNumber.trim();
+  if (!name) throw new Error("产品名不能为空");
+  if (!modelNumber) throw new Error("型号不能为空");
+  await prisma.product.update({
+    where: { id: input.productId },
+    data: { name, modelNumber },
+  });
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 画廊图（ProductImage）与封面图的管理。图片文件先经 /api/upload 落 R2 拿到 URL，
+ * 这里只持久化引用关系。封面图与画廊图相互独立：公开页把封面排在画廊最前。
+ */
+
+/** 画廊图：新增一张（排到末尾）。 */
+export async function addProductImage(input: {
+  productId: string;
+  url: string;
+  alt?: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  const url = input.url.trim();
+  if (!url) throw new Error("缺少图片地址");
+  const count = await prisma.productImage.count({
+    where: { productId: input.productId },
+  });
+  await prisma.productImage.create({
+    data: {
+      productId: input.productId,
+      url,
+      alt: input.alt?.trim() || null,
+      sortOrder: count,
+    },
+  });
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/** 画廊图：删除一张（连带删 R2 文件）。 */
+export async function removeProductImage(imageId: string, productId: string) {
+  const factory = await authedFactory();
+  await assertOwned(productId, factory.id);
+  const img = await prisma.productImage.findUnique({ where: { id: imageId } });
+  if (!img || img.productId !== productId) throw new Error("图片不存在");
+  await prisma.productImage.delete({ where: { id: imageId } });
+  await deleteFromR2(img.url);
+  revalidatePath(`/admin/products/${productId}`);
+}
+
+/** 画廊图：按给定 id 顺序重排 sortOrder（越权/外来 id 自动过滤）。 */
+export async function reorderProductImages(
+  productId: string,
+  orderedIds: string[],
+) {
+  const factory = await authedFactory();
+  await assertOwned(productId, factory.id);
+  const imgs = await prisma.productImage.findMany({
+    where: { productId },
+    select: { id: true },
+  });
+  const own = new Set(imgs.map((i) => i.id));
+  const ids = orderedIds.filter((id) => own.has(id));
+  await prisma.$transaction(
+    ids.map((id, i) =>
+      prisma.productImage.update({ where: { id }, data: { sortOrder: i } }),
+    ),
+  );
+  revalidatePath(`/admin/products/${productId}`);
+}
+
+/** 封面图：设置 / 清空（传空字符串即清空）。 */
+export async function setProductCover(productId: string, url: string) {
+  const factory = await authedFactory();
+  await assertOwned(productId, factory.id);
+  await prisma.product.update({
+    where: { id: productId },
+    data: { coverImage: url.trim() || null },
+  });
+  revalidatePath(`/admin/products/${productId}`);
 }
 
 const LANG_NAMES: Record<AppLocale, string> = {
@@ -201,7 +307,7 @@ export async function translateShowcase(productId: string) {
     docTitles: product.documents.map((d) => d.title),
   };
 
-  const sourceLocale = normalizeLocale(product.sourceLocale) ?? "zh";
+  const sourceLocale = normalizeLocale(product.sourceLocale) ?? "es";
   const targets = routing.locales.filter((l) => l !== sourceLocale);
   const srcJson = JSON.stringify(source);
 
@@ -265,6 +371,7 @@ export async function translateShowcase(productId: string) {
         install: product.install,
         dimensions: product.dimensions,
         detailBlocks: product.detailBlocks,
+        specs: product.specs,
         sourceLocale: product.sourceLocale,
       }),
     },
@@ -302,7 +409,7 @@ export async function saveTranslation(input: {
     select: { contentI18n: true, dimensions: true, specs: true, sourceLocale: true },
   });
   if (!product) throw new Error("产品不存在");
-  if (loc === (normalizeLocale(product.sourceLocale) ?? "zh")) {
+  if (loc === (normalizeLocale(product.sourceLocale) ?? "es")) {
     throw new Error("源语言请用「保存展示内容」");
   }
 
@@ -575,4 +682,196 @@ export async function removeLink(linkId: string, fromId: string) {
     where: { id: linkId, factoryId: factory.id },
   });
   revalidatePath(`/admin/products/${fromId}`);
+}
+
+/**
+ * 保存产品规格表（specs）与认证（certifications）。
+ * 这两项原本只能靠 xlsx 重导，这里支持后台即时编辑。
+ * specs 经 parseSpecs 清洗（缺 label/value 的行静默丢弃）；空集合存 [] 表示"无"。
+ */
+export async function saveProductSpecs(input: {
+  productId: string;
+  specs: unknown; // [{ group?, label, value, unit? }]
+  certifications: unknown; // string[]
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+
+  const specs = parseSpecs(input.specs);
+  const certifications = Array.isArray(input.certifications)
+    ? input.certifications
+        .map((c) => String(c).trim())
+        .filter(Boolean)
+        .slice(0, 24)
+    : [];
+
+  await prisma.product.update({
+    where: { id: input.productId },
+    data: { specs, certifications },
+  });
+
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 删除产品（连带级联清除图片 / 文档 / 视频 / 关系 / 扫码记录）。
+ * 删库前尽力清掉 R2 上的图片 / 文档 / 视频文件，避免留孤儿；外链 URL 自动跳过。
+ */
+export async function deleteProduct(productId: string) {
+  const factory = await authedFactory();
+  await assertOwned(productId, factory.id);
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: {
+      coverImage: true,
+      images: { select: { url: true } },
+      documents: { select: { fileUrl: true } },
+      videos: { select: { url: true } },
+    },
+  });
+
+  // 先删库（级联清子表），再清 R2 文件（best-effort，失败不影响删除结果）
+  await prisma.product.delete({ where: { id: productId } });
+
+  if (product) {
+    const urls = [
+      product.coverImage,
+      ...product.images.map((i) => i.url),
+      ...product.documents.map((d) => d.fileUrl),
+      ...product.videos.map((v) => v.url),
+    ].filter((u): u is string => !!u);
+    await Promise.all(
+      urls.map((u) => deleteFromR2(u).catch(() => {})),
+    );
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath("/admin");
+}
+
+/**
+ * 手动新建产品（不依赖同步/导入）。sourceId = 型号，便于将来导入对账；型号冲突报错。
+ * 可选直接归入分类 / 系列，并同步镜像字符串。返回新产品 id 供前端跳转编辑页。
+ */
+export async function createProduct(input: {
+  name: string;
+  modelNumber: string;
+  categoryId?: string | null;
+  seriesId?: string | null;
+}): Promise<string> {
+  const factory = await authedFactory();
+  const name = input.name.trim();
+  const modelNumber = input.modelNumber.trim();
+  if (!name) throw new Error("产品名不能为空");
+  if (!modelNumber) throw new Error("型号不能为空");
+
+  const dupe = await prisma.product.findUnique({
+    where: { factoryId_sourceId: { factoryId: factory.id, sourceId: modelNumber } },
+    select: { id: true },
+  });
+  if (dupe) throw new Error("该型号已存在，请直接编辑或更换型号");
+
+  // slug 全局唯一
+  const base = catalogSlug(modelNumber, "product");
+  let slug = base;
+  let i = 1;
+  while (
+    await prisma.product.findUnique({ where: { slug }, select: { id: true } })
+  ) {
+    slug = `${base}-${i++}`;
+  }
+
+  // 归类/归系列时同步镜像字符串
+  let category: string | null = null;
+  let series: string | null = null;
+  if (input.categoryId) {
+    const c = await prisma.category.findUnique({ where: { id: input.categoryId } });
+    if (c?.factoryId === factory.id) category = c.kind;
+  }
+  if (input.seriesId) {
+    const s = await prisma.series.findUnique({ where: { id: input.seriesId } });
+    if (s?.factoryId === factory.id) series = s.name;
+  }
+
+  const p = await prisma.product.create({
+    data: {
+      factoryId: factory.id,
+      sourceId: modelNumber,
+      slug,
+      modelNumber,
+      name,
+      category,
+      categoryId: input.categoryId || null,
+      series,
+      seriesId: input.seriesId || null,
+      sourceLocale: "es",
+    },
+  });
+
+  revalidatePath("/admin/products");
+  return p.id;
+}
+
+/** 批量删除产品（仅删属于当前工厂的）。级联清子表 + best-effort 清 R2。 */
+export async function bulkDeleteProducts(ids: string[]) {
+  const factory = await authedFactory();
+  if (!ids.length) return { deleted: 0 };
+  const products = await prisma.product.findMany({
+    where: { id: { in: ids }, factoryId: factory.id },
+    select: {
+      id: true,
+      coverImage: true,
+      images: { select: { url: true } },
+      documents: { select: { fileUrl: true } },
+      videos: { select: { url: true } },
+    },
+  });
+  const ownIds = products.map((p) => p.id);
+  if (ownIds.length) {
+    await prisma.product.deleteMany({ where: { id: { in: ownIds } } });
+    const urls = products
+      .flatMap((p) => [
+        p.coverImage,
+        ...p.images.map((i) => i.url),
+        ...p.documents.map((d) => d.fileUrl),
+        ...p.videos.map((v) => v.url),
+      ])
+      .filter((u): u is string => !!u);
+    await Promise.all(urls.map((u) => deleteFromR2(u).catch(() => {})));
+  }
+  revalidatePath("/admin/products");
+  return { deleted: ownIds.length };
+}
+
+/** 批量设类目（空字符串 = 清空）。仅当前工厂。 */
+export async function bulkSetCategory(ids: string[], category: string) {
+  const factory = await authedFactory();
+  if (!ids.length) return { updated: 0 };
+  let cat: string | null = null;
+  if (category) {
+    if (!isCategory(category)) throw new Error("未知类目");
+    cat = category;
+  }
+  const categoryId = await categoryIdByKind(factory.id, cat);
+  const r = await prisma.product.updateMany({
+    where: { id: { in: ids }, factoryId: factory.id },
+    data: { category: cat, categoryId },
+  });
+  revalidatePath("/admin/products");
+  return { updated: r.count };
+}
+
+/** 批量设系列（空字符串 = 清空）。仅当前工厂。 */
+export async function bulkSetSeries(ids: string[], series: string) {
+  const factory = await authedFactory();
+  if (!ids.length) return { updated: 0 };
+  const name = series.trim() || null;
+  const seriesId = await seriesIdByName(factory.id, name);
+  const r = await prisma.product.updateMany({
+    where: { id: { in: ids }, factoryId: factory.id },
+    data: { series: name, seriesId },
+  });
+  revalidatePath("/admin/products");
+  return { updated: r.count };
 }

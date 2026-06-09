@@ -45,6 +45,7 @@ export default async function AdminAnalyticsPage() {
           install: true,
           dimensions: true,
           detailBlocks: true,
+          specs: true,
           sourceLocale: true,
           contentI18n: true,
           translationStamp: true,

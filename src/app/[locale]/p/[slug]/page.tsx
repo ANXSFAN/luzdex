@@ -67,7 +67,7 @@ import { PdfDownloadLink } from "@/components/pdf-download-link";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ShareButton } from "@/components/share-button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
-import { routing, type AppLocale } from "@/i18n/routing";
+import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 
 interface PageProps {
@@ -230,11 +230,24 @@ export default async function ProductDatasheetPage({
     ...(product.coverImage
       ? [{ url: product.coverImage, alt: name }]
       : []),
-    ...product.images.map((img) => ({ url: img.url, alt: img.alt })),
+    // 封面若也在画廊里（「设为封面」会复用同一 URL），去重避免轮播重复
+    ...product.images
+      .filter((img) => img.url !== product.coverImage)
+      .map((img) => ({ url: img.url, alt: img.alt })),
   ];
 
-  // 9 语言站：内容由 AI 自动补全各语言，切换器默认展示全部受支持语言。
-  const supportedLocales = [...routing.locales];
+  // 切换器只展示「已有内容」的语言：源语言 + 已翻译语言（+ 当前正在看的语言，
+  // 保证激活项始终在列）。未翻译的语言不进切换器，避免顾客切过去只看到回退源文。
+  const translatedLocales = Object.keys(parseContentI18n(product.contentI18n));
+  const productSourceLocale = normalizeLocale(product.sourceLocale) ?? "es";
+  const availableLocales = new Set<string>([
+    productSourceLocale,
+    locale,
+    ...translatedLocales,
+  ]);
+  const supportedLocales = routing.locales.filter((l) =>
+    availableLocales.has(l),
+  );
 
   const pdfHref = getPathname({
     href: `/p/${product.slug}/pdf`,
