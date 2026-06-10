@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
+import { errMsg } from "@/lib/admin-err";
+import { getAdminLocale } from "@/lib/admin-locale";
+import { getTranslations } from "next-intl/server";
 
 type RowError = { sheet?: string; row?: number; model?: string; message?: string };
 
@@ -16,21 +19,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "未授权" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: await errMsg("unauthorized") }, { status: 401 });
   const factory = await getActiveFactory();
-  if (!factory) return NextResponse.json({ error: "未选择工厂" }, { status: 400 });
+  if (!factory)
+    return NextResponse.json({ error: await errMsg("noFactory") }, { status: 400 });
 
   const { id } = await params;
   const job = await prisma.importJob.findUnique({ where: { id } });
   if (!job || job.factoryId !== factory.id) {
-    return NextResponse.json({ error: "任务不存在" }, { status: 404 });
+    return NextResponse.json({ error: await errMsg("jobNotFound") }, { status: 404 });
   }
 
   const report = (job.report ?? {}) as { errors?: RowError[] };
   const errors = Array.isArray(report.errors) ? report.errors : [];
 
+  const tp = await getTranslations({
+    locale: await getAdminLocale(),
+    namespace: "admin.page",
+  });
   const lines = [
-    ["Sheet", "行", "型号", "错误"].join(","),
+    ["Sheet", tp("repRow"), tp("repModel"), tp("repError")].join(","),
     ...errors.map((e) =>
       [csvCell(e.sheet), csvCell(e.row), csvCell(e.model), csvCell(e.message)].join(","),
     ),

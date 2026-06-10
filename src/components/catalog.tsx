@@ -213,7 +213,7 @@ export function Catalog({
         setSelected(new Set());
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
+        toast.error(e instanceof Error ? e.message : t("common.opFail"));
       }
     });
   }
@@ -563,7 +563,7 @@ export function Catalog({
         {/* 产品列表 */}
         {panelProducts.length === 0 ? (
           <p className="mt-10 text-center text-sm text-[var(--color-ink-muted)]">
-            该节点下没有匹配的产品
+            {t("catalog.noMatch")}
           </p>
         ) : (
           <ul className="mt-4 space-y-1.5">
@@ -753,7 +753,7 @@ function Row({
         toast.success(tp("duplicatedOk"));
         router.push(`/admin/products/${id}`);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
+        toast.error(e instanceof Error ? e.message : t("common.opFail"));
       }
     });
   }
@@ -773,7 +773,7 @@ function Row({
         checked={selected}
         onChange={onToggle}
         className="h-4 w-4 shrink-0 cursor-pointer accent-[var(--color-ink)]"
-        aria-label="选择"
+        aria-label={t("common.select")}
       />
       <Link
         href={`/admin/products/${p.id}`}

@@ -32,7 +32,7 @@ async function uploadImage(file: File) {
   const res = await fetch("/api/upload", { method: "POST", body: fd });
   if (!res.ok) {
     const msg = await res.json().catch(() => null);
-    throw new Error(msg?.error ?? "上传失败");
+    throw new Error(msg?.error ?? ""); // 空消息时调用方回退本地化文案
   }
   return res.json() as Promise<{ url: string }>;
 }
@@ -70,7 +70,7 @@ export function GalleryManager({
         if (okMsg) toast.success(okMsg);
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
+        toast.error(e instanceof Error && e.message ? e.message : t("admin.common.opFail"));
       }
     });
   }
@@ -80,10 +80,10 @@ export function GalleryManager({
     try {
       const { url } = await uploadImage(file);
       await setProductCover(productId, url);
-      toast.success("封面已更新");
+      toast.success(t("prod.coverUpdated"));
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : t("admin.common.uploadFail"));
     } finally {
       setUploading(false);
     }
@@ -97,10 +97,10 @@ export function GalleryManager({
         const { url } = await uploadImage(file);
         await addProductImage({ productId, url });
       }
-      toast.success(`已添加 ${files.length} 张图`);
+      toast.success(t("prod.imagesAdded", { n: files.length }));
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : t("admin.common.uploadFail"));
     } finally {
       setUploading(false);
     }
@@ -272,7 +272,7 @@ export function GalleryManager({
                       type="button"
                       onClick={() => move(i, -1)}
                       disabled={i === 0 || pending}
-                      aria-label="上移"
+                      aria-label={t("show.moveUp")}
                       className="p-1 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                     >
                       <ArrowUp className="h-3.5 w-3.5" />
@@ -281,7 +281,7 @@ export function GalleryManager({
                       type="button"
                       onClick={() => move(i, 1)}
                       disabled={i === order.length - 1 || pending}
-                      aria-label="下移"
+                      aria-label={t("show.moveDown")}
                       className="p-1 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                     >
                       <ArrowDown className="h-3.5 w-3.5" />
@@ -308,11 +308,11 @@ export function GalleryManager({
                       onClick={() =>
                         run(
                           () => removeProductImage(img.id, productId),
-                          "已删除",
+                          t("admin.common.deleted"),
                         )
                       }
                       disabled={pending}
-                      aria-label="删除"
+                      aria-label={t("admin.common.delete")}
                       className="p-1 text-[var(--color-ink-faint)] transition hover:text-red-500 disabled:opacity-30"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

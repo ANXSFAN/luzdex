@@ -28,7 +28,21 @@
       "noFactory": "Nenhuma fábrica selecionada. Escolha-a na barra superior.",
       "ok": "OK",
       "confirmTitle": "Confirme",
-      "manage": "Gerir"
+      "manage": "Gerir",
+      "saveFail": "Falha ao salvar",
+      "uploadFail": "Falha no upload",
+      "opFail": "A operação falhou",
+      "delFail": "Falha ao excluir",
+      "createFail": "Falha ao criar",
+      "transFail": "Falha na tradução",
+      "aiFail": "Falha na geração por IA",
+      "deleted": "Excluído",
+      "uploadedDraft": "Enviado — lembre-se de salvar",
+      "select": "Selecionar",
+      "uiLang": "Idioma do painel",
+      "langSwitchFail": "Falha ao mudar de idioma",
+      "curFactory": "Fábrica atual",
+      "factorySwitchFail": "Falha ao mudar de fábrica"
     },
     "page": {
       "dashboard": "Resumo",
@@ -41,7 +55,19 @@
       "factories": "Fábricas",
       "categoriesSub": "Árvore de categorias multinível · nomes em 9 idiomas",
       "seriesSub": "Nome / descrição da série em 9 idiomas · imagem",
-      "rulesSub": "Motor de compatibilidade entre categorias · sugerir / vincular acessórios"
+      "rulesSub": "Motor de compatibilidade entre categorias · sugerir / vincular acessórios",
+      "importSub": "Importe produtos, especificações, imagens e vínculos de acessórios de uma pasta multi-folha — pré-visualize antes de gravar",
+      "importHistory": "Histórico de importações",
+      "noImports": "Ainda não há importações.",
+      "rowCreated": "Novos {n}",
+      "rowUpdated": "Atualizados {n}",
+      "rowErrors": "Erros {n}",
+      "errorReport": "Relatório de erros",
+      "repRow": "Linha",
+      "repModel": "Modelo",
+      "repError": "Erro",
+      "factoryCount": "{n} fábricas — edite marca, contactos e cor",
+      "factoryEmpty": "Ainda não há fábricas"
     },
     "dashboard": {
       "last30": "Últimos 30 dias",
@@ -115,7 +141,12 @@
       "replaceImg": "Substituir imagem",
       "transDone": "Outros idiomas traduzidos",
       "emptyName": "O nome da categoria (idioma de origem) é obrigatório",
-      "addSub": "Adicionar subcategoria"
+      "addSub": "Adicionar subcategoria",
+      "savedOk": "Categoria salva",
+      "deletedOk": "Categoria excluída",
+      "needNameFirst": "Preencha o nome no idioma de origem antes de traduzir",
+      "defaultName": "Nova categoria",
+      "iconPh": "ex.: Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Séries",
@@ -135,7 +166,11 @@
       "uploadCover": "Enviar imagem",
       "replaceCover": "Substituir imagem",
       "emptyName": "O nome da série (idioma de origem) é obrigatório",
-      "transDone": "Outros idiomas traduzidos"
+      "transDone": "Outros idiomas traduzidos",
+      "savedOk": "Série salva",
+      "deletedOk": "Série excluída",
+      "needNameFirst": "Preencha o conteúdo no idioma de origem antes de traduzir",
+      "defaultName": "Nova série"
     },
     "rule": {
       "count": "{n} regras. As regras definem qual tipo de produto combina com qual, sugerindo acessórios entre categorias.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Pré-visualizar",
     "mdEdit": "Editar",
-    "mdText": "texto"
+    "mdText": "texto",
+    "coverUpdated": "Capa atualizada",
+    "imagesAdded": "{n} imagens adicionadas",
+    "specsSaved": "Especificações e certificações salvas",
+    "certsHint": "Liste apenas certificações presentes na embalagem ou nos certificados. A página pública explica as marcas conhecidas.",
+    "backToList": "Voltar à lista de produtos",
+    "previewPublic": "Pré-visualizar página pública",
+    "statScans": "Leituras",
+    "statPdf": "Downloads de PDF",
+    "statConv": "Conversão de download",
+    "bySource": "Por origem",
+    "directSource": "Direto / sem código de canal"
   },
   "show": {
     "sub": "Argumentos · destaques · aplicações · detalhe · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Fonte / IRC",
       "battery": "Bateria",
       "dot": "Genérico"
-    }
+    },
+    "imgUploaded": "Imagem enviada",
+    "transDoneCount": "{ok}/{total} idiomas traduzidos",
+    "genDone": "Rascunho de IA preenchido — revise, ajuste e salve",
+    "savedOk": "Conteúdo salvo",
+    "transSavedOk": "Tradução {lang} salva"
   },
   "pdf": {
     "title": "Preencher automaticamente do PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Adicionar vídeo",
     "upload": "Enviar",
     "docTitle": "Título do documento (vazio = nome do ficheiro)",
-    "pickUpload": "Escolher ficheiro e enviar"
+    "pickUpload": "Escolher ficheiro e enviar",
+    "catNone": "— Sem categoria —",
+    "catStrip": "Fita LED",
+    "catChannel": "Perfil de alumínio",
+    "catPower": "Fonte de alimentação",
+    "catConnector": "Conector",
+    "catAccessory": "Acessório",
+    "videoUploaded": "Vídeo enviado",
+    "videoUploadFail": "Falha no envio do vídeo",
+    "videoNeedFields": "Insira um título e o URL do vídeo",
+    "videoAdded": "Vídeo adicionado",
+    "docAdded": "Documento adicionado",
+    "addFail": "Falha ao adicionar"
   },
   "more": {
     "qrTitle": "Digitalizar / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Fim da ficha —"
     }
+  },
+  "err": {
+    "unauthorized": "Não autorizado",
+    "noFactory": "Nenhuma fábrica selecionada",
+    "factoryNotFound": "Fábrica não encontrada",
+    "unsupportedLang": "Idioma não suportado",
+    "productNotFound": "Produto não encontrado",
+    "notOwned": "Produto não encontrado ou não pertence à fábrica atual",
+    "unknownRelation": "Tipo de relação desconhecido",
+    "unknownCategory": "Categoria desconhecida",
+    "nameRequired": "O nome do produto não pode estar vazio",
+    "modelRequired": "O número do modelo não pode estar vazio",
+    "imageUrlMissing": "Falta o URL da imagem",
+    "imageNotFound": "Imagem não encontrada",
+    "unknownLocale": "Idioma desconhecido",
+    "useSourceSave": "Para o idioma de origem use «Guardar conteúdo»",
+    "needImgBrief": "Forneça pelo menos uma imagem e uma descrição",
+    "selfLink": "Não é possível vincular a si mesmo",
+    "modelNotFound": "Modelo «{model}» não encontrado na fábrica atual",
+    "modelExists": "Esse modelo já existe — edite-o ou use outro número",
+    "selfVariant": "Não é possível adicionar o produto a si mesmo",
+    "catNameRequired": "O nome da categoria não pode estar vazio",
+    "catNotFound": "Categoria não encontrada",
+    "moveIntoSelf": "Não é possível mover para baixo de si mesma",
+    "moveIntoChild": "Não é possível mover para baixo de uma subcategoria própria",
+    "catHasProducts": "Esta categoria (incl. subcategorias) ainda tem {n} produtos — mova-os primeiro",
+    "seriesNameRequired": "O nome da série não pode estar vazio",
+    "seriesNotFound": "Série não encontrada",
+    "ruleNotFound": "Regra não encontrada",
+    "ruleNameRequired": "O nome da regra não pode estar vazio",
+    "ruleCatsRequired": "Selecione a categoria principal e a de acessórios",
+    "docTitleRequired": "O título não pode estar vazio",
+    "paramError": "Parâmetros inválidos",
+    "docNotFound": "Documento não encontrado",
+    "fileMissing": "Falta o ficheiro",
+    "fileTooLarge5m": "O ficheiro excede 5 MB",
+    "importFail": "Falha na importação: {msg}",
+    "parseFail": "Falha ao analisar o ficheiro: {msg}",
+    "jobNotFound": "Tarefa não encontrada",
+    "invalidFileUrl": "URL de ficheiro inválido",
+    "pdfReadFail": "Falha ao ler o PDF — envie novamente",
+    "pdfTooLarge": "PDF demasiado grande (máx. 25 MB)",
+    "pdfNoModel": "Modelo não detetado no PDF — crie o produto manualmente e use «Preencher do PDF»",
+    "unknown": "Erro desconhecido",
+    "fileTooLarge25m": "Ficheiro demasiado grande (máx. 25 MB)",
+    "unsupportedFileType": "Tipo de ficheiro não suportado",
+    "imageOnly": "Envie um ficheiro de imagem",
+    "videoNotFound": "Vídeo não encontrado",
+    "aiNoKey": "OPENROUTER_API_KEY não configurada — IA indisponível",
+    "aiEmpty": "A IA devolveu uma resposta vazia",
+    "aiBadJson": "A resposta da IA não é JSON válido"
+  },
+  "gallery": {
+    "zoom": "Ampliar imagem",
+    "viewer": "Visualizador de imagens",
+    "close": "Fechar",
+    "prev": "Anterior",
+    "next": "Seguinte",
+    "goto": "Imagem {n}",
+    "show": "Mostrar imagem {n}"
+  },
+  "notFound": {
+    "title": "Registo não encontrado",
+    "desc": "Não existe ficha para este código. Verifique a referência na etiqueta do produto ou contacte o fabricante impresso na embalagem."
   }
 }

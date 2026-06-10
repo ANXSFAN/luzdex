@@ -28,7 +28,21 @@
       "noFactory": "未选择工厂，请先在顶栏切换「当前工厂」",
       "ok": "确定",
       "confirmTitle": "请确认",
-      "manage": "管理"
+      "manage": "管理",
+      "saveFail": "保存失败",
+      "uploadFail": "上传失败",
+      "opFail": "操作失败",
+      "delFail": "删除失败",
+      "createFail": "新建失败",
+      "transFail": "翻译失败",
+      "aiFail": "AI 生成失败",
+      "deleted": "已删除",
+      "uploadedDraft": "已上传，记得保存",
+      "select": "选择",
+      "uiLang": "后台界面语言",
+      "langSwitchFail": "切换语言失败",
+      "curFactory": "当前工厂",
+      "factorySwitchFail": "切换工厂失败"
     },
     "page": {
       "dashboard": "总览",
@@ -41,7 +55,19 @@
       "factories": "工厂",
       "categoriesSub": "多级分类树 · 分类名 9 语言",
       "seriesSub": "系列名 / 简介 9 语言 · 主视觉",
-      "rulesSub": "跨分类兼容规则引擎 · 自动推荐 / 建链配件"
+      "rulesSub": "跨分类兼容规则引擎 · 自动推荐 / 建链配件",
+      "importSub": "多 Sheet 工作簿一次导入产品、规格、图片与配件关系 · 先预览再写库",
+      "importHistory": "导入历史",
+      "noImports": "还没有导入记录。",
+      "rowCreated": "新增 {n}",
+      "rowUpdated": "更新 {n}",
+      "rowErrors": "错误 {n}",
+      "errorReport": "错误报告",
+      "repRow": "行",
+      "repModel": "型号",
+      "repError": "错误",
+      "factoryCount": "共 {n} 家工厂 · 编辑品牌、联系方式与主题色",
+      "factoryEmpty": "暂无工厂记录"
     },
     "dashboard": {
       "last30": "近 30 天",
@@ -115,7 +141,12 @@
       "replaceImg": "替换分类图",
       "transDone": "已翻译其余语言",
       "emptyName": "分类名（源语言）不能为空",
-      "addSub": "加子分类"
+      "addSub": "加子分类",
+      "savedOk": "分类已保存",
+      "deletedOk": "已删除分类",
+      "needNameFirst": "先填源语言分类名再翻译",
+      "defaultName": "新分类",
+      "iconPh": "如 Lightbulb / https://…"
     },
     "series": {
       "listLabel": "系列",
@@ -135,7 +166,11 @@
       "uploadCover": "上传主视觉",
       "replaceCover": "替换主视觉",
       "emptyName": "系列名（源语言）不能为空",
-      "transDone": "已翻译其余语言"
+      "transDone": "已翻译其余语言",
+      "savedOk": "系列已保存",
+      "deletedOk": "已删除系列",
+      "needNameFirst": "先填源语言内容再翻译",
+      "defaultName": "新系列"
     },
     "rule": {
       "count": "共 {n} 条规则。规则定义「哪类产品配哪类」，自动跨分类推荐配件。",
@@ -229,7 +264,18 @@
     "mdLink": "链接",
     "mdPreview": "预览",
     "mdEdit": "编辑",
-    "mdText": "文本"
+    "mdText": "文本",
+    "coverUpdated": "封面已更新",
+    "imagesAdded": "已添加 {n} 张图",
+    "specsSaved": "规格 / 认证已保存",
+    "certsHint": "只填包装 / 证书上确有的认证。公开页会按已知认证给出释义。",
+    "backToList": "返回产品列表",
+    "previewPublic": "预览公开页",
+    "statScans": "扫码",
+    "statPdf": "PDF 下载",
+    "statConv": "下载转化",
+    "bySource": "来源渠道",
+    "directSource": "直接访问 / 无渠道码"
   },
   "show": {
     "sub": "卖点 · 亮点 · 应用场景 · 图文 · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "光源 / 显色",
       "battery": "电池 / 续航",
       "dot": "通用"
-    }
+    },
+    "imgUploaded": "图片已上传",
+    "transDoneCount": "已翻译 {ok}/{total} 种语言",
+    "genDone": "AI 草稿已填入，请过目修改后保存",
+    "savedOk": "展示内容已保存",
+    "transSavedOk": "已保存 {lang} 译文"
   },
   "pdf": {
     "title": "从 PDF 自动填充",
@@ -399,7 +450,19 @@
     "addVideo": "添加视频",
     "upload": "上传",
     "docTitle": "文档标题（留空则用文件名）",
-    "pickUpload": "选择文件并上传"
+    "pickUpload": "选择文件并上传",
+    "catNone": "— 未分类 —",
+    "catStrip": "灯带",
+    "catChannel": "铝槽",
+    "catPower": "电源",
+    "catConnector": "连接件",
+    "catAccessory": "配件",
+    "videoUploaded": "视频已上传",
+    "videoUploadFail": "视频上传失败",
+    "videoNeedFields": "请填写标题和视频链接",
+    "videoAdded": "视频已添加",
+    "docAdded": "文档已添加",
+    "addFail": "添加失败"
   },
   "more": {
     "qrTitle": "扫码访问 / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— 资料结束 —"
     }
+  },
+  "err": {
+    "unauthorized": "未授权",
+    "noFactory": "未选择工厂",
+    "factoryNotFound": "工厂不存在",
+    "unsupportedLang": "不支持的语言",
+    "productNotFound": "产品不存在",
+    "notOwned": "产品不存在或不属于当前工厂",
+    "unknownRelation": "未知关系类型",
+    "unknownCategory": "未知类目",
+    "nameRequired": "产品名不能为空",
+    "modelRequired": "型号不能为空",
+    "imageUrlMissing": "缺少图片地址",
+    "imageNotFound": "图片不存在",
+    "unknownLocale": "未知语言",
+    "useSourceSave": "源语言请用「保存展示内容」",
+    "needImgBrief": "请提供至少一张图片和一段描述",
+    "selfLink": "不能关联自身",
+    "modelNotFound": "当前工厂未找到型号「{model}」",
+    "modelExists": "该型号已存在，请直接编辑或更换型号",
+    "selfVariant": "不能把产品加入自己",
+    "catNameRequired": "分类名不能为空",
+    "catNotFound": "分类不存在",
+    "moveIntoSelf": "不能移到自身下",
+    "moveIntoChild": "不能移到自己的子分类下",
+    "catHasProducts": "该分类（含子分类）下还有 {n} 个产品，请先把产品移到别的分类，再删除分类",
+    "seriesNameRequired": "系列名不能为空",
+    "seriesNotFound": "系列不存在",
+    "ruleNotFound": "规则不存在",
+    "ruleNameRequired": "规则名不能为空",
+    "ruleCatsRequired": "请选择主品分类与配件分类",
+    "docTitleRequired": "标题不能为空",
+    "paramError": "参数错误",
+    "docNotFound": "文档不存在",
+    "fileMissing": "缺少文件",
+    "fileTooLarge5m": "文件超过 5MB",
+    "importFail": "导入失败：{msg}",
+    "parseFail": "文件解析失败：{msg}",
+    "jobNotFound": "任务不存在",
+    "invalidFileUrl": "无效的文件地址",
+    "pdfReadFail": "读取 PDF 失败，请重新上传",
+    "pdfTooLarge": "PDF 过大（上限 25MB）",
+    "pdfNoModel": "未能从 PDF 识别出型号，请手动新建后再用「从 PDF 填充」",
+    "unknown": "未知错误",
+    "fileTooLarge25m": "文件过大（上限 25MB）",
+    "unsupportedFileType": "不支持的文件类型",
+    "imageOnly": "请上传图片文件",
+    "videoNotFound": "视频不存在",
+    "aiNoKey": "未配置 OPENROUTER_API_KEY，无法调用 AI",
+    "aiEmpty": "AI 返回为空",
+    "aiBadJson": "AI 返回不是合法 JSON"
+  },
+  "gallery": {
+    "zoom": "放大查看",
+    "viewer": "图片查看器",
+    "close": "关闭",
+    "prev": "上一张",
+    "next": "下一张",
+    "goto": "第 {n} 张",
+    "show": "显示第 {n} 张"
+  },
+  "notFound": {
+    "title": "未找到记录",
+    "desc": "该二维码对应的产品资料不存在。请核对产品标签上的编号，或联系外包装上印制的制造商。"
   }
 }

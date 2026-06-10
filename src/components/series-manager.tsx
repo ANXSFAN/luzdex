@@ -45,12 +45,12 @@ export function SeriesManager({
   function newSeries() {
     start(async () => {
       try {
-        const id = await createSeries({ name: "新系列" });
+        const id = await createSeries({ name: t("series.defaultName") });
         setSelId(id);
         toast.success(t("series.draftOk"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "新建失败");
+        toast.error(e instanceof Error ? e.message : t("common.createFail"));
       }
     });
   }

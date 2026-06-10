@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { adminErr } from "@/lib/admin-err";
 import { getActiveFactory } from "@/lib/active-factory";
 import { isCategory } from "@/lib/matching";
 import {
@@ -32,9 +33,9 @@ type Relation = "accessory" | "alternative";
 /** 登录 + 选中工厂校验。 */
 async function authedFactory() {
   const session = await auth();
-  if (!session) throw new Error("未授权");
+  if (!session) throw await adminErr("unauthorized");
   const factory = await getActiveFactory();
-  if (!factory) throw new Error("未选择工厂");
+  if (!factory) throw await adminErr("noFactory");
   return factory;
 }
 
@@ -45,12 +46,12 @@ async function assertOwned(productId: string, factoryId: string) {
     select: { factoryId: true },
   });
   if (!p || p.factoryId !== factoryId) {
-    throw new Error("产品不存在或不属于当前工厂");
+    throw await adminErr("notOwned");
   }
 }
 
-function asRelation(v: string): Relation {
-  if (v !== "accessory" && v !== "alternative") throw new Error("未知关系类型");
+async function asRelation(v: string): Promise<Relation> {
+  if (v !== "accessory" && v !== "alternative") throw await adminErr("unknownRelation");
   return v;
 }
 
@@ -68,7 +69,7 @@ export async function saveProductMeta(input: {
 
   let category: string | null = null;
   if (input.category) {
-    if (!isCategory(input.category)) throw new Error("未知类目");
+    if (!isCategory(input.category)) throw await adminErr("unknownCategory");
     category = input.category;
   }
 
@@ -167,8 +168,8 @@ export async function saveProductBasics(input: {
   await assertOwned(input.productId, factory.id);
   const name = input.name.trim();
   const modelNumber = input.modelNumber.trim();
-  if (!name) throw new Error("产品名不能为空");
-  if (!modelNumber) throw new Error("型号不能为空");
+  if (!name) throw await adminErr("nameRequired");
+  if (!modelNumber) throw await adminErr("modelRequired");
   await prisma.product.update({
     where: { id: input.productId },
     data: { name, modelNumber },
@@ -190,7 +191,7 @@ export async function addProductImage(input: {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
   const url = input.url.trim();
-  if (!url) throw new Error("缺少图片地址");
+  if (!url) throw await adminErr("imageUrlMissing");
   const count = await prisma.productImage.count({
     where: { productId: input.productId },
   });
@@ -210,7 +211,7 @@ export async function removeProductImage(imageId: string, productId: string) {
   const factory = await authedFactory();
   await assertOwned(productId, factory.id);
   const img = await prisma.productImage.findUnique({ where: { id: imageId } });
-  if (!img || img.productId !== productId) throw new Error("图片不存在");
+  if (!img || img.productId !== productId) throw await adminErr("imageNotFound");
   await prisma.productImage.delete({ where: { id: imageId } });
   await deleteFromR2(img.url);
   revalidatePath(`/admin/products/${productId}`);
@@ -288,7 +289,7 @@ export async function translateShowcase(productId: string) {
       documents: { select: { title: true }, orderBy: { sortOrder: "asc" } },
     },
   });
-  if (!product) throw new Error("产品不存在");
+  if (!product) throw await adminErr("productNotFound");
 
   // 组装源语言内容包（含结构，AI 只改文字）
   const source = {
@@ -402,15 +403,15 @@ export async function saveTranslation(input: {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
   const loc = normalizeLocale(input.locale);
-  if (!loc) throw new Error("未知语言");
+  if (!loc) throw await adminErr("unknownLocale");
 
   const product = await prisma.product.findUnique({
     where: { id: input.productId },
     select: { contentI18n: true, dimensions: true, specs: true, sourceLocale: true },
   });
-  if (!product) throw new Error("产品不存在");
+  if (!product) throw await adminErr("productNotFound");
   if (loc === (normalizeLocale(product.sourceLocale) ?? "es")) {
-    throw new Error("源语言请用「保存展示内容」");
+    throw await adminErr("useSourceSave");
   }
 
   const all = parseContentI18n(product.contentI18n);
@@ -555,7 +556,7 @@ export async function generateShowcaseDraft(productId: string) {
       certifications: true,
     },
   });
-  if (!product) throw new Error("产品不存在");
+  if (!product) throw await adminErr("productNotFound");
 
   const specs = parseSpecs(product.specs);
   const specLines = specs
@@ -646,13 +647,13 @@ export async function generateDetailLayout(input: {
 
   const images = input.images.map((u) => u.trim()).filter(Boolean).slice(0, 12);
   const brief = input.brief.trim();
-  if (!images.length || !brief) throw new Error("请提供至少一张图片和一段描述");
+  if (!images.length || !brief) throw await adminErr("needImgBrief");
 
   const product = await prisma.product.findUnique({
     where: { id: input.productId },
     select: { name: true, modelNumber: true, luminaireType: true, tagline: true },
   });
-  if (!product) throw new Error("产品不存在");
+  if (!product) throw await adminErr("productNotFound");
 
   // 图片用编号指代，AI 输出 {kind:"image", index:N}，服务端换回真实 URL——
   // 既省 token 也从结构上杜绝编造 URL。
@@ -729,10 +730,10 @@ export async function adoptSuggestion(
   relation: string,
 ) {
   const factory = await authedFactory();
-  const rel = asRelation(relation);
+  const rel = await asRelation(relation);
   await assertOwned(fromId, factory.id);
   await assertOwned(toId, factory.id);
-  if (fromId === toId) throw new Error("不能关联自身");
+  if (fromId === toId) throw await adminErr("selfLink");
 
   await prisma.productLink.upsert({
     where: { fromId_toId_relation: { fromId, toId, relation: rel } },
@@ -750,15 +751,15 @@ export async function addAccessoryByModel(
   relation: string,
 ) {
   const factory = await authedFactory();
-  const rel = asRelation(relation);
+  const rel = await asRelation(relation);
   await assertOwned(fromId, factory.id);
 
   const target = await prisma.product.findFirst({
     where: { factoryId: factory.id, modelNumber: toModel.trim() },
     select: { id: true },
   });
-  if (!target) throw new Error(`当前工厂未找到型号「${toModel}」`);
-  if (target.id === fromId) throw new Error("不能关联自身");
+  if (!target) throw await adminErr("modelNotFound", { model: toModel });
+  if (target.id === fromId) throw await adminErr("selfLink");
 
   await prisma.productLink.upsert({
     where: { fromId_toId_relation: { fromId, toId: target.id, relation: rel } },
@@ -857,14 +858,14 @@ export async function createProduct(input: {
   const factory = await authedFactory();
   const name = input.name.trim();
   const modelNumber = input.modelNumber.trim();
-  if (!name) throw new Error("产品名不能为空");
-  if (!modelNumber) throw new Error("型号不能为空");
+  if (!name) throw await adminErr("nameRequired");
+  if (!modelNumber) throw await adminErr("modelRequired");
 
   const dupe = await prisma.product.findUnique({
     where: { factoryId_sourceId: { factoryId: factory.id, sourceId: modelNumber } },
     select: { id: true },
   });
-  if (dupe) throw new Error("该型号已存在，请直接编辑或更换型号");
+  if (dupe) throw await adminErr("modelExists");
 
   // slug 全局唯一
   const base = catalogSlug(modelNumber, "product");
@@ -944,7 +945,7 @@ export async function bulkSetCategory(ids: string[], category: string) {
   if (!ids.length) return { updated: 0 };
   let cat: string | null = null;
   if (category) {
-    if (!isCategory(category)) throw new Error("未知类目");
+    if (!isCategory(category)) throw await adminErr("unknownCategory");
     cat = category;
   }
   const categoryId = await categoryIdByKind(factory.id, cat);
@@ -997,7 +998,7 @@ export async function addVariantMember(input: {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
   await assertOwned(input.otherId, factory.id);
-  if (input.productId === input.otherId) throw new Error("不能把产品加入自己");
+  if (input.productId === input.otherId) throw await adminErr("selfVariant");
 
   const [me, other] = await Promise.all([
     prisma.product.findUnique({
@@ -1086,7 +1087,7 @@ export async function duplicateProduct(input: {
     where: { id: input.productId },
     include: { images: { orderBy: { sortOrder: "asc" } } },
   });
-  if (!src) throw new Error("产品不存在");
+  if (!src) throw await adminErr("productNotFound");
 
   // 型号 / sourceId 唯一：-COPY、-COPY2、…
   let modelNumber = `${src.modelNumber}-COPY`;

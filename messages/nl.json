@@ -28,7 +28,21 @@
       "noFactory": "Geen fabriek geselecteerd. Kies deze in de bovenbalk.",
       "ok": "OK",
       "confirmTitle": "Bevestigen",
-      "manage": "Beheren"
+      "manage": "Beheren",
+      "saveFail": "Opslaan mislukt",
+      "uploadFail": "Upload mislukt",
+      "opFail": "Actie mislukt",
+      "delFail": "Verwijderen mislukt",
+      "createFail": "Aanmaken mislukt",
+      "transFail": "Vertalen mislukt",
+      "aiFail": "AI-generatie mislukt",
+      "deleted": "Verwijderd",
+      "uploadedDraft": "Geüpload — vergeet niet op te slaan",
+      "select": "Selecteren",
+      "uiLang": "Taal van het beheer",
+      "langSwitchFail": "Taal wisselen mislukt",
+      "curFactory": "Huidige fabriek",
+      "factorySwitchFail": "Fabriek wisselen mislukt"
     },
     "page": {
       "dashboard": "Overzicht",
@@ -41,7 +55,19 @@
       "factories": "Fabrieken",
       "categoriesSub": "Categorieboom met meerdere niveaus · namen in 9 talen",
       "seriesSub": "Serienaam / -intro in 9 talen · omslag",
-      "rulesSub": "Compatibiliteitsengine over categorieën · accessoires voorstellen / koppelen"
+      "rulesSub": "Compatibiliteitsengine over categorieën · accessoires voorstellen / koppelen",
+      "importSub": "Importeer producten, specificaties, afbeeldingen en accessoirekoppelingen uit een werkmap met meerdere sheets — eerst voorbeeld, dan wegschrijven",
+      "importHistory": "Importgeschiedenis",
+      "noImports": "Nog geen imports.",
+      "rowCreated": "Nieuw {n}",
+      "rowUpdated": "Bijgewerkt {n}",
+      "rowErrors": "Fouten {n}",
+      "errorReport": "Foutenrapport",
+      "repRow": "Rij",
+      "repModel": "Model",
+      "repError": "Fout",
+      "factoryCount": "{n} fabrieken — merk, contact en kleur bewerken",
+      "factoryEmpty": "Nog geen fabrieken"
     },
     "dashboard": {
       "last30": "Laatste 30 dagen",
@@ -115,7 +141,12 @@
       "replaceImg": "Afbeelding vervangen",
       "transDone": "Andere talen vertaald",
       "emptyName": "Categorienaam (brontaal) is verplicht",
-      "addSub": "Subcategorie toevoegen"
+      "addSub": "Subcategorie toevoegen",
+      "savedOk": "Categorie opgeslagen",
+      "deletedOk": "Categorie verwijderd",
+      "needNameFirst": "Vul eerst de naam in de brontaal in voordat je vertaalt",
+      "defaultName": "Nieuwe categorie",
+      "iconPh": "bijv. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Series",
@@ -135,7 +166,11 @@
       "uploadCover": "Omslag uploaden",
       "replaceCover": "Omslag vervangen",
       "emptyName": "Serienaam (brontaal) is verplicht",
-      "transDone": "Andere talen vertaald"
+      "transDone": "Andere talen vertaald",
+      "savedOk": "Serie opgeslagen",
+      "deletedOk": "Serie verwijderd",
+      "needNameFirst": "Vul eerst de inhoud in de brontaal in voordat je vertaalt",
+      "defaultName": "Nieuwe serie"
     },
     "rule": {
       "count": "{n} regels. Regels bepalen welk producttype bij welk past en stellen accessoires voor over categorieën heen.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Voorbeeld",
     "mdEdit": "Bewerken",
-    "mdText": "tekst"
+    "mdText": "tekst",
+    "coverUpdated": "Omslag bijgewerkt",
+    "imagesAdded": "{n} afbeeldingen toegevoegd",
+    "specsSaved": "Specificaties & certificeringen opgeslagen",
+    "certsHint": "Vermeld alleen certificeringen die echt op verpakking of certificaat staan. De publieke pagina licht bekende keurmerken toe.",
+    "backToList": "Terug naar productlijst",
+    "previewPublic": "Publieke pagina bekijken",
+    "statScans": "Scans",
+    "statPdf": "PDF-downloads",
+    "statConv": "Downloadconversie",
+    "bySource": "Per bron",
+    "directSource": "Direct / zonder kanaalcode"
   },
   "show": {
     "sub": "Verkooppunten · highlights · toepassingen · detail · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Bron / CRI",
       "battery": "Batterij",
       "dot": "Algemeen"
-    }
+    },
+    "imgUploaded": "Afbeelding geüpload",
+    "transDoneCount": "{ok}/{total} talen vertaald",
+    "genDone": "AI-concept ingevuld — controleer, pas aan en sla op",
+    "savedOk": "Inhoud opgeslagen",
+    "transSavedOk": "Vertaling {lang} opgeslagen"
   },
   "pdf": {
     "title": "Automatisch invullen vanuit PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Video toevoegen",
     "upload": "Uploaden",
     "docTitle": "Documenttitel (leeg = bestandsnaam)",
-    "pickUpload": "Bestand kiezen en uploaden"
+    "pickUpload": "Bestand kiezen en uploaden",
+    "catNone": "— Zonder categorie —",
+    "catStrip": "LED-strip",
+    "catChannel": "Aluminium profiel",
+    "catPower": "Voeding",
+    "catConnector": "Connector",
+    "catAccessory": "Accessoire",
+    "videoUploaded": "Video geüpload",
+    "videoUploadFail": "Video-upload mislukt",
+    "videoNeedFields": "Vul een titel en video-URL in",
+    "videoAdded": "Video toegevoegd",
+    "docAdded": "Document toegevoegd",
+    "addFail": "Toevoegen mislukt"
   },
   "more": {
     "qrTitle": "Scannen / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Einde datasheet —"
     }
+  },
+  "err": {
+    "unauthorized": "Niet geautoriseerd",
+    "noFactory": "Geen fabriek geselecteerd",
+    "factoryNotFound": "Fabriek niet gevonden",
+    "unsupportedLang": "Niet-ondersteunde taal",
+    "productNotFound": "Product niet gevonden",
+    "notOwned": "Product niet gevonden of hoort niet bij de huidige fabriek",
+    "unknownRelation": "Onbekend relatietype",
+    "unknownCategory": "Onbekende categorie",
+    "nameRequired": "Productnaam mag niet leeg zijn",
+    "modelRequired": "Modelnummer mag niet leeg zijn",
+    "imageUrlMissing": "Afbeeldings-URL ontbreekt",
+    "imageNotFound": "Afbeelding niet gevonden",
+    "unknownLocale": "Onbekende taal",
+    "useSourceSave": "Gebruik voor de brontaal “Inhoud opslaan”",
+    "needImgBrief": "Geef minstens één afbeelding en een beschrijving op",
+    "selfLink": "Kan niet aan zichzelf worden gekoppeld",
+    "modelNotFound": "Model “{model}” niet gevonden in de huidige fabriek",
+    "modelExists": "Dit modelnummer bestaat al — bewerk het of gebruik een ander",
+    "selfVariant": "Kan een product niet aan zichzelf toevoegen",
+    "catNameRequired": "Categorienaam mag niet leeg zijn",
+    "catNotFound": "Categorie niet gevonden",
+    "moveIntoSelf": "Kan niet onder zichzelf worden verplaatst",
+    "moveIntoChild": "Kan niet onder een eigen subcategorie worden verplaatst",
+    "catHasProducts": "Deze categorie (incl. subcategorieën) bevat nog {n} producten — verplaats ze eerst",
+    "seriesNameRequired": "Serienaam mag niet leeg zijn",
+    "seriesNotFound": "Serie niet gevonden",
+    "ruleNotFound": "Regel niet gevonden",
+    "ruleNameRequired": "Regelnaam mag niet leeg zijn",
+    "ruleCatsRequired": "Selecteer hoofd- en accessoirecategorie",
+    "docTitleRequired": "Titel mag niet leeg zijn",
+    "paramError": "Ongeldige parameters",
+    "docNotFound": "Document niet gevonden",
+    "fileMissing": "Bestand ontbreekt",
+    "fileTooLarge5m": "Bestand groter dan 5 MB",
+    "importFail": "Import mislukt: {msg}",
+    "parseFail": "Bestandsanalyse mislukt: {msg}",
+    "jobNotFound": "Taak niet gevonden",
+    "invalidFileUrl": "Ongeldige bestands-URL",
+    "pdfReadFail": "PDF lezen mislukt — upload opnieuw",
+    "pdfTooLarge": "PDF te groot (max. 25 MB)",
+    "pdfNoModel": "Geen modelnummer in de PDF gevonden — maak het product handmatig aan en gebruik “Invullen vanuit PDF”",
+    "unknown": "Onbekende fout",
+    "fileTooLarge25m": "Bestand te groot (max. 25 MB)",
+    "unsupportedFileType": "Niet-ondersteund bestandstype",
+    "imageOnly": "Upload een afbeeldingsbestand",
+    "videoNotFound": "Video niet gevonden",
+    "aiNoKey": "OPENROUTER_API_KEY niet geconfigureerd — AI niet beschikbaar",
+    "aiEmpty": "AI gaf een leeg antwoord terug",
+    "aiBadJson": "AI-antwoord was geen geldige JSON"
+  },
+  "gallery": {
+    "zoom": "Afbeelding vergroten",
+    "viewer": "Afbeeldingsviewer",
+    "close": "Sluiten",
+    "prev": "Vorige",
+    "next": "Volgende",
+    "goto": "Afbeelding {n}",
+    "show": "Afbeelding {n} tonen"
+  },
+  "notFound": {
+    "title": "Record niet gevonden",
+    "desc": "Er bestaat geen datasheet voor deze code. Controleer de referentie op het productetiket of neem contact op met de fabrikant op de verpakking."
   }
 }

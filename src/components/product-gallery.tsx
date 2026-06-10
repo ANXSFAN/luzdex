@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Expand, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 type GalleryImage = { url: string; alt?: string | null };
@@ -15,6 +16,7 @@ export function ProductGallery({
   modelNumber: string;
   fallbackAlt: string;
 }) {
+  const t = useTranslations("gallery");
   const [active, setActive] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const total = images.length;
@@ -49,7 +51,7 @@ export function ProductGallery({
         onClick={() => setZoomOpen(true)}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        aria-label="放大查看"
+        aria-label={t("zoom")}
         className="apple-tile group relative block aspect-[16/10] w-full cursor-zoom-in touch-pan-y select-none overflow-hidden border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]"
       >
         <Image
@@ -83,7 +85,7 @@ export function ProductGallery({
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`显示第 ${i + 1} 张`}
+              aria-label={t("show", { n: i + 1 })}
               aria-current={i === active}
               className="flex h-9 items-center px-1.5"
             >
@@ -170,6 +172,7 @@ function Lightbox({
   onIndex: (i: number) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("gallery");
   const total = images.length;
   const [zoomed, setZoomed] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -248,7 +251,7 @@ function Lightbox({
       className="fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="图片查看器"
+      aria-label={t("viewer")}
     >
       {/* Top bar */}
       <div className="flex shrink-0 items-center justify-between px-5 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/70">
@@ -259,7 +262,7 @@ function Lightbox({
         <button
           type="button"
           onClick={onClose}
-          aria-label="关闭"
+          aria-label={t("close")}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/80 transition hover:bg-white/10"
         >
           <X className="h-4 w-4" strokeWidth={1.5} />
@@ -278,7 +281,7 @@ function Lightbox({
             type="button"
             onClick={() => step(-1)}
             disabled={index === 0}
-            aria-label="上一张"
+            aria-label={t("prev")}
             className="absolute left-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/80 transition hover:bg-white/10 disabled:opacity-25 sm:left-6"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
@@ -310,7 +313,7 @@ function Lightbox({
             type="button"
             onClick={() => step(1)}
             disabled={index === total - 1}
-            aria-label="下一张"
+            aria-label={t("next")}
             className="absolute right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/80 transition hover:bg-white/10 disabled:opacity-25 sm:right-6"
           >
             <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
@@ -330,7 +333,7 @@ function Lightbox({
                 setOffset({ x: 0, y: 0 });
                 onIndex(i);
               }}
-              aria-label={`第 ${i + 1} 张`}
+              aria-label={t("goto", { n: i + 1 })}
               aria-current={i === index}
               className={`relative aspect-square h-12 w-12 shrink-0 overflow-hidden rounded-md border transition ${
                 i === index

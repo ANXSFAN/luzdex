@@ -9,7 +9,9 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminCategoriesPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const adminLocale = await getAdminLocale();
+  const t = await getTranslations({ locale: adminLocale, namespace: "admin.page" });
+  const tc = await getTranslations({ locale: adminLocale, namespace: "admin.common" });
 
   const [categories, counts] = factory
     ? await Promise.all([
@@ -49,7 +51,7 @@ export default async function AdminCategoriesPage() {
               {t("categoriesSub")}
             </>
           ) : (
-            "未选择工厂，请先在顶栏切换「当前工厂」"
+            tc("noFactory")
           )}
         </p>
       </div>

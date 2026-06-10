@@ -28,7 +28,21 @@
       "noFactory": "Nessuna fabbrica selezionata. Scegliela nella barra in alto.",
       "ok": "OK",
       "confirmTitle": "Conferma",
-      "manage": "Gestisci"
+      "manage": "Gestisci",
+      "saveFail": "Salvataggio non riuscito",
+      "uploadFail": "Caricamento non riuscito",
+      "opFail": "Operazione non riuscita",
+      "delFail": "Eliminazione non riuscita",
+      "createFail": "Creazione non riuscita",
+      "transFail": "Traduzione non riuscita",
+      "aiFail": "Generazione IA non riuscita",
+      "deleted": "Eliminato",
+      "uploadedDraft": "Caricato: ricorda di salvare",
+      "select": "Seleziona",
+      "uiLang": "Lingua del pannello",
+      "langSwitchFail": "Cambio lingua non riuscito",
+      "curFactory": "Fabbrica corrente",
+      "factorySwitchFail": "Cambio fabbrica non riuscito"
     },
     "page": {
       "dashboard": "Panoramica",
@@ -41,7 +55,19 @@
       "factories": "Fabbriche",
       "categoriesSub": "Albero categorie multilivello · nomi in 9 lingue",
       "seriesSub": "Nome / descrizione serie in 9 lingue · immagine",
-      "rulesSub": "Motore di compatibilità tra categorie · suggerisci / collega accessori"
+      "rulesSub": "Motore di compatibilità tra categorie · suggerisci / collega accessori",
+      "importSub": "Importa prodotti, specifiche, immagini e collegamenti accessori da una cartella multi-foglio: anteprima prima di scrivere",
+      "importHistory": "Cronologia importazioni",
+      "noImports": "Nessuna importazione ancora.",
+      "rowCreated": "Nuovi {n}",
+      "rowUpdated": "Aggiornati {n}",
+      "rowErrors": "Errori {n}",
+      "errorReport": "Report errori",
+      "repRow": "Riga",
+      "repModel": "Modello",
+      "repError": "Errore",
+      "factoryCount": "{n} fabbriche: modifica marchio, contatti e colore",
+      "factoryEmpty": "Nessuna fabbrica ancora"
     },
     "dashboard": {
       "last30": "Ultimi 30 giorni",
@@ -115,7 +141,12 @@
       "replaceImg": "Sostituisci immagine",
       "transDone": "Altre lingue tradotte",
       "emptyName": "Il nome categoria (lingua sorgente) è obbligatorio",
-      "addSub": "Aggiungi sottocategoria"
+      "addSub": "Aggiungi sottocategoria",
+      "savedOk": "Categoria salvata",
+      "deletedOk": "Categoria eliminata",
+      "needNameFirst": "Inserisci prima il nome nella lingua di origine, poi traduci",
+      "defaultName": "Nuova categoria",
+      "iconPh": "es. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Serie",
@@ -135,7 +166,11 @@
       "uploadCover": "Carica immagine",
       "replaceCover": "Sostituisci immagine",
       "emptyName": "Il nome serie (lingua sorgente) è obbligatorio",
-      "transDone": "Altre lingue tradotte"
+      "transDone": "Altre lingue tradotte",
+      "savedOk": "Serie salvata",
+      "deletedOk": "Serie eliminata",
+      "needNameFirst": "Inserisci prima il contenuto nella lingua di origine, poi traduci",
+      "defaultName": "Nuova serie"
     },
     "rule": {
       "count": "{n} regole. Le regole definiscono quale tipo di prodotto si abbina a quale, suggerendo accessori tra categorie.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Anteprima",
     "mdEdit": "Modifica",
-    "mdText": "testo"
+    "mdText": "testo",
+    "coverUpdated": "Copertina aggiornata",
+    "imagesAdded": "{n} immagini aggiunte",
+    "specsSaved": "Specifiche e certificazioni salvate",
+    "certsHint": "Indica solo certificazioni presenti su confezione o certificati. La pagina pubblica spiega i marchi noti.",
+    "backToList": "Torna all'elenco prodotti",
+    "previewPublic": "Anteprima pagina pubblica",
+    "statScans": "Scansioni",
+    "statPdf": "Download PDF",
+    "statConv": "Conversione download",
+    "bySource": "Per origine",
+    "directSource": "Diretto / senza codice canale"
   },
   "show": {
     "sub": "Punti di forza · highlight · applicazioni · dettaglio · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Sorgente / CRI",
       "battery": "Batteria",
       "dot": "Generico"
-    }
+    },
+    "imgUploaded": "Immagine caricata",
+    "transDoneCount": "Tradotte {ok}/{total} lingue",
+    "genDone": "Bozza IA inserita: rivedi, modifica e salva",
+    "savedOk": "Contenuto salvato",
+    "transSavedOk": "Traduzione {lang} salvata"
   },
   "pdf": {
     "title": "Compilazione automatica da PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Aggiungi video",
     "upload": "Carica",
     "docTitle": "Titolo del documento (vuoto = nome file)",
-    "pickUpload": "Scegli file e carica"
+    "pickUpload": "Scegli file e carica",
+    "catNone": "— Senza categoria —",
+    "catStrip": "Striscia LED",
+    "catChannel": "Profilo in alluminio",
+    "catPower": "Alimentatore",
+    "catConnector": "Connettore",
+    "catAccessory": "Accessorio",
+    "videoUploaded": "Video caricato",
+    "videoUploadFail": "Caricamento video non riuscito",
+    "videoNeedFields": "Inserisci titolo e URL del video",
+    "videoAdded": "Video aggiunto",
+    "docAdded": "Documento aggiunto",
+    "addFail": "Aggiunta non riuscita"
   },
   "more": {
     "qrTitle": "Scansiona / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Fine della scheda —"
     }
+  },
+  "err": {
+    "unauthorized": "Non autorizzato",
+    "noFactory": "Nessuna fabbrica selezionata",
+    "factoryNotFound": "Fabbrica inesistente",
+    "unsupportedLang": "Lingua non supportata",
+    "productNotFound": "Prodotto inesistente",
+    "notOwned": "Prodotto inesistente o non appartenente alla fabbrica corrente",
+    "unknownRelation": "Tipo di relazione sconosciuto",
+    "unknownCategory": "Categoria sconosciuta",
+    "nameRequired": "Il nome del prodotto è obbligatorio",
+    "modelRequired": "Il numero di modello è obbligatorio",
+    "imageUrlMissing": "URL dell'immagine mancante",
+    "imageNotFound": "Immagine inesistente",
+    "unknownLocale": "Lingua sconosciuta",
+    "useSourceSave": "Per la lingua di origine usa «Salva contenuto»",
+    "needImgBrief": "Fornisci almeno un'immagine e una descrizione",
+    "selfLink": "Non può essere collegato a sé stesso",
+    "modelNotFound": "Modello «{model}» non trovato nella fabbrica corrente",
+    "modelExists": "Questo modello esiste già: modificalo o usane un altro",
+    "selfVariant": "Non puoi aggiungere il prodotto a sé stesso",
+    "catNameRequired": "Il nome della categoria è obbligatorio",
+    "catNotFound": "Categoria inesistente",
+    "moveIntoSelf": "Non può essere spostata sotto sé stessa",
+    "moveIntoChild": "Non può essere spostata sotto una propria sottocategoria",
+    "catHasProducts": "Questa categoria (incl. sottocategorie) contiene ancora {n} prodotti: spostali prima di eliminarla",
+    "seriesNameRequired": "Il nome della serie è obbligatorio",
+    "seriesNotFound": "Serie inesistente",
+    "ruleNotFound": "Regola inesistente",
+    "ruleNameRequired": "Il nome della regola è obbligatorio",
+    "ruleCatsRequired": "Seleziona la categoria principale e quella degli accessori",
+    "docTitleRequired": "Il titolo è obbligatorio",
+    "paramError": "Parametri non validi",
+    "docNotFound": "Documento inesistente",
+    "fileMissing": "File mancante",
+    "fileTooLarge5m": "Il file supera i 5 MB",
+    "importFail": "Importazione non riuscita: {msg}",
+    "parseFail": "Analisi del file non riuscita: {msg}",
+    "jobNotFound": "Attività inesistente",
+    "invalidFileUrl": "URL del file non valido",
+    "pdfReadFail": "Lettura del PDF non riuscita: caricalo di nuovo",
+    "pdfTooLarge": "PDF troppo grande (max 25 MB)",
+    "pdfNoModel": "Modello non rilevato nel PDF: crea il prodotto manualmente e usa «Compila da PDF»",
+    "unknown": "Errore sconosciuto",
+    "fileTooLarge25m": "File troppo grande (max 25 MB)",
+    "unsupportedFileType": "Tipo di file non supportato",
+    "imageOnly": "Carica un file immagine",
+    "videoNotFound": "Video inesistente",
+    "aiNoKey": "OPENROUTER_API_KEY non configurata: IA non disponibile",
+    "aiEmpty": "L'IA ha restituito una risposta vuota",
+    "aiBadJson": "La risposta dell'IA non è JSON valido"
+  },
+  "gallery": {
+    "zoom": "Ingrandisci immagine",
+    "viewer": "Visualizzatore immagini",
+    "close": "Chiudi",
+    "prev": "Precedente",
+    "next": "Successiva",
+    "goto": "Immagine {n}",
+    "show": "Mostra immagine {n}"
+  },
+  "notFound": {
+    "title": "Record non trovato",
+    "desc": "Nessuna scheda corrisponde a questo codice. Verifica il riferimento sull'etichetta del prodotto o contatta il produttore indicato sulla confezione."
   }
 }

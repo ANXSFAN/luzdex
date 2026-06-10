@@ -33,7 +33,7 @@ export function BasicInfoEditor({
         toast.success(t("prod.basicsTitle"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : t("admin.common.saveFail"));
       }
     });
   }

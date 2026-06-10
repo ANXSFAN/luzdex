@@ -30,7 +30,7 @@ async function uploadFile(file: File) {
   const fd = new FormData();
   fd.append("file", file);
   const res = await fetch("/api/upload", { method: "POST", body: fd });
-  if (!res.ok) throw new Error("上传失败");
+  if (!res.ok) throw new Error(""); // 调用方按场景给本地化提示
   return res.json() as Promise<{
     url: string;
     fileName: string;
@@ -63,6 +63,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function VideoSection({ productId, videos }: { productId: string; videos: VideoItem[] }) {
   const router = useRouter();
   const t = useTranslations("misc");
+  const tc = useTranslations("admin.common");
   const fileRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -75,9 +76,9 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
       const result = await uploadFile(file);
       setUrl(result.url);
       if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
-      toast.success("视频已上传");
+      toast.success(t("videoUploaded"));
     } catch {
-      toast.error("视频上传失败");
+      toast.error(t("videoUploadFail"));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -96,7 +97,7 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
 
   async function handleAdd() {
     if (!title.trim() || !url.trim()) {
-      toast.error("请填写标题和视频链接");
+      toast.error(t("videoNeedFields"));
       return;
     }
     setSaving(true);
@@ -107,9 +108,9 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
         body: JSON.stringify({ productId, title: title.trim(), url: url.trim() }),
       });
       if (!res.ok) {
-        toast.error("添加失败");
+        toast.error(t("addFail"));
       } else {
-        toast.success("视频已添加");
+        toast.success(t("videoAdded"));
         setTitle("");
         setUrl("");
         router.refresh();
@@ -122,10 +123,10 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
   async function handleDelete(id: string) {
     const res = await fetch(`/api/videos/${id}`, { method: "DELETE" });
     if (res.ok) {
-      toast.success("已删除");
+      toast.success(tc("deleted"));
       router.refresh();
     } else {
-      toast.error("删除失败");
+      toast.error(tc("delFail"));
     }
   }
 
@@ -205,6 +206,7 @@ function DocumentSection({
 }) {
   const router = useRouter();
   const t = useTranslations("misc");
+  const tc = useTranslations("admin.common");
   const fileRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -227,14 +229,14 @@ function DocumentSection({
         }),
       });
       if (!res.ok) {
-        toast.error("添加失败");
+        toast.error(t("addFail"));
       } else {
-        toast.success("文档已添加");
+        toast.success(t("docAdded"));
         setTitle("");
         router.refresh();
       }
     } catch {
-      toast.error("上传失败");
+      toast.error(tc("uploadFail"));
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -254,10 +256,10 @@ function DocumentSection({
   async function handleDelete(id: string) {
     const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
     if (res.ok) {
-      toast.success("已删除");
+      toast.success(tc("deleted"));
       router.refresh();
     } else {
-      toast.error("删除失败");
+      toast.error(tc("delFail"));
     }
   }
 

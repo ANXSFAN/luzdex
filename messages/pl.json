@@ -28,7 +28,21 @@
       "noFactory": "Nie wybrano fabryki. Wybierz ją na górnym pasku.",
       "ok": "OK",
       "confirmTitle": "Potwierdź",
-      "manage": "Zarządzaj"
+      "manage": "Zarządzaj",
+      "saveFail": "Zapis się nie powiódł",
+      "uploadFail": "Przesyłanie nie powiodło się",
+      "opFail": "Operacja nie powiodła się",
+      "delFail": "Usuwanie nie powiodło się",
+      "createFail": "Tworzenie nie powiodło się",
+      "transFail": "Tłumaczenie nie powiodło się",
+      "aiFail": "Generowanie AI nie powiodło się",
+      "deleted": "Usunięto",
+      "uploadedDraft": "Przesłano — pamiętaj o zapisaniu",
+      "select": "Wybierz",
+      "uiLang": "Język panelu",
+      "langSwitchFail": "Nie udało się zmienić języka",
+      "curFactory": "Bieżąca fabryka",
+      "factorySwitchFail": "Nie udało się zmienić fabryki"
     },
     "page": {
       "dashboard": "Przegląd",
@@ -41,7 +55,19 @@
       "factories": "Fabryki",
       "categoriesSub": "Wielopoziomowe drzewo kategorii · nazwy w 9 językach",
       "seriesSub": "Nazwa / opis serii w 9 językach · okładka",
-      "rulesSub": "Silnik dopasowania między kategoriami · sugeruj / łącz akcesoria"
+      "rulesSub": "Silnik dopasowania między kategoriami · sugeruj / łącz akcesoria",
+      "importSub": "Importuj produkty, specyfikacje, obrazy i powiązania akcesoriów z wieloarkuszowego skoroszytu — najpierw podgląd, potem zapis",
+      "importHistory": "Historia importów",
+      "noImports": "Brak importów.",
+      "rowCreated": "Nowe {n}",
+      "rowUpdated": "Zaktualizowane {n}",
+      "rowErrors": "Błędy {n}",
+      "errorReport": "Raport błędów",
+      "repRow": "Wiersz",
+      "repModel": "Model",
+      "repError": "Błąd",
+      "factoryCount": "{n} fabryk — edytuj markę, kontakty i kolor",
+      "factoryEmpty": "Brak fabryk"
     },
     "dashboard": {
       "last30": "Ostatnie 30 dni",
@@ -115,7 +141,12 @@
       "replaceImg": "Zmień obraz",
       "transDone": "Przetłumaczono pozostałe języki",
       "emptyName": "Nazwa kategorii (język źródłowy) jest wymagana",
-      "addSub": "Dodaj podkategorię"
+      "addSub": "Dodaj podkategorię",
+      "savedOk": "Kategoria zapisana",
+      "deletedOk": "Kategoria usunięta",
+      "needNameFirst": "Najpierw wpisz nazwę w języku źródłowym, potem tłumacz",
+      "defaultName": "Nowa kategoria",
+      "iconPh": "np. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Serie",
@@ -135,7 +166,11 @@
       "uploadCover": "Prześlij okładkę",
       "replaceCover": "Zmień okładkę",
       "emptyName": "Nazwa serii (język źródłowy) jest wymagana",
-      "transDone": "Przetłumaczono pozostałe języki"
+      "transDone": "Przetłumaczono pozostałe języki",
+      "savedOk": "Seria zapisana",
+      "deletedOk": "Seria usunięta",
+      "needNameFirst": "Najpierw wpisz treść w języku źródłowym, potem tłumacz",
+      "defaultName": "Nowa seria"
     },
     "rule": {
       "count": "{n} reguł. Reguły określają, jaki typ produktu pasuje do jakiego, sugerując akcesoria między kategoriami.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Podgląd",
     "mdEdit": "Edytuj",
-    "mdText": "tekst"
+    "mdText": "tekst",
+    "coverUpdated": "Okładka zaktualizowana",
+    "imagesAdded": "Dodano {n} obrazów",
+    "specsSaved": "Zapisano specyfikacje i certyfikaty",
+    "certsHint": "Podawaj tylko certyfikaty faktycznie obecne na opakowaniu lub certyfikatach. Strona publiczna objaśnia znane oznaczenia.",
+    "backToList": "Wróć do listy produktów",
+    "previewPublic": "Podgląd strony publicznej",
+    "statScans": "Skany",
+    "statPdf": "Pobrania PDF",
+    "statConv": "Konwersja pobrań",
+    "bySource": "Według źródła",
+    "directSource": "Bezpośrednio / bez kodu kanału"
   },
   "show": {
     "sub": "Zalety · wyróżnienia · zastosowania · szczegóły · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Źródło / CRI",
       "battery": "Bateria",
       "dot": "Ogólne"
-    }
+    },
+    "imgUploaded": "Obraz przesłany",
+    "transDoneCount": "Przetłumaczono {ok}/{total} języków",
+    "genDone": "Szkic AI wstawiony — przejrzyj, popraw i zapisz",
+    "savedOk": "Treść zapisana",
+    "transSavedOk": "Zapisano tłumaczenie: {lang}"
   },
   "pdf": {
     "title": "Automatyczne wypełnianie z PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Dodaj film",
     "upload": "Prześlij",
     "docTitle": "Tytuł dokumentu (puste = nazwa pliku)",
-    "pickUpload": "Wybierz plik i prześlij"
+    "pickUpload": "Wybierz plik i prześlij",
+    "catNone": "— Bez kategorii —",
+    "catStrip": "Taśma LED",
+    "catChannel": "Profil aluminiowy",
+    "catPower": "Zasilacz",
+    "catConnector": "Złączka",
+    "catAccessory": "Akcesorium",
+    "videoUploaded": "Wideo przesłane",
+    "videoUploadFail": "Przesyłanie wideo nie powiodło się",
+    "videoNeedFields": "Podaj tytuł i adres URL wideo",
+    "videoAdded": "Wideo dodane",
+    "docAdded": "Dokument dodany",
+    "addFail": "Dodawanie nie powiodło się"
   },
   "more": {
     "qrTitle": "Skanuj / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Koniec karty —"
     }
+  },
+  "err": {
+    "unauthorized": "Brak autoryzacji",
+    "noFactory": "Nie wybrano fabryki",
+    "factoryNotFound": "Fabryka nie istnieje",
+    "unsupportedLang": "Nieobsługiwany język",
+    "productNotFound": "Produkt nie istnieje",
+    "notOwned": "Produkt nie istnieje lub nie należy do bieżącej fabryki",
+    "unknownRelation": "Nieznany typ relacji",
+    "unknownCategory": "Nieznana kategoria",
+    "nameRequired": "Nazwa produktu nie może być pusta",
+    "modelRequired": "Numer modelu nie może być pusty",
+    "imageUrlMissing": "Brak adresu URL obrazu",
+    "imageNotFound": "Obraz nie istnieje",
+    "unknownLocale": "Nieznany język",
+    "useSourceSave": "Dla języka źródłowego użyj „Zapisz treść”",
+    "needImgBrief": "Podaj co najmniej jeden obraz i opis",
+    "selfLink": "Nie można powiązać z samym sobą",
+    "modelNotFound": "Nie znaleziono modelu „{model}” w bieżącej fabryce",
+    "modelExists": "Ten model już istnieje — edytuj go lub użyj innego numeru",
+    "selfVariant": "Nie można dodać produktu do samego siebie",
+    "catNameRequired": "Nazwa kategorii nie może być pusta",
+    "catNotFound": "Kategoria nie istnieje",
+    "moveIntoSelf": "Nie można przenieść pod samą siebie",
+    "moveIntoChild": "Nie można przenieść pod własną podkategorię",
+    "catHasProducts": "Ta kategoria (wraz z podkategoriami) zawiera jeszcze {n} produktów — najpierw je przenieś",
+    "seriesNameRequired": "Nazwa serii nie może być pusta",
+    "seriesNotFound": "Seria nie istnieje",
+    "ruleNotFound": "Reguła nie istnieje",
+    "ruleNameRequired": "Nazwa reguły nie może być pusta",
+    "ruleCatsRequired": "Wybierz kategorię główną i kategorię akcesoriów",
+    "docTitleRequired": "Tytuł nie może być pusty",
+    "paramError": "Nieprawidłowe parametry",
+    "docNotFound": "Dokument nie istnieje",
+    "fileMissing": "Brak pliku",
+    "fileTooLarge5m": "Plik przekracza 5 MB",
+    "importFail": "Import nie powiódł się: {msg}",
+    "parseFail": "Analiza pliku nie powiodła się: {msg}",
+    "jobNotFound": "Zadanie nie istnieje",
+    "invalidFileUrl": "Nieprawidłowy adres pliku",
+    "pdfReadFail": "Nie udało się odczytać PDF — prześlij ponownie",
+    "pdfTooLarge": "PDF zbyt duży (maks. 25 MB)",
+    "pdfNoModel": "Nie wykryto modelu w PDF — utwórz produkt ręcznie i użyj „Wypełnij z PDF”",
+    "unknown": "Nieznany błąd",
+    "fileTooLarge25m": "Plik zbyt duży (maks. 25 MB)",
+    "unsupportedFileType": "Nieobsługiwany typ pliku",
+    "imageOnly": "Prześlij plik graficzny",
+    "videoNotFound": "Wideo nie istnieje",
+    "aiNoKey": "Brak konfiguracji OPENROUTER_API_KEY — AI niedostępne",
+    "aiEmpty": "AI zwróciło pustą odpowiedź",
+    "aiBadJson": "Odpowiedź AI nie jest poprawnym JSON"
+  },
+  "gallery": {
+    "zoom": "Powiększ obraz",
+    "viewer": "Przeglądarka obrazów",
+    "close": "Zamknij",
+    "prev": "Poprzedni",
+    "next": "Następny",
+    "goto": "Obraz {n}",
+    "show": "Pokaż obraz {n}"
+  },
+  "notFound": {
+    "title": "Nie znaleziono rekordu",
+    "desc": "Dla tego kodu nie istnieje karta produktu. Sprawdź oznaczenie na etykiecie produktu lub skontaktuj się z producentem podanym na opakowaniu."
   }
 }

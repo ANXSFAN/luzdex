@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { parseAttributes } from "@/lib/products";
+import { adminErr } from "@/lib/admin-err";
 import {
   parseConditions,
   suggestByRules,
@@ -14,20 +15,20 @@ import {
 
 async function authedFactory() {
   const session = await auth();
-  if (!session) throw new Error("未授权");
+  if (!session) throw await adminErr("unauthorized");
   const factory = await getActiveFactory();
-  if (!factory) throw new Error("未选择工厂");
+  if (!factory) throw await adminErr("noFactory");
   return factory;
 }
 
 async function assertCat(id: string, factoryId: string) {
   const c = await prisma.category.findUnique({ where: { id }, select: { factoryId: true } });
-  if (!c || c.factoryId !== factoryId) throw new Error("分类不存在");
+  if (!c || c.factoryId !== factoryId) throw await adminErr("catNotFound");
 }
 
 const RELATIONS = ["accessory", "alternative", "required"];
 
-function clean(input: {
+async function clean(input: {
   label: string;
   description?: string;
   fromCategoryId: string;
@@ -40,8 +41,8 @@ function clean(input: {
   priority: number;
 }) {
   const label = input.label.trim();
-  if (!label) throw new Error("规则名不能为空");
-  if (!input.fromCategoryId || !input.toCategoryId) throw new Error("请选择主品分类与配件分类");
+  if (!label) throw await adminErr("ruleNameRequired");
+  if (!input.fromCategoryId || !input.toCategoryId) throw await adminErr("ruleCatsRequired");
   const relation = RELATIONS.includes(input.relation) ? input.relation : "accessory";
   return {
     label,
@@ -70,7 +71,7 @@ export async function createRule(input: {
   const factory = await authedFactory();
   await assertCat(input.fromCategoryId, factory.id);
   await assertCat(input.toCategoryId, factory.id);
-  const data = clean(input);
+  const data = await clean(input);
   const created = await prisma.compatRule.create({
     data: {
       factoryId: factory.id,
@@ -100,10 +101,10 @@ export async function updateRule(
 ) {
   const factory = await authedFactory();
   const r = await prisma.compatRule.findUnique({ where: { id }, select: { factoryId: true } });
-  if (!r || r.factoryId !== factory.id) throw new Error("规则不存在");
+  if (!r || r.factoryId !== factory.id) throw await adminErr("ruleNotFound");
   await assertCat(input.fromCategoryId, factory.id);
   await assertCat(input.toCategoryId, factory.id);
-  const data = clean(input);
+  const data = await clean(input);
   await prisma.compatRule.update({
     where: { id },
     data: {

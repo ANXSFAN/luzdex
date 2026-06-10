@@ -54,9 +54,9 @@ const COND_KEY: Record<string, string> = {
   attr_lte: "lte",
 };
 const RELATIONS = [
-  { v: "accessory", l: "配件" },
-  { v: "alternative", l: "替代" },
-  { v: "required", l: "必配" },
+  { v: "accessory" },
+  { v: "alternative" },
+  { v: "required" },
 ];
 const ATTR_HINTS = ["pcbWidth", "voltage", "watt"];
 
@@ -120,7 +120,7 @@ export function RuleManager({
         toast.success(t("rule.applied", { scanned: r.scanned, created: r.created }));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "执行失败");
+        toast.error(e instanceof Error ? e.message : t("rule.appliedFail"));
       }
     });
   }
@@ -131,7 +131,7 @@ export function RuleManager({
         await toggleRule(rule.id, !rule.enabled);
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
+        toast.error(e instanceof Error ? e.message : t("common.opFail"));
       }
     });
   }
@@ -150,7 +150,7 @@ export function RuleManager({
         if (editing !== "new" && editing?.id === rule.id) setEditing(null);
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "删除失败");
+        toast.error(e instanceof Error ? e.message : t("common.delFail"));
       }
     });
   }
@@ -281,6 +281,7 @@ function RuleEditor({
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
+  const te = useTranslations("err");
   const isNew = !initial.id;
   const [f, setF] = useState<Rule>(initial);
   const [pending, start] = useTransition();
@@ -303,9 +304,9 @@ function RuleEditor({
   }
 
   function save() {
-    if (!f.label.trim()) return toast.error("规则名不能为空");
+    if (!f.label.trim()) return toast.error(te("ruleNameRequired"));
     if (!f.fromCategoryId || !f.toCategoryId)
-      return toast.error("请选择主品分类与配件分类");
+      return toast.error(te("ruleCatsRequired"));
     const payload = {
       label: f.label,
       description: f.description ?? "",
@@ -333,7 +334,7 @@ function RuleEditor({
         onClose();
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : t("common.saveFail"));
       }
     });
   }

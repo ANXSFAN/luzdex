@@ -18,6 +18,7 @@ import {
   localizedProductName,
 } from "@/lib/products";
 import { getAdminLocale } from "@/lib/admin-locale";
+import { getTranslations } from "next-intl/server";
 import { suggestByRules, parseConditions, type CompatRuleData } from "@/lib/compat";
 import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
@@ -78,6 +79,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   if (!product) notFound();
 
   const adminLocale = await getAdminLocale();
+  const tp = await getTranslations({ locale: adminLocale, namespace: "prod" });
 
   // 配件关系 + 规则引擎建议（同工厂候选池）。候选名按后台语言取译名展示。
   const [rawCandidates, ruleCats, rawRules] = await Promise.all([
@@ -319,7 +321,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         className="flex w-fit items-center gap-1 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
-        返回产品列表
+        {tp("backToList")}
       </Link>
 
       <div className="mt-4 flex items-start justify-between gap-4">
@@ -339,7 +341,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
             rel="noopener noreferrer"
             className="flex shrink-0 items-center gap-1.5 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
           >
-            预览公开页
+            {tp("previewPublic")}
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
@@ -357,9 +359,9 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-6">
-          <Stat label="Scans · 扫码" value={totalScans} />
-          <Stat label="PDF · 下载" value={pdfDownloads} />
-          <Stat label="Conv · 下载转化" value={pdfConv} suffix="%" />
+          <Stat label={tp("statScans")} value={totalScans} />
+          <Stat label={tp("statPdf")} value={pdfDownloads} />
+          <Stat label={tp("statConv")} value={pdfConv} suffix="%" />
         </div>
 
         <div className="mt-6">
@@ -399,12 +401,12 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         {totalScans > 0 && (
           <div className="mt-6 border-t border-[var(--color-rule)] pt-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-              By source · 来源渠道
+              {tp("bySource")}
             </p>
             <div className="mt-3 space-y-2">
               {sourceRows.map(([key, n]) => {
                 const label =
-                  key === "__direct" ? "直接访问 / 无渠道码" : key;
+                  key === "__direct" ? tp("directSource") : key;
                 const pct = Math.round((n / totalScans) * 100);
                 return (
                   <div key={key} className="flex items-center gap-3">

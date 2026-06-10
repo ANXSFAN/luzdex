@@ -77,9 +77,9 @@ export function SpecsEditor({
           specs: cleanSpecs,
           certifications: certs,
         });
-        toast.success("规格 / 认证已保存");
+        toast.success(t("prod.specsSaved"));
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : t("admin.common.saveFail"));
       }
     });
   }
@@ -153,7 +153,7 @@ export function SpecsEditor({
                     type="button"
                     onClick={() => moveRow(i, -1)}
                     disabled={i === 0}
-                    aria-label="上移"
+                    aria-label={t("show.moveUp")}
                     className="p-1.5 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                   >
                     <ArrowUp className="h-3.5 w-3.5" />
@@ -162,7 +162,7 @@ export function SpecsEditor({
                     type="button"
                     onClick={() => moveRow(i, 1)}
                     disabled={i === rows.length - 1}
-                    aria-label="下移"
+                    aria-label={t("show.moveDown")}
                     className="p-1.5 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                   >
                     <ArrowDown className="h-3.5 w-3.5" />
@@ -170,7 +170,7 @@ export function SpecsEditor({
                   <button
                     type="button"
                     onClick={() => removeRow(i)}
-                    aria-label="删除"
+                    aria-label={t("admin.common.delete")}
                     className="p-1.5 text-[var(--color-ink-faint)] transition hover:text-red-500"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -195,7 +195,7 @@ export function SpecsEditor({
               <button
                 type="button"
                 onClick={() => removeCert(i)}
-                aria-label={`移除 ${c}`}
+                aria-label={`${t("admin.common.delete")} ${c}`}
                 className="text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <X className="h-3.5 w-3.5" />
@@ -217,7 +217,7 @@ export function SpecsEditor({
           />
         </div>
         <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
-          只填包装 / 证书上确有的认证。公开页会按已知认证给出中英释义。
+          {t("prod.certsHint")}
         </p>
       </div>
 

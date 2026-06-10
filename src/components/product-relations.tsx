@@ -12,26 +12,27 @@ import {
   removeLink,
 } from "@/app/admin/products/actions";
 
-const CATEGORY_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: "— 未分类 —" },
-  { value: "strip", label: "灯带 strip" },
-  { value: "channel", label: "铝槽 channel" },
-  { value: "power", label: "电源 power" },
-  { value: "connector", label: "连接件 connector" },
-  { value: "accessory", label: "配件 accessory" },
+// label 走 misc 命名空间的 i18n key；value 仍是入库的类目代码
+const CATEGORY_OPTIONS: { value: string; labelKey: string }[] = [
+  { value: "", labelKey: "catNone" },
+  { value: "strip", labelKey: "catStrip" },
+  { value: "channel", labelKey: "catChannel" },
+  { value: "power", labelKey: "catPower" },
+  { value: "connector", labelKey: "catConnector" },
+  { value: "accessory", labelKey: "catAccessory" },
 ];
 
-const CAT_ZH: Record<string, string> = {
-  strip: "灯带",
-  channel: "铝槽",
-  power: "电源",
-  connector: "连接件",
-  accessory: "配件",
+const CAT_KEY: Record<string, string> = {
+  strip: "catStrip",
+  channel: "catChannel",
+  power: "catPower",
+  connector: "catConnector",
+  accessory: "catAccessory",
 };
 
-const REL_ZH: Record<string, string> = {
-  accessory: "配件",
-  alternative: "替代",
+const REL_KEY: Record<string, string> = {
+  accessory: "relAccessory",
+  alternative: "relAlternative",
 };
 
 interface LinkItem {
@@ -62,10 +63,11 @@ interface Props {
 }
 
 function CatChip({ category }: { category: string | null }) {
-  if (!category || !CAT_ZH[category]) return null;
+  const t = useTranslations("misc");
+  if (!category || !CAT_KEY[category]) return null;
   return (
     <span className="rounded-full border border-[var(--color-rule)] px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">
-      {CAT_ZH[category]}
+      {t(CAT_KEY[category])}
     </span>
   );
 }
@@ -81,6 +83,7 @@ export function ProductRelations({
 }: Props) {
   const router = useRouter();
   const t = useTranslations("misc");
+  const tc = useTranslations("admin.common");
   const [pending, startTransition] = useTransition();
 
   // 属性表单
@@ -102,7 +105,7 @@ export function ProductRelations({
         onOk?.();
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
+        toast.error(e instanceof Error ? e.message : tc("opFail"));
       }
     });
   }
@@ -124,7 +127,7 @@ export function ProductRelations({
               >
                 {CATEGORY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label}
+                    {o.value ? `${t(o.labelKey)} ${o.value}` : t(o.labelKey)}
                   </option>
                 ))}
               </select>
@@ -242,7 +245,7 @@ export function ProductRelations({
                   <span className="font-mono text-xs text-[var(--color-ink)]">{l.modelNumber}</span>
                   <span className="truncate text-sm text-[var(--color-ink-soft)]">{l.name}</span>
                   <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                    {REL_ZH[l.relation] ?? l.relation}
+                    {REL_KEY[l.relation] ? t(REL_KEY[l.relation]) : l.relation}
                   </span>
                 </div>
                 <button

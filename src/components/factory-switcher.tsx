@@ -2,8 +2,9 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Factory } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { setActiveFactory } from "@/app/admin/actions";
 
 type Option = { id: string; name: string; brandShort: string | null };
@@ -19,6 +20,7 @@ export function FactorySwitcher({
   activeId: string | null;
 }) {
   const router = useRouter();
+  const t = useTranslations("admin.common");
   const [pending, startTransition] = useTransition();
 
   if (factories.length === 0) return null;
@@ -30,21 +32,19 @@ export function FactorySwitcher({
         await setActiveFactory(id);
         router.refresh();
       } catch {
-        toast.error("切换工厂失败");
+        toast.error(t("factorySwitchFail"));
       }
     });
   }
 
   return (
     <div className="relative flex w-full min-w-0 items-center">
-      <span className="pointer-events-none absolute left-3 text-[11px] text-[var(--color-ink-faint)]">
-        厂
-      </span>
+      <Factory className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--color-ink-faint)]" />
       <select
         value={activeId ?? ""}
         onChange={onChange}
         disabled={pending}
-        aria-label="当前工厂"
+        aria-label={t("curFactory")}
         className="w-full min-w-0 appearance-none truncate rounded-lg border border-[var(--color-rule)] bg-transparent py-2 pl-8 pr-8 text-sm text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50"
       >
         {factories.map((f) => (

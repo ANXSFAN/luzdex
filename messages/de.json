@@ -28,7 +28,21 @@
       "noFactory": "Kein Werk gewählt. Bitte oben das aktuelle Werk wählen.",
       "ok": "OK",
       "confirmTitle": "Bitte bestätigen",
-      "manage": "Verwalten"
+      "manage": "Verwalten",
+      "saveFail": "Speichern fehlgeschlagen",
+      "uploadFail": "Upload fehlgeschlagen",
+      "opFail": "Aktion fehlgeschlagen",
+      "delFail": "Löschen fehlgeschlagen",
+      "createFail": "Erstellen fehlgeschlagen",
+      "transFail": "Übersetzung fehlgeschlagen",
+      "aiFail": "KI-Generierung fehlgeschlagen",
+      "deleted": "Gelöscht",
+      "uploadedDraft": "Hochgeladen — bitte speichern",
+      "select": "Auswählen",
+      "uiLang": "Sprache der Admin-Oberfläche",
+      "langSwitchFail": "Sprachwechsel fehlgeschlagen",
+      "curFactory": "Aktuelles Werk",
+      "factorySwitchFail": "Werkwechsel fehlgeschlagen"
     },
     "page": {
       "dashboard": "Übersicht",
@@ -41,7 +55,19 @@
       "factories": "Werke",
       "categoriesSub": "Mehrstufiger Kategorienbaum · Namen in 9 Sprachen",
       "seriesSub": "Serienname / -beschreibung in 9 Sprachen · Titelbild",
-      "rulesSub": "Kategorienübergreifende Kompatibilität · Zubehör vorschlagen / verknüpfen"
+      "rulesSub": "Kategorienübergreifende Kompatibilität · Zubehör vorschlagen / verknüpfen",
+      "importSub": "Produkte, Spezifikationen, Bilder und Zubehör-Verknüpfungen aus einer Multi-Sheet-Arbeitsmappe importieren — erst Vorschau, dann Schreiben",
+      "importHistory": "Importverlauf",
+      "noImports": "Noch keine Importe.",
+      "rowCreated": "Neu {n}",
+      "rowUpdated": "Aktualisiert {n}",
+      "rowErrors": "Fehler {n}",
+      "errorReport": "Fehlerbericht",
+      "repRow": "Zeile",
+      "repModel": "Modell",
+      "repError": "Fehler",
+      "factoryCount": "{n} Werke — Marke, Kontakt und Farbe bearbeiten",
+      "factoryEmpty": "Noch keine Werke"
     },
     "dashboard": {
       "last30": "Letzte 30 Tage",
@@ -115,7 +141,12 @@
       "replaceImg": "Bild ersetzen",
       "transDone": "Andere Sprachen übersetzt",
       "emptyName": "Kategoriename (Quellsprache) ist erforderlich",
-      "addSub": "Unterkategorie hinzufügen"
+      "addSub": "Unterkategorie hinzufügen",
+      "savedOk": "Kategorie gespeichert",
+      "deletedOk": "Kategorie gelöscht",
+      "needNameFirst": "Erst den Namen in der Quellsprache eintragen, dann übersetzen",
+      "defaultName": "Neue Kategorie",
+      "iconPh": "z. B. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Serien",
@@ -135,7 +166,11 @@
       "uploadCover": "Titelbild hochladen",
       "replaceCover": "Titelbild ersetzen",
       "emptyName": "Serienname (Quellsprache) ist erforderlich",
-      "transDone": "Andere Sprachen übersetzt"
+      "transDone": "Andere Sprachen übersetzt",
+      "savedOk": "Serie gespeichert",
+      "deletedOk": "Serie gelöscht",
+      "needNameFirst": "Erst Inhalte in der Quellsprache eintragen, dann übersetzen",
+      "defaultName": "Neue Serie"
     },
     "rule": {
       "count": "{n} Regeln. Regeln legen fest, welcher Produkttyp zu welchem passt, und schlagen Zubehör kategorienübergreifend vor.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Vorschau",
     "mdEdit": "Bearbeiten",
-    "mdText": "Text"
+    "mdText": "Text",
+    "coverUpdated": "Cover aktualisiert",
+    "imagesAdded": "{n} Bilder hinzugefügt",
+    "specsSaved": "Spezifikationen & Zertifizierungen gespeichert",
+    "certsHint": "Nur Zertifizierungen eintragen, die auf Verpackung/Zertifikat stehen. Die öffentliche Seite erklärt bekannte Zeichen.",
+    "backToList": "Zurück zur Produktliste",
+    "previewPublic": "Öffentliche Seite ansehen",
+    "statScans": "Scans",
+    "statPdf": "PDF-Downloads",
+    "statConv": "Download-Konversion",
+    "bySource": "Nach Quelle",
+    "directSource": "Direkt / ohne Kanalcode"
   },
   "show": {
     "sub": "Verkaufsargumente · Highlights · Anwendungen · Detail · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Quelle / CRI",
       "battery": "Batterie",
       "dot": "Allgemein"
-    }
+    },
+    "imgUploaded": "Bild hochgeladen",
+    "transDoneCount": "{ok}/{total} Sprachen übersetzt",
+    "genDone": "KI-Entwurf eingefügt — prüfen, anpassen, speichern",
+    "savedOk": "Inhalt gespeichert",
+    "transSavedOk": "Übersetzung {lang} gespeichert"
   },
   "pdf": {
     "title": "Automatisch aus PDF füllen",
@@ -399,7 +450,19 @@
     "addVideo": "Video hinzufügen",
     "upload": "Hochladen",
     "docTitle": "Dokumenttitel (leer = Dateiname)",
-    "pickUpload": "Datei wählen und hochladen"
+    "pickUpload": "Datei wählen und hochladen",
+    "catNone": "— Ohne Kategorie —",
+    "catStrip": "LED-Streifen",
+    "catChannel": "Alu-Profil",
+    "catPower": "Netzteil",
+    "catConnector": "Verbinder",
+    "catAccessory": "Zubehör",
+    "videoUploaded": "Video hochgeladen",
+    "videoUploadFail": "Video-Upload fehlgeschlagen",
+    "videoNeedFields": "Bitte Titel und Video-URL angeben",
+    "videoAdded": "Video hinzugefügt",
+    "docAdded": "Dokument hinzugefügt",
+    "addFail": "Hinzufügen fehlgeschlagen"
   },
   "more": {
     "qrTitle": "Scannen / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Ende des Datenblatts —"
     }
+  },
+  "err": {
+    "unauthorized": "Nicht autorisiert",
+    "noFactory": "Kein Werk gewählt",
+    "factoryNotFound": "Werk nicht gefunden",
+    "unsupportedLang": "Nicht unterstützte Sprache",
+    "productNotFound": "Produkt nicht gefunden",
+    "notOwned": "Produkt nicht gefunden oder gehört nicht zum aktuellen Werk",
+    "unknownRelation": "Unbekannter Beziehungstyp",
+    "unknownCategory": "Unbekannte Kategorie",
+    "nameRequired": "Produktname darf nicht leer sein",
+    "modelRequired": "Modellnummer darf nicht leer sein",
+    "imageUrlMissing": "Bild-URL fehlt",
+    "imageNotFound": "Bild nicht gefunden",
+    "unknownLocale": "Unbekannte Sprache",
+    "useSourceSave": "Für die Quellsprache bitte „Inhalt speichern“ verwenden",
+    "needImgBrief": "Bitte mindestens ein Bild und eine Beschreibung angeben",
+    "selfLink": "Kann nicht mit sich selbst verknüpft werden",
+    "modelNotFound": "Modell „{model}“ im aktuellen Werk nicht gefunden",
+    "modelExists": "Diese Modellnummer existiert bereits — bearbeiten oder andere verwenden",
+    "selfVariant": "Produkt kann nicht sich selbst hinzugefügt werden",
+    "catNameRequired": "Kategoriename darf nicht leer sein",
+    "catNotFound": "Kategorie nicht gefunden",
+    "moveIntoSelf": "Kann nicht unter sich selbst verschoben werden",
+    "moveIntoChild": "Kann nicht unter eine eigene Unterkategorie verschoben werden",
+    "catHasProducts": "Diese Kategorie (inkl. Unterkategorien) enthält noch {n} Produkte — bitte zuerst verschieben",
+    "seriesNameRequired": "Serienname darf nicht leer sein",
+    "seriesNotFound": "Serie nicht gefunden",
+    "ruleNotFound": "Regel nicht gefunden",
+    "ruleNameRequired": "Regelname darf nicht leer sein",
+    "ruleCatsRequired": "Bitte Haupt- und Zubehörkategorie wählen",
+    "docTitleRequired": "Titel darf nicht leer sein",
+    "paramError": "Ungültige Parameter",
+    "docNotFound": "Dokument nicht gefunden",
+    "fileMissing": "Datei fehlt",
+    "fileTooLarge5m": "Datei größer als 5 MB",
+    "importFail": "Import fehlgeschlagen: {msg}",
+    "parseFail": "Datei-Analyse fehlgeschlagen: {msg}",
+    "jobNotFound": "Auftrag nicht gefunden",
+    "invalidFileUrl": "Ungültige Datei-URL",
+    "pdfReadFail": "PDF konnte nicht gelesen werden — bitte erneut hochladen",
+    "pdfTooLarge": "PDF zu groß (max. 25 MB)",
+    "pdfNoModel": "Keine Modellnummer im PDF erkannt — Produkt manuell anlegen und „Aus PDF füllen“ nutzen",
+    "unknown": "Unbekannter Fehler",
+    "fileTooLarge25m": "Datei zu groß (max. 25 MB)",
+    "unsupportedFileType": "Nicht unterstützter Dateityp",
+    "imageOnly": "Bitte eine Bilddatei hochladen",
+    "videoNotFound": "Video nicht gefunden",
+    "aiNoKey": "OPENROUTER_API_KEY nicht konfiguriert — KI nicht verfügbar",
+    "aiEmpty": "KI lieferte eine leere Antwort",
+    "aiBadJson": "KI-Antwort war kein gültiges JSON"
+  },
+  "gallery": {
+    "zoom": "Bild vergrößern",
+    "viewer": "Bildbetrachter",
+    "close": "Schließen",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "goto": "Bild {n}",
+    "show": "Bild {n} anzeigen"
+  },
+  "notFound": {
+    "title": "Eintrag nicht gefunden",
+    "desc": "Zu diesem Code existiert kein Datenblatt. Prüfen Sie die Referenz auf dem Produktetikett oder kontaktieren Sie den auf der Verpackung angegebenen Hersteller."
   }
 }

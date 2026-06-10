@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Loader2, Plus, X, ImageOff } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useFileDrop } from "@/components/use-file-drop";
 
 /**
@@ -20,6 +21,7 @@ export function FactoryLogoField({
   uploadLabel: string;
   clearLabel: string;
 }) {
+  const t = useTranslations("admin.common");
   const [url, setUrl] = useState(initial ?? "");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,11 +35,11 @@ export function FactoryLogoField({
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       if (!res.ok) {
         const m = await res.json().catch(() => null);
-        throw new Error(m?.error ?? "上传失败");
+        throw new Error(m?.error ?? t("uploadFail"));
       }
       setUrl((await res.json()).url as string);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error ? err.message : t("uploadFail"));
     } finally {
       setUploading(false);
     }

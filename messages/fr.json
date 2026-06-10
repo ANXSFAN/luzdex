@@ -28,7 +28,21 @@
       "noFactory": "Aucune usine sélectionnée. Choisissez-la dans la barre du haut.",
       "ok": "OK",
       "confirmTitle": "Veuillez confirmer",
-      "manage": "Gérer"
+      "manage": "Gérer",
+      "saveFail": "Échec de l'enregistrement",
+      "uploadFail": "Échec du téléversement",
+      "opFail": "Échec de l'opération",
+      "delFail": "Échec de la suppression",
+      "createFail": "Échec de la création",
+      "transFail": "Échec de la traduction",
+      "aiFail": "Échec de la génération IA",
+      "deleted": "Supprimé",
+      "uploadedDraft": "Téléversé — pensez à enregistrer",
+      "select": "Sélectionner",
+      "uiLang": "Langue de l'interface admin",
+      "langSwitchFail": "Échec du changement de langue",
+      "curFactory": "Usine actuelle",
+      "factorySwitchFail": "Échec du changement d'usine"
     },
     "page": {
       "dashboard": "Aperçu",
@@ -41,7 +55,19 @@
       "factories": "Usines",
       "categoriesSub": "Arbre de catégories multiniveau · noms en 9 langues",
       "seriesSub": "Nom / présentation de série en 9 langues · visuel",
-      "rulesSub": "Moteur de compatibilité inter-catégories · suggérer / lier les accessoires"
+      "rulesSub": "Moteur de compatibilité inter-catégories · suggérer / lier les accessoires",
+      "importSub": "Importez produits, spécifications, images et liens accessoires depuis un classeur multi-feuilles — aperçu avant écriture",
+      "importHistory": "Historique des imports",
+      "noImports": "Aucun import pour l'instant.",
+      "rowCreated": "Ajoutés {n}",
+      "rowUpdated": "Mis à jour {n}",
+      "rowErrors": "Erreurs {n}",
+      "errorReport": "Rapport d'erreurs",
+      "repRow": "Ligne",
+      "repModel": "Modèle",
+      "repError": "Erreur",
+      "factoryCount": "{n} usines — modifiez marque, contacts et couleur",
+      "factoryEmpty": "Aucune usine pour l'instant"
     },
     "dashboard": {
       "last30": "30 derniers jours",
@@ -115,7 +141,12 @@
       "replaceImg": "Remplacer image",
       "transDone": "Autres langues traduites",
       "emptyName": "Le nom de catégorie (langue source) est obligatoire",
-      "addSub": "Ajouter sous-catégorie"
+      "addSub": "Ajouter sous-catégorie",
+      "savedOk": "Catégorie enregistrée",
+      "deletedOk": "Catégorie supprimée",
+      "needNameFirst": "Renseignez d'abord le nom en langue source avant de traduire",
+      "defaultName": "Nouvelle catégorie",
+      "iconPh": "ex. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Séries",
@@ -135,7 +166,11 @@
       "uploadCover": "Téléverser visuel",
       "replaceCover": "Remplacer visuel",
       "emptyName": "Le nom de série (langue source) est obligatoire",
-      "transDone": "Autres langues traduites"
+      "transDone": "Autres langues traduites",
+      "savedOk": "Série enregistrée",
+      "deletedOk": "Série supprimée",
+      "needNameFirst": "Renseignez d'abord le contenu en langue source avant de traduire",
+      "defaultName": "Nouvelle série"
     },
     "rule": {
       "count": "{n} règles. Les règles définissent quel type de produit va avec quel autre, en suggérant des accessoires entre catégories.",
@@ -229,7 +264,18 @@
     "mdLink": "Lien",
     "mdPreview": "Aperçu",
     "mdEdit": "Modifier",
-    "mdText": "texte"
+    "mdText": "texte",
+    "coverUpdated": "Couverture mise à jour",
+    "imagesAdded": "{n} images ajoutées",
+    "specsSaved": "Spécifications et certifications enregistrées",
+    "certsHint": "N'indiquez que les certifications figurant sur l'emballage ou les certificats. La page publique explique les marques connues.",
+    "backToList": "Retour à la liste des produits",
+    "previewPublic": "Aperçu de la page publique",
+    "statScans": "Scans",
+    "statPdf": "Téléchargements PDF",
+    "statConv": "Conversion téléchargement",
+    "bySource": "Par source",
+    "directSource": "Direct / sans code canal"
   },
   "show": {
     "sub": "Arguments · points forts · applications · détail · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Source / IRC",
       "battery": "Batterie",
       "dot": "Générique"
-    }
+    },
+    "imgUploaded": "Image téléversée",
+    "transDoneCount": "{ok}/{total} langues traduites",
+    "genDone": "Brouillon IA inséré — relisez, ajustez puis enregistrez",
+    "savedOk": "Contenu enregistré",
+    "transSavedOk": "Traduction {lang} enregistrée"
   },
   "pdf": {
     "title": "Remplissage auto depuis PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Ajouter une vidéo",
     "upload": "Téléverser",
     "docTitle": "Titre du document (vide = nom de fichier)",
-    "pickUpload": "Choisir un fichier et téléverser"
+    "pickUpload": "Choisir un fichier et téléverser",
+    "catNone": "— Sans catégorie —",
+    "catStrip": "Ruban LED",
+    "catChannel": "Profilé aluminium",
+    "catPower": "Alimentation",
+    "catConnector": "Connecteur",
+    "catAccessory": "Accessoire",
+    "videoUploaded": "Vidéo téléversée",
+    "videoUploadFail": "Échec du téléversement de la vidéo",
+    "videoNeedFields": "Saisissez un titre et l'URL de la vidéo",
+    "videoAdded": "Vidéo ajoutée",
+    "docAdded": "Document ajouté",
+    "addFail": "Échec de l'ajout"
   },
   "more": {
     "qrTitle": "Scanner / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— Fin de la fiche —"
     }
+  },
+  "err": {
+    "unauthorized": "Non autorisé",
+    "noFactory": "Aucune usine sélectionnée",
+    "factoryNotFound": "Usine introuvable",
+    "unsupportedLang": "Langue non prise en charge",
+    "productNotFound": "Produit introuvable",
+    "notOwned": "Produit introuvable ou n'appartenant pas à l'usine actuelle",
+    "unknownRelation": "Type de relation inconnu",
+    "unknownCategory": "Catégorie inconnue",
+    "nameRequired": "Le nom du produit est requis",
+    "modelRequired": "Le numéro de modèle est requis",
+    "imageUrlMissing": "URL de l'image manquante",
+    "imageNotFound": "Image introuvable",
+    "unknownLocale": "Langue inconnue",
+    "useSourceSave": "Pour la langue source, utilisez « Enregistrer le contenu »",
+    "needImgBrief": "Fournissez au moins une image et une description",
+    "selfLink": "Impossible de lier un produit à lui-même",
+    "modelNotFound": "Modèle « {model} » introuvable dans l'usine actuelle",
+    "modelExists": "Ce numéro de modèle existe déjà — modifiez-le ou utilisez-en un autre",
+    "selfVariant": "Impossible d'ajouter un produit à lui-même",
+    "catNameRequired": "Le nom de la catégorie est requis",
+    "catNotFound": "Catégorie introuvable",
+    "moveIntoSelf": "Impossible de déplacer sous elle-même",
+    "moveIntoChild": "Impossible de déplacer sous l'une de ses sous-catégories",
+    "catHasProducts": "Cette catégorie (sous-catégories incluses) contient encore {n} produits — déplacez-les d'abord",
+    "seriesNameRequired": "Le nom de la série est requis",
+    "seriesNotFound": "Série introuvable",
+    "ruleNotFound": "Règle introuvable",
+    "ruleNameRequired": "Le nom de la règle est requis",
+    "ruleCatsRequired": "Sélectionnez la catégorie principale et celle des accessoires",
+    "docTitleRequired": "Le titre est requis",
+    "paramError": "Paramètres invalides",
+    "docNotFound": "Document introuvable",
+    "fileMissing": "Fichier manquant",
+    "fileTooLarge5m": "Le fichier dépasse 5 Mo",
+    "importFail": "Échec de l'importation : {msg}",
+    "parseFail": "Échec de l'analyse du fichier : {msg}",
+    "jobNotFound": "Tâche introuvable",
+    "invalidFileUrl": "URL de fichier invalide",
+    "pdfReadFail": "Échec de lecture du PDF — téléversez-le à nouveau",
+    "pdfTooLarge": "PDF trop volumineux (25 Mo max)",
+    "pdfNoModel": "Numéro de modèle introuvable dans le PDF — créez le produit manuellement puis utilisez « Remplir depuis le PDF »",
+    "unknown": "Erreur inconnue",
+    "fileTooLarge25m": "Fichier trop volumineux (25 Mo max)",
+    "unsupportedFileType": "Type de fichier non pris en charge",
+    "imageOnly": "Veuillez téléverser un fichier image",
+    "videoNotFound": "Vidéo introuvable",
+    "aiNoKey": "OPENROUTER_API_KEY non configurée — IA indisponible",
+    "aiEmpty": "L'IA a renvoyé une réponse vide",
+    "aiBadJson": "La réponse de l'IA n'est pas un JSON valide"
+  },
+  "gallery": {
+    "zoom": "Agrandir l'image",
+    "viewer": "Visionneuse d'images",
+    "close": "Fermer",
+    "prev": "Précédente",
+    "next": "Suivante",
+    "goto": "Image {n}",
+    "show": "Afficher l'image {n}"
+  },
+  "notFound": {
+    "title": "Fiche introuvable",
+    "desc": "Aucune fiche ne correspond à ce code. Vérifiez la référence sur l'étiquette du produit ou contactez le fabricant indiqué sur l'emballage."
   }
 }

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { buildTemplateWorkbook } from "@/lib/import";
+import { errMsg } from "@/lib/admin-err";
 
 // 下载四 Sheet 导入模板（产品 / 规格 / 图片 / 配件），带示例行。
 export async function GET() {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "未授权" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: await errMsg("unauthorized") }, { status: 401 });
 
   const buf = buildTemplateWorkbook();
   return new NextResponse(new Uint8Array(buf), {

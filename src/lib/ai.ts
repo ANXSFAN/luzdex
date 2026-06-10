@@ -1,5 +1,7 @@
 import "server-only";
 
+import { adminErr } from "@/lib/admin-err";
+
 // OpenRouter（OpenAI 兼容）聊天补全。模型走环境变量，便于按账号可用 slug 调整。
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -32,7 +34,7 @@ export async function openRouterJSONRich(
   opts?: { temperature?: number },
 ): Promise<unknown> {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("未配置 OPENROUTER_API_KEY，无法调用 AI");
+  if (!apiKey) throw await adminErr("aiNoKey");
   const model = process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4.5";
 
   const res = await fetch(OPENROUTER_URL, {
@@ -57,11 +59,11 @@ export async function openRouterJSONRich(
 
   const data = await res.json();
   const content: string | undefined = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("AI 返回为空");
+  if (!content) throw await adminErr("aiEmpty");
   return safeParseJSON(content);
 }
 
-function safeParseJSON(text: string): unknown {
+async function safeParseJSON(text: string): Promise<unknown> {
   try {
     return JSON.parse(text);
   } catch {
@@ -74,6 +76,6 @@ function safeParseJSON(text: string): unknown {
         /* fallthrough */
       }
     }
-    throw new Error("AI 返回不是合法 JSON");
+    throw await adminErr("aiBadJson");
   }
 }

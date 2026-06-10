@@ -6,13 +6,14 @@ import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { uniqueCategorySlug, uniqueSeriesSlug } from "@/lib/catalog";
 import { openRouterJSON, type ChatMessage } from "@/lib/ai";
+import { adminErr } from "@/lib/admin-err";
 import { routing } from "@/i18n/routing";
 
 async function authedFactory() {
   const session = await auth();
-  if (!session) throw new Error("未授权");
+  if (!session) throw await adminErr("unauthorized");
   const factory = await getActiveFactory();
-  if (!factory) throw new Error("未选择工厂");
+  if (!factory) throw await adminErr("noFactory");
   return factory;
 }
 
@@ -27,7 +28,7 @@ const KINDS = ["strip", "channel", "power", "connector", "accessory"];
 
 async function assertCategoryOwned(id: string, factoryId: string) {
   const c = await prisma.category.findUnique({ where: { id } });
-  if (!c || c.factoryId !== factoryId) throw new Error("分类不存在");
+  if (!c || c.factoryId !== factoryId) throw await adminErr("catNotFound");
   return c;
 }
 
@@ -64,7 +65,7 @@ export async function createCategory(input: {
 }) {
   const factory = await authedFactory();
   const name = input.name.trim();
-  if (!name) throw new Error("分类名不能为空");
+  if (!name) throw await adminErr("catNameRequired");
   if (input.parentId) await assertCategoryOwned(input.parentId, factory.id);
   const kind = input.kind && KINDS.includes(input.kind) ? input.kind : null;
   const slug = await uniqueCategorySlug(factory.id, name);
@@ -108,7 +109,7 @@ export async function updateCategory(
   } = {};
   if (input.name !== undefined) {
     const name = input.name.trim();
-    if (!name) throw new Error("分类名不能为空");
+    if (!name) throw await adminErr("catNameRequired");
     data.name = name;
   }
   if (input.nameI18n !== undefined) {
@@ -122,10 +123,10 @@ export async function updateCategory(
   if (input.parentId !== undefined) {
     const pid = input.parentId || null;
     if (pid) {
-      if (pid === id) throw new Error("不能移到自身下");
+      if (pid === id) throw await adminErr("moveIntoSelf");
       await assertCategoryOwned(pid, factory.id);
       const desc = await descendantIds(factory.id, id);
-      if (desc.has(pid)) throw new Error("不能移到自己的子分类下");
+      if (desc.has(pid)) throw await adminErr("moveIntoChild");
     }
     data.parentId = pid;
   }
@@ -153,9 +154,7 @@ export async function deleteCategory(id: string) {
     where: { factoryId: factory.id, categoryId: { in: subtree } },
   });
   if (productCount > 0) {
-    throw new Error(
-      `该分类（含子分类）下还有 ${productCount} 个产品，请先把产品移到别的分类，再删除分类`,
-    );
+    throw await adminErr("catHasProducts", { n: productCount });
   }
   await prisma.category.deleteMany({
     where: { id: { in: subtree }, factoryId: factory.id },
@@ -213,7 +212,7 @@ export async function createSeries(input: {
 }) {
   const factory = await authedFactory();
   const name = input.name.trim();
-  if (!name) throw new Error("系列名不能为空");
+  if (!name) throw await adminErr("seriesNameRequired");
   const slug = await uniqueSeriesSlug(factory.id, name);
   const count = await prisma.series.count({ where: { factoryId: factory.id } });
   const created = await prisma.series.create({
@@ -244,7 +243,7 @@ export async function updateSeries(
 ) {
   const factory = await authedFactory();
   const ser = await prisma.series.findUnique({ where: { id } });
-  if (!ser || ser.factoryId !== factory.id) throw new Error("系列不存在");
+  if (!ser || ser.factoryId !== factory.id) throw await adminErr("seriesNotFound");
 
   const data: {
     name?: string;
@@ -256,7 +255,7 @@ export async function updateSeries(
   } = {};
   if (input.name !== undefined) {
     const name = input.name.trim();
-    if (!name) throw new Error("系列名不能为空");
+    if (!name) throw await adminErr("seriesNameRequired");
     data.name = name;
     await prisma.product.updateMany({
       where: { factoryId: factory.id, seriesId: id },
@@ -288,7 +287,7 @@ export async function updateSeries(
 export async function translateSeries(id: string) {
   const factory = await authedFactory();
   const ser = await prisma.series.findUnique({ where: { id } });
-  if (!ser || ser.factoryId !== factory.id) throw new Error("系列不存在");
+  if (!ser || ser.factoryId !== factory.id) throw await adminErr("seriesNotFound");
   const targets = routing.locales.filter((l) => l !== "es");
   const sys: ChatMessage = {
     role: "system",
@@ -322,7 +321,7 @@ export async function translateSeries(id: string) {
 export async function deleteSeries(id: string) {
   const factory = await authedFactory();
   const ser = await prisma.series.findUnique({ where: { id } });
-  if (!ser || ser.factoryId !== factory.id) throw new Error("系列不存在");
+  if (!ser || ser.factoryId !== factory.id) throw await adminErr("seriesNotFound");
   await prisma.product.updateMany({
     where: { factoryId: factory.id, seriesId: id },
     data: { series: null },
@@ -359,7 +358,7 @@ export async function assignProductsToCategory(
   let kind: string | null = null;
   if (categoryId) {
     const cat = await prisma.category.findUnique({ where: { id: categoryId } });
-    if (!cat || cat.factoryId !== factory.id) throw new Error("分类不存在");
+    if (!cat || cat.factoryId !== factory.id) throw await adminErr("catNotFound");
     kind = cat.kind;
   }
   const r = await prisma.product.updateMany({
@@ -380,7 +379,7 @@ export async function assignProductsToSeries(
   let name: string | null = null;
   if (seriesId) {
     const ser = await prisma.series.findUnique({ where: { id: seriesId } });
-    if (!ser || ser.factoryId !== factory.id) throw new Error("系列不存在");
+    if (!ser || ser.factoryId !== factory.id) throw await adminErr("seriesNotFound");
     name = ser.name;
   }
   const r = await prisma.product.updateMany({

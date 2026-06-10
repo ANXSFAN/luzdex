@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const locale = await getLocale();
+  const t = await getTranslations("notFound");
   return (
     <main className="relative mx-auto flex min-h-screen max-w-[1240px] flex-col px-5 pb-16 pt-20 sm:px-10 sm:pt-28">
       <header className="glass-nav fixed inset-x-0 top-0 z-20 border-b border-[var(--color-rule)]">
@@ -22,9 +25,11 @@ export default function NotFound() {
           <p className="kicker mt-4">
             <span>Record not found</span>
           </p>
-          <p className="mt-1 text-[13px] text-[var(--color-ink-muted)]">
-            未找到记录
-          </p>
+          {locale !== "en" && (
+            <p className="mt-1 text-[13px] text-[var(--color-ink-muted)]">
+              {t("title")}
+            </p>
+          )}
         </div>
 
         <div className="lg:col-span-9">
@@ -44,10 +49,11 @@ export default function NotFound() {
             manufacturer printed on the packaging.
           </p>
 
-          <p className="mt-3 max-w-[36rem] text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
-            该二维码对应的产品资料不存在。请核对产品标签上的编号，
-            或联系外包装上印制的制造商。
-          </p>
+          {locale !== "en" && (
+            <p className="mt-3 max-w-[36rem] text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
+              {t("desc")}
+            </p>
+          )}
 
           <div className="mt-10">
             <Link href="/" className="appbtn">

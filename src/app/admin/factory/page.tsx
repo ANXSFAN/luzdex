@@ -18,14 +18,14 @@ export default async function AdminFactoryListPage() {
       <div>
         <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("factories")}</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-          共 {factories.length} 家工厂 · 编辑品牌、联系方式与主题色
+          {t("factoryCount", { n: factories.length })}
         </p>
       </div>
 
       {factories.length === 0 ? (
         <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-16 text-center">
           <p className="text-sm text-[var(--color-ink-muted)]">
-            暂无工厂记录
+            {t("factoryEmpty")}
           </p>
         </div>
       ) : (

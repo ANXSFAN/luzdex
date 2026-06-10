@@ -52,7 +52,7 @@ async function uploadImage(file: File): Promise<string> {
   const res = await fetch("/api/upload", { method: "POST", body: fd });
   if (!res.ok) {
     const m = await res.json().catch(() => null);
-    throw new Error(m?.error ?? "上传失败");
+    throw new Error(m?.error ?? ""); // 空消息时调用方回退本地化文案
   }
   return (await res.json()).url as string;
 }
@@ -169,9 +169,9 @@ export function CategoryEditor({
     setUploading(true);
     try {
       setImage(await uploadImage(f));
-      toast.success("图片已上传，记得保存");
+      toast.success(t("common.uploadedDraft"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : t("common.uploadFail"));
     } finally {
       setUploading(false);
     }
@@ -189,7 +189,7 @@ export function CategoryEditor({
   });
 
   function save() {
-    if (!name.trim()) return toast.error("分类名（源语言）不能为空");
+    if (!name.trim()) return toast.error(t("category.emptyName"));
     start(async () => {
       try {
         await updateCategory(category.id, {
@@ -199,24 +199,24 @@ export function CategoryEditor({
           icon,
           parentId: parentId || null,
         });
-        toast.success("分类已保存");
+        toast.success(t("category.savedOk"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : t("common.saveFail"));
       }
     });
   }
 
   function translate() {
-    if (!name.trim()) return toast.error("先填源语言分类名再翻译");
+    if (!name.trim()) return toast.error(t("category.needNameFirst"));
     startTr(async () => {
       try {
         const r = await translateCategory(category.id);
         setNameI18n(r);
-        toast.success("已翻译其余语言");
+        toast.success(t("category.transDone"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "翻译失败");
+        toast.error(e instanceof Error ? e.message : t("common.transFail"));
       }
     });
   }
@@ -233,11 +233,11 @@ export function CategoryEditor({
     start(async () => {
       try {
         await deleteCategory(category.id);
-        toast.success("已删除分类");
+        toast.success(t("category.deletedOk"));
         onDeleted();
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "删除失败");
+        toast.error(e instanceof Error ? e.message : t("common.delFail"));
       }
     });
   }
@@ -336,7 +336,7 @@ export function CategoryEditor({
               <input
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
-                placeholder="如 Lightbulb / https://…"
+                placeholder={t("category.iconPh")}
                 className={inputCls}
               />
             </div>
@@ -386,9 +386,9 @@ export function SeriesEditor({
     setUploading(true);
     try {
       setCover(await uploadImage(f));
-      toast.success("封面已上传，记得保存");
+      toast.success(t("common.uploadedDraft"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : t("common.uploadFail"));
     } finally {
       setUploading(false);
     }
@@ -406,7 +406,7 @@ export function SeriesEditor({
   }
 
   function save() {
-    if (!name.trim()) return toast.error("系列名（源语言）不能为空");
+    if (!name.trim()) return toast.error(t("series.emptyName"));
     start(async () => {
       try {
         await updateSeries(series.id, {
@@ -417,25 +417,25 @@ export function SeriesEditor({
           categoryId: categoryId || null,
           coverImage: cover,
         });
-        toast.success("系列已保存");
+        toast.success(t("series.savedOk"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : t("common.saveFail"));
       }
     });
   }
 
   function translate() {
-    if (!name.trim()) return toast.error("先填源语言内容再翻译");
+    if (!name.trim()) return toast.error(t("series.needNameFirst"));
     startTr(async () => {
       try {
         const r = await translateSeries(series.id);
         setNameI18n(r.nameI18n);
         setIntroI18n(r.introI18n);
-        toast.success("已翻译其余语言");
+        toast.success(t("series.transDone"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "翻译失败");
+        toast.error(e instanceof Error ? e.message : t("common.transFail"));
       }
     });
   }
@@ -452,11 +452,11 @@ export function SeriesEditor({
     start(async () => {
       try {
         await deleteSeries(series.id);
-        toast.success("已删除系列");
+        toast.success(t("series.deletedOk"));
         onDeleted();
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "删除失败");
+        toast.error(e instanceof Error ? e.message : t("common.delFail"));
       }
     });
   }

@@ -11,6 +11,7 @@ export default async function AdminSeriesPage() {
   const factory = await getActiveFactory();
   const locale = await getAdminLocale();
   const t = await getTranslations({ locale, namespace: "admin.page" });
+  const tc = await getTranslations({ locale, namespace: "admin.common" });
 
   const [series, categories, counts] = factory
     ? await Promise.all([
@@ -55,7 +56,7 @@ export default async function AdminSeriesPage() {
               {t("seriesSub")}
             </>
           ) : (
-            "未选择工厂，请先在顶栏切换「当前工厂」"
+            tc("noFactory")
           )}
         </p>
       </div>

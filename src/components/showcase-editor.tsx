@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
 import {
   Plus,
@@ -65,19 +65,20 @@ const EMPTY_CONTENT: LocaleContent = {
   dimCutout: "",
 };
 
-const ICONS: { key: string; label: string }[] = [
-  { key: "shield", label: "防护 / 认证" },
-  { key: "droplet", label: "防水" },
-  { key: "zap", label: "功率 / 电气" },
-  { key: "clock", label: "寿命" },
-  { key: "award", label: "质保 / 奖项" },
-  { key: "sun", label: "亮度 / 光效" },
-  { key: "temp", label: "温度" },
-  { key: "ruler", label: "尺寸" },
-  { key: "gauge", label: "性能指标" },
-  { key: "bulb", label: "光源 / 显色" },
-  { key: "battery", label: "电池 / 续航" },
-  { key: "dot", label: "通用" },
+// 图标白名单；显示名走 show.icons.* 的 i18n key
+const ICONS: { key: string }[] = [
+  { key: "shield" },
+  { key: "droplet" },
+  { key: "zap" },
+  { key: "clock" },
+  { key: "award" },
+  { key: "sun" },
+  { key: "temp" },
+  { key: "ruler" },
+  { key: "gauge" },
+  { key: "bulb" },
+  { key: "battery" },
+  { key: "dot" },
 ];
 
 const inputCls =
@@ -95,7 +96,7 @@ async function uploadImageFile(file: File): Promise<string> {
   const res = await fetch("/api/upload", { method: "POST", body: fd });
   if (!res.ok) {
     const msg = await res.json().catch(() => null);
-    throw new Error(msg?.error ?? "上传失败");
+    throw new Error(msg?.error ?? ""); // 空消息时调用方回退本地化文案
   }
   const data = (await res.json()) as { url: string };
   return data.url;
@@ -114,6 +115,8 @@ function ImageUrlField({
   previewMaxH?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const sIcons = useTranslations("show");
+  const tc = useTranslations("admin.common");
   const [busy, setBusy] = useState(false);
 
   async function uploadOne(file: File) {
@@ -121,9 +124,9 @@ function ImageUrlField({
     try {
       const url = await uploadImageFile(file);
       onChange(url);
-      toast.success("图片已上传");
+      toast.success(sIcons("imgUploaded"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : tc("uploadFail"));
     } finally {
       setBusy(false);
     }
@@ -167,7 +170,7 @@ function ImageUrlField({
           ) : (
             <Upload className="h-3.5 w-3.5" />
           )}
-          上传
+          {tc("upload")}
         </button>
         <input ref={ref} type="file" accept="image/*" hidden onChange={pick} />
       </div>
@@ -251,6 +254,8 @@ export function ShowcaseEditor({
   const isSource = editingLocale === baseLocale;
   const tr = useTranslations("prod");
   const s = useTranslations("show");
+  const tc = useTranslations("admin.common");
+  const uiLocale = useLocale();
   const [pending, start] = useTransition();
   const [genPending, startGen] = useTransition();
   const [transPending, startTrans] = useTransition();
@@ -272,7 +277,7 @@ export function ShowcaseEditor({
         setAiImages((list) => [...list, url]);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error && err.message ? err.message : tc("uploadFail"));
     } finally {
       setAiUploading(false);
     }
@@ -301,7 +306,7 @@ export function ShowcaseEditor({
         );
         toast.success(s("aiLayoutDone"));
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "AI 生成失败");
+        toast.error(e instanceof Error ? e.message : tc("aiFail"));
       }
     });
   }
@@ -350,9 +355,9 @@ export function ShowcaseEditor({
     startTrans(async () => {
       try {
         const r = await translateShowcase(productId);
-        toast.success(`已翻译 ${r.ok}/${r.total} 种语言`);
+        toast.success(s("transDoneCount", { ok: r.ok, total: r.total }));
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "翻译失败");
+        toast.error(e instanceof Error ? e.message : tc("transFail"));
       }
     });
   }
@@ -420,9 +425,9 @@ export function ShowcaseEditor({
               : b
           )
         );
-        toast.success("AI 草稿已填入，请过目修改后保存");
+        toast.success(s("genDone"));
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "AI 生成失败");
+        toast.error(e instanceof Error ? e.message : tc("aiFail"));
       }
     });
   }
@@ -549,7 +554,7 @@ export function ShowcaseEditor({
             dimensions: cleanDim,
             sourceLocale,
           });
-          toast.success("展示内容已保存");
+          toast.success(s("savedOk"));
         } else {
           await saveTranslation({
             productId,
@@ -566,11 +571,15 @@ export function ShowcaseEditor({
             dimCutout: dimCutout.trim(),
           });
           toast.success(
-            `已保存 ${LOCALE_LABELS[editingLocale as keyof typeof LOCALE_LABELS] ?? editingLocale} 译文`
+            s("transSavedOk", {
+              lang:
+                LOCALE_LABELS[editingLocale as keyof typeof LOCALE_LABELS] ??
+                editingLocale,
+            })
           );
         }
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : tc("saveFail"));
       }
     });
   }
@@ -749,7 +758,7 @@ export function ShowcaseEditor({
           <option value="">{s("unset")}</option>
           {LUMINAIRE_TYPES.map((t) => (
             <option key={t.key} value={t.key}>
-              {t.zh}
+              {uiLocale === "zh" ? t.zh : t.en}
             </option>
           ))}
           {luminaireType &&
@@ -822,7 +831,7 @@ export function ShowcaseEditor({
               <button
                 type="button"
                 onClick={() => removeHighlight(i)}
-                aria-label="删除"
+                aria-label={tc("delete")}
                 className="shrink-0 p-2 text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
@@ -893,7 +902,7 @@ export function ShowcaseEditor({
               <button
                 type="button"
                 onClick={() => removeApplication(i)}
-                aria-label="删除"
+                aria-label={tc("delete")}
                 className="shrink-0 p-2 text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
@@ -968,7 +977,7 @@ export function ShowcaseEditor({
                     onClick={() =>
                       setAiImages((list) => list.filter((_, j) => j !== i))
                     }
-                    aria-label="删除"
+                    aria-label={tc("delete")}
                     className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-[var(--color-ink)] text-[var(--color-surface)] group-hover:flex"
                   >
                     <Trash2 className="h-3 w-3" />
@@ -1071,7 +1080,7 @@ export function ShowcaseEditor({
                   type="button"
                   onClick={() => moveBlock(i, -1)}
                   disabled={i === 0}
-                  aria-label="上移"
+                  aria-label={s("moveUp")}
                   className="p-1 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                 >
                   <ArrowUp className="h-3.5 w-3.5" />
@@ -1080,7 +1089,7 @@ export function ShowcaseEditor({
                   type="button"
                   onClick={() => moveBlock(i, 1)}
                   disabled={i === blocks.length - 1}
-                  aria-label="下移"
+                  aria-label={s("moveDown")}
                   className="p-1 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                 >
                   <ArrowDown className="h-3.5 w-3.5" />
@@ -1088,7 +1097,7 @@ export function ShowcaseEditor({
                 <button
                   type="button"
                   onClick={() => removeBlock(i)}
-                  aria-label="删除"
+                  aria-label={tc("delete")}
                   className="p-1 text-[var(--color-ink-faint)] transition hover:text-red-500"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -1134,7 +1143,7 @@ export function ShowcaseEditor({
               <button
                 type="button"
                 onClick={() => removeBox(i)}
-                aria-label="删除"
+                aria-label={tc("delete")}
                 className="shrink-0 p-2 text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
@@ -1219,7 +1228,7 @@ export function ShowcaseEditor({
               <button
                 type="button"
                 onClick={() => removeStep(i)}
-                aria-label="删除"
+                aria-label={tc("delete")}
                 className="shrink-0 p-2 text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
@@ -1270,7 +1279,7 @@ export function ShowcaseEditor({
               <button
                 type="button"
                 onClick={() => removeFaq(i)}
-                aria-label="删除"
+                aria-label={tc("delete")}
                 className="shrink-0 p-2 text-[var(--color-ink-faint)] transition hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />

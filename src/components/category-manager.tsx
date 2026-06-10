@@ -70,13 +70,13 @@ export function CategoryManager({
   function createCat(parentId?: string) {
     start(async () => {
       try {
-        const id = await createCategory({ name: "新分类", parentId });
+        const id = await createCategory({ name: t("category.defaultName"), parentId });
         if (parentId) setExpanded((p) => new Set(p).add(parentId));
         setSelId(id);
         toast.success(t("category.draftOk"));
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "新建失败");
+        toast.error(e instanceof Error ? e.message : t("common.createFail"));
       }
     });
   }

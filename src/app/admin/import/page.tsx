@@ -15,7 +15,9 @@ function fmtTime(d: Date) {
 
 export default async function AdminImportPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const adminLocale = await getAdminLocale();
+  const t = await getTranslations({ locale: adminLocale, namespace: "admin.page" });
+  const tc = await getTranslations({ locale: adminLocale, namespace: "admin.common" });
   const [missingShowcase, jobs] = factory
     ? await Promise.all([
         countMissingShowcase(),
@@ -32,7 +34,7 @@ export default async function AdminImportPage() {
       <div>
         <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("import")}</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-          多 Sheet 工作簿一次导入产品、规格、图片与配件关系 · 先预览再写库
+          {t("importSub")}
         </p>
       </div>
 
@@ -44,11 +46,11 @@ export default async function AdminImportPage() {
           {/* 导入历史 */}
           <section className="mt-10">
             <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-              导入历史
+              {t("importHistory")}
             </h2>
             {jobs.length === 0 ? (
               <p className="mt-3 text-sm text-[var(--color-ink-faint)]">
-                还没有导入记录。
+                {t("noImports")}
               </p>
             ) : (
               <ul className="mt-3 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
@@ -64,10 +66,12 @@ export default async function AdminImportPage() {
                           {j.fileName}
                         </p>
                         <p className="font-mono text-[11px] text-[var(--color-ink-muted)]">
-                          {fmtTime(j.createdAt)} · 新增 {j.createdRows} · 更新{" "}
-                          {j.updatedRows}
+                          {fmtTime(j.createdAt)} · {t("rowCreated", { n: j.createdRows })} ·{" "}
+                          {t("rowUpdated", { n: j.updatedRows })}
                           {j.errorRows > 0 && (
-                            <span className="text-amber-700"> · 错误 {j.errorRows}</span>
+                            <span className="text-amber-700">
+                              {" "}· {t("rowErrors", { n: j.errorRows })}
+                            </span>
                           )}
                         </p>
                       </div>
@@ -78,7 +82,7 @@ export default async function AdminImportPage() {
                         className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-rule)] px-3 py-1.5 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
                       >
                         <Download className="h-3.5 w-3.5" />
-                        错误报告
+                        {t("errorReport")}
                       </a>
                     )}
                   </li>
@@ -90,7 +94,7 @@ export default async function AdminImportPage() {
       ) : (
         <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-16 text-center">
           <p className="text-sm text-[var(--color-ink-muted)]">
-            未选择工厂，请先在顶栏切换「当前工厂」
+            {tc("noFactory")}
           </p>
         </div>
       )}

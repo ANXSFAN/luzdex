@@ -4,11 +4,13 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Globe } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { LOCALE_LABELS, LOCALE_ORDER, type AppLocale } from "@/i18n/routing";
 import { setAdminLocale } from "@/app/admin/actions";
 
 export function AdminLanguageSwitcher({ current }: { current: AppLocale }) {
   const router = useRouter();
+  const t = useTranslations("admin.common");
   const [pending, start] = useTransition();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -18,7 +20,7 @@ export function AdminLanguageSwitcher({ current }: { current: AppLocale }) {
         await setAdminLocale(locale);
         router.refresh();
       } catch {
-        toast.error("切换语言失败");
+        toast.error(t("langSwitchFail"));
       }
     });
   }
@@ -30,7 +32,7 @@ export function AdminLanguageSwitcher({ current }: { current: AppLocale }) {
         value={current}
         onChange={onChange}
         disabled={pending}
-        aria-label="后台界面语言"
+        aria-label={t("uiLang")}
         className="w-full min-w-0 appearance-none truncate rounded-lg border border-[var(--color-rule)] bg-transparent py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50"
       >
         {LOCALE_ORDER.map((l) => (

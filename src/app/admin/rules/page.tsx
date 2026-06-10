@@ -12,6 +12,8 @@ export default async function AdminRulesPage() {
   const factory = await getActiveFactory();
   const locale = await getAdminLocale();
   const t = await getTranslations({ locale, namespace: "admin.page" });
+  const tc = await getTranslations({ locale, namespace: "admin.common" });
+  const tr = await getTranslations({ locale, namespace: "admin.rule" });
 
   const [categories, rules] = factory
     ? await Promise.all([
@@ -42,7 +44,7 @@ export default async function AdminRulesPage() {
               {t("rulesSub")}
             </>
           ) : (
-            "未选择工厂，请先在顶栏切换「当前工厂」"
+            tc("noFactory")
           )}
         </p>
       </div>
@@ -50,7 +52,7 @@ export default async function AdminRulesPage() {
       {factory &&
         (categories.length < 2 ? (
           <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-14 text-center text-sm text-[var(--color-ink-muted)]">
-            规则需要至少两个分类（主品分类 + 配件分类）。请先到「分类」建好分类树。
+            {tr("needTwoCats")}
           </div>
         ) : (
           <RuleManager

@@ -28,7 +28,21 @@
       "noFactory": "No factory selected. Pick the current factory in the top bar.",
       "ok": "OK",
       "confirmTitle": "Please confirm",
-      "manage": "Manage"
+      "manage": "Manage",
+      "saveFail": "Save failed",
+      "uploadFail": "Upload failed",
+      "opFail": "Operation failed",
+      "delFail": "Delete failed",
+      "createFail": "Create failed",
+      "transFail": "Translation failed",
+      "aiFail": "AI generation failed",
+      "deleted": "Deleted",
+      "uploadedDraft": "Uploaded — remember to save",
+      "select": "Select",
+      "uiLang": "Admin UI language",
+      "langSwitchFail": "Failed to switch language",
+      "curFactory": "Current factory",
+      "factorySwitchFail": "Failed to switch factory"
     },
     "page": {
       "dashboard": "Overview",
@@ -41,7 +55,19 @@
       "factories": "Factories",
       "categoriesSub": "Multi-level category tree · names in 9 languages",
       "seriesSub": "Series name / intro in 9 languages · cover image",
-      "rulesSub": "Cross-category compatibility engine · auto suggest / link accessories"
+      "rulesSub": "Cross-category compatibility engine · auto suggest / link accessories",
+      "importSub": "Import products, specs, images and accessory links from a multi-sheet workbook — preview before committing",
+      "importHistory": "Import history",
+      "noImports": "No imports yet.",
+      "rowCreated": "Added {n}",
+      "rowUpdated": "Updated {n}",
+      "rowErrors": "Errors {n}",
+      "errorReport": "Error report",
+      "repRow": "Row",
+      "repModel": "Model",
+      "repError": "Error",
+      "factoryCount": "{n} factories — edit brand, contacts and theme color",
+      "factoryEmpty": "No factories yet"
     },
     "dashboard": {
       "last30": "Last 30 days",
@@ -115,7 +141,12 @@
       "replaceImg": "Replace image",
       "transDone": "Translated the other languages",
       "emptyName": "Category name (source language) is required",
-      "addSub": "Add subcategory"
+      "addSub": "Add subcategory",
+      "savedOk": "Category saved",
+      "deletedOk": "Category deleted",
+      "needNameFirst": "Fill in the source-language name before translating",
+      "defaultName": "New category",
+      "iconPh": "e.g. Lightbulb / https://…"
     },
     "series": {
       "listLabel": "Series",
@@ -135,7 +166,11 @@
       "uploadCover": "Upload cover",
       "replaceCover": "Replace cover",
       "emptyName": "Series name (source language) is required",
-      "transDone": "Translated the other languages"
+      "transDone": "Translated the other languages",
+      "savedOk": "Series saved",
+      "deletedOk": "Series deleted",
+      "needNameFirst": "Fill in the source-language content before translating",
+      "defaultName": "New series"
     },
     "rule": {
       "count": "{n} rules. Rules define which product type fits which, auto-suggesting accessories across categories.",
@@ -229,7 +264,18 @@
     "mdLink": "Link",
     "mdPreview": "Preview",
     "mdEdit": "Edit",
-    "mdText": "text"
+    "mdText": "text",
+    "coverUpdated": "Cover updated",
+    "imagesAdded": "Added {n} images",
+    "specsSaved": "Specs & certifications saved",
+    "certsHint": "Only list certifications that actually appear on the packaging or certificates. The public page explains known marks.",
+    "backToList": "Back to product list",
+    "previewPublic": "Preview public page",
+    "statScans": "Scans",
+    "statPdf": "PDF downloads",
+    "statConv": "Download conversion",
+    "bySource": "By source",
+    "directSource": "Direct / no channel code"
   },
   "show": {
     "sub": "Selling points · highlights · applications · long detail · FAQ",
@@ -332,7 +378,12 @@
       "bulb": "Source / CRI",
       "battery": "Battery",
       "dot": "Generic"
-    }
+    },
+    "imgUploaded": "Image uploaded",
+    "transDoneCount": "Translated {ok}/{total} languages",
+    "genDone": "AI draft filled in — review, tweak, then save",
+    "savedOk": "Showcase content saved",
+    "transSavedOk": "{lang} translation saved"
   },
   "pdf": {
     "title": "Auto-fill from PDF",
@@ -399,7 +450,19 @@
     "addVideo": "Add video",
     "upload": "Upload",
     "docTitle": "Document title (blank = filename)",
-    "pickUpload": "Choose file and upload"
+    "pickUpload": "Choose file and upload",
+    "catNone": "— Uncategorized —",
+    "catStrip": "LED strip",
+    "catChannel": "Aluminum channel",
+    "catPower": "Power supply",
+    "catConnector": "Connector",
+    "catAccessory": "Accessory",
+    "videoUploaded": "Video uploaded",
+    "videoUploadFail": "Video upload failed",
+    "videoNeedFields": "Enter a title and a video URL",
+    "videoAdded": "Video added",
+    "docAdded": "Document added",
+    "addFail": "Add failed"
   },
   "more": {
     "qrTitle": "Scan / QR",
@@ -623,5 +686,69 @@
       "page": "Page 01 / 01",
       "end": "— End of datasheet —"
     }
+  },
+  "err": {
+    "unauthorized": "Unauthorized",
+    "noFactory": "No factory selected",
+    "factoryNotFound": "Factory not found",
+    "unsupportedLang": "Unsupported language",
+    "productNotFound": "Product not found",
+    "notOwned": "Product not found or not owned by the current factory",
+    "unknownRelation": "Unknown relation type",
+    "unknownCategory": "Unknown category",
+    "nameRequired": "Product name is required",
+    "modelRequired": "Model number is required",
+    "imageUrlMissing": "Missing image URL",
+    "imageNotFound": "Image not found",
+    "unknownLocale": "Unknown language",
+    "useSourceSave": "For the source language use “Save showcase content”",
+    "needImgBrief": "Provide at least one image and a brief",
+    "selfLink": "Cannot link a product to itself",
+    "modelNotFound": "Model “{model}” not found in the current factory",
+    "modelExists": "This model number already exists — edit it or use another",
+    "selfVariant": "Cannot add a product to itself",
+    "catNameRequired": "Category name is required",
+    "catNotFound": "Category not found",
+    "moveIntoSelf": "Cannot move a category under itself",
+    "moveIntoChild": "Cannot move a category under one of its children",
+    "catHasProducts": "This category (incl. subcategories) still has {n} products — move them elsewhere first",
+    "seriesNameRequired": "Series name is required",
+    "seriesNotFound": "Series not found",
+    "ruleNotFound": "Rule not found",
+    "ruleNameRequired": "Rule name is required",
+    "ruleCatsRequired": "Select both the main and accessory categories",
+    "docTitleRequired": "Title is required",
+    "paramError": "Invalid parameters",
+    "docNotFound": "Document not found",
+    "fileMissing": "File missing",
+    "fileTooLarge5m": "File exceeds 5 MB",
+    "importFail": "Import failed: {msg}",
+    "parseFail": "File parsing failed: {msg}",
+    "jobNotFound": "Job not found",
+    "invalidFileUrl": "Invalid file URL",
+    "pdfReadFail": "Failed to read the PDF — upload it again",
+    "pdfTooLarge": "PDF too large (25 MB max)",
+    "pdfNoModel": "Could not detect a model number in the PDF — create the product manually, then use “Fill from PDF”",
+    "unknown": "Unknown error",
+    "fileTooLarge25m": "File too large (25 MB max)",
+    "unsupportedFileType": "Unsupported file type",
+    "imageOnly": "Please upload an image file",
+    "videoNotFound": "Video not found",
+    "aiNoKey": "OPENROUTER_API_KEY is not configured — AI is unavailable",
+    "aiEmpty": "AI returned an empty response",
+    "aiBadJson": "AI response was not valid JSON"
+  },
+  "gallery": {
+    "zoom": "Zoom image",
+    "viewer": "Image viewer",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "goto": "Image {n}",
+    "show": "Show image {n}"
+  },
+  "notFound": {
+    "title": "Record not found",
+    "desc": "No datasheet exists for this code. Verify the reference on the product label, or contact the manufacturer printed on the packaging."
   }
 }

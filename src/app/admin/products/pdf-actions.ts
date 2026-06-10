@@ -19,6 +19,7 @@ import {
   type ProductAttributes,
 } from "@/lib/products";
 import { openRouterJSONRich, type ContentPart } from "@/lib/ai";
+import { adminErr } from "@/lib/admin-err";
 import { isR2Url, deleteFromR2 } from "@/lib/r2";
 import { routing, normalizeLocale } from "@/i18n/routing";
 import { LUMINAIRE_TYPES } from "@/lib/luminaire";
@@ -35,9 +36,9 @@ import { createProduct } from "./actions";
 /** 登录 + 选中工厂校验（与 actions.ts 同约定）。 */
 async function authedFactory() {
   const session = await auth();
-  if (!session) throw new Error("未授权");
+  if (!session) throw await adminErr("unauthorized");
   const factory = await getActiveFactory();
-  if (!factory) throw new Error("未选择工厂");
+  if (!factory) throw await adminErr("noFactory");
   return factory;
 }
 
@@ -47,7 +48,7 @@ async function assertOwned(productId: string, factoryId: string) {
     select: { factoryId: true },
   });
   if (!p || p.factoryId !== factoryId) {
-    throw new Error("产品不存在或不属于当前工厂");
+    throw await adminErr("notOwned");
   }
 }
 
@@ -175,11 +176,11 @@ const ALL_FIELDS: PdfDraftField[] = [
 
 /** 从 R2 公开 URL 回读 PDF 字节（限本桶，挡 SSRF；读完即删临时文件）。 */
 async function fetchPdfBytes(pdfUrl: string): Promise<Buffer> {
-  if (!isR2Url(pdfUrl)) throw new Error("无效的文件地址");
+  if (!isR2Url(pdfUrl)) throw await adminErr("invalidFileUrl");
   const res = await fetch(pdfUrl);
-  if (!res.ok) throw new Error("读取 PDF 失败，请重新上传");
+  if (!res.ok) throw await adminErr("pdfReadFail");
   const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length > 25 * 1024 * 1024) throw new Error("PDF 过大（上限 25MB）");
+  if (buf.length > 25 * 1024 * 1024) throw await adminErr("pdfTooLarge");
   // 临时文件用完即清，避免 R2 留孤儿（失败不影响主流程）
   await deleteFromR2(pdfUrl).catch(() => {});
   return buf;
@@ -334,7 +335,7 @@ export async function createProductFromPdf(input: {
   const draft = await extractDraft(bytes, input.fileName ?? "datasheet.pdf");
 
   if (!draft.modelNumber) {
-    throw new Error("未能从 PDF 识别出型号，请手动新建后再用「从 PDF 填充」");
+    throw await adminErr("pdfNoModel");
   }
   const id = await createProduct({
     name: draft.name ?? draft.modelNumber,

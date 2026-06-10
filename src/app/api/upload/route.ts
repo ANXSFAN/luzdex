@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { auth } from "@/lib/auth";
 import { uploadToR2 } from "@/lib/r2";
+import { errMsg } from "@/lib/admin-err";
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB 上限，挡住误传超大文件刷爆存储
 
@@ -20,16 +21,17 @@ const BLOCKED_EXT = new Set([
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "未授权" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: await errMsg("unauthorized") }, { status: 401 });
 
   const formData = await request.formData();
   const file = formData.get("file");
   const kind = formData.get("kind"); // "image" 时强制要求图片类型
   if (!(file instanceof File)) {
-    return NextResponse.json({ error: "缺少文件" }, { status: 400 });
+    return NextResponse.json({ error: await errMsg("fileMissing") }, { status: 400 });
   }
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "文件过大（上限 25MB）" }, { status: 413 });
+    return NextResponse.json({ error: await errMsg("fileTooLarge25m") }, { status: 413 });
   }
 
   const type = file.type || "application/octet-stream";
@@ -37,10 +39,10 @@ export async function POST(request: NextRequest) {
   const ext = /^[a-z0-9]+$/i.test(rawExt) ? rawExt.toLowerCase() : "bin";
 
   if (BLOCKED_TYPES.has(type) || BLOCKED_EXT.has(ext)) {
-    return NextResponse.json({ error: "不支持的文件类型" }, { status: 415 });
+    return NextResponse.json({ error: await errMsg("unsupportedFileType") }, { status: 415 });
   }
   if (kind === "image" && !type.startsWith("image/")) {
-    return NextResponse.json({ error: "请上传图片文件" }, { status: 415 });
+    return NextResponse.json({ error: await errMsg("imageOnly") }, { status: 415 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
