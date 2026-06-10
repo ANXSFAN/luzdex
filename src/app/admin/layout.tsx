@@ -10,6 +10,7 @@ import { FactorySwitcher } from "@/components/factory-switcher";
 import { AdminNav } from "@/components/admin-nav";
 import { AdminLanguageSwitcher } from "@/components/admin-language-switcher";
 import { LuzHubMark } from "@/components/luzhub-mark";
+import { ConfirmHost } from "@/components/confirm-dialog";
 
 export default async function AdminLayout({
   children,
@@ -66,6 +67,7 @@ export default async function AdminLayout({
           <div className="px-5 py-8 sm:px-8 lg:px-10">{children}</div>
         </main>
       </div>
+      <ConfirmHost />
     </NextIntlClientProvider>
   );
 }

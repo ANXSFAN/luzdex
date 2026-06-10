@@ -382,12 +382,13 @@ export async function translateShowcase(productId: string) {
 
 /**
  * 保存某一种语言的人工审校译文（语言模式编辑器）。只覆盖编辑器管理的字段，
- * 保留该语言已有的 name / specs 译文；尺寸沿用源 w/h/d/unit + 译文 cutout。
+ * 保留该语言已有的 specs 译文；尺寸沿用源 w/h/d/unit + 译文 cutout。
  * 不动 translationStamp（手改译文不影响"源是否变更"的判断）。
  */
 export async function saveTranslation(input: {
   productId: string;
   locale: string;
+  name?: string;
   tagline: string;
   description: string;
   highlights: unknown;
@@ -415,7 +416,10 @@ export async function saveTranslation(input: {
   const all = parseContentI18n(product.contentI18n);
   const prev = all[loc] ?? {};
   const built: LocalizedContent = {};
-  if (prev.name) built.name = prev.name; // 保留 AI 译名（编辑器不改名）
+  // 译名：编辑器传了就用（清空 = 前台回退源名）；老调用方没传则保留原值
+  if (input.name !== undefined) {
+    if (input.name.trim()) built.name = input.name.trim();
+  } else if (prev.name) built.name = prev.name;
   if (prev.specs?.length) built.specs = prev.specs; // 保留规格译文
   if (input.description.trim()) built.description = input.description.trim();
   if (input.tagline.trim()) built.tagline = input.tagline.trim();
@@ -625,6 +629,97 @@ export async function generateShowcaseDraft(productId: string) {
     dimensions: parseDimensionsJson(raw.dimensions),
     detailBlocks: parseDetailBlocks(raw.detailBlocks),
   };
+}
+
+/**
+ * AI 图文排版：客户上传若干图片 + 一段描述 → 生成图文穿插的长详情块序列。
+ * **只生成、不入库**——返回给编辑器，客户过目后保存。图片必须来自客户提供的
+ * URL 列表（AI 禁止编 URL；越界的 image 块服务端丢弃，漏排的图补到末尾）。
+ */
+export async function generateDetailLayout(input: {
+  productId: string;
+  images: string[];
+  brief: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+
+  const images = input.images.map((u) => u.trim()).filter(Boolean).slice(0, 12);
+  const brief = input.brief.trim();
+  if (!images.length || !brief) throw new Error("请提供至少一张图片和一段描述");
+
+  const product = await prisma.product.findUnique({
+    where: { id: input.productId },
+    select: { name: true, modelNumber: true, luminaireType: true, tagline: true },
+  });
+  if (!product) throw new Error("产品不存在");
+
+  // 图片用编号指代，AI 输出 {kind:"image", index:N}，服务端换回真实 URL——
+  // 既省 token 也从结构上杜绝编造 URL。
+  const system: ChatMessage = {
+    role: "system",
+    content:
+      "你是照明产品展示页的图文详情排版师。本站是【纯展示种草站】：面向终端顾客，顾客看完回原零售店购买。" +
+      "必须严格遵守：" +
+      "1) 文案只基于客户描述与产品事实组织语言，禁止编造数字参数、认证、尺寸、价格。" +
+      "2) 禁止联系方式、价格、厂家/制造商导向及采购术语（OEM、ODM、MOQ、批发、报价）。" +
+      "3) 输出语言与客户描述的语言一致。" +
+      "4) 只输出一个 JSON 对象，不要额外解释。",
+  };
+
+  const user: ChatMessage = {
+    role: "user",
+    content:
+      `产品：${product.name}（型号 ${product.modelNumber}）` +
+      (product.luminaireType
+        ? `，类型 ${luminaireLabel(product.luminaireType, "zh")}`
+        : "") +
+      (product.tagline ? `，卖点 ${product.tagline}` : "") +
+      `\n\n客户描述（排版的内容依据）：\n${brief}\n\n` +
+      `客户提供了 ${images.length} 张图片，编号 1 到 ${images.length}（顺序即客户上传顺序，通常 1 为主图）。\n\n` +
+      `请生成京东式自上而下的图文长详情，输出 JSON：\n` +
+      `{"blocks":[{"kind":"heading","text":"小标题"},{"kind":"text","text":"段落"},{"kind":"image","index":1,"caption":"图注(可选)"}]}\n` +
+      `要求：标题/段落/图片交替穿插、节奏舒服；每张图片恰好使用一次、放在与其内容最相关的文字附近；` +
+      `共 ${Math.min(6 + images.length * 2, 18)} 块左右；段落每段 2-3 句、面向终端顾客自然种草。`,
+  };
+
+  const raw = (await openRouterJSON([system, user])) as Record<string, unknown>;
+  const list = Array.isArray(raw.blocks) ? raw.blocks : [];
+
+  const used = new Set<number>();
+  const blocks: ({ kind: "heading" | "text"; text: string } | {
+    kind: "image";
+    url: string;
+    caption?: string;
+  })[] = [];
+  for (const b of list) {
+    if (!b || typeof b !== "object") continue;
+    const r = b as Record<string, unknown>;
+    if (r.kind === "heading" || r.kind === "text") {
+      if (typeof r.text === "string" && r.text.trim()) {
+        blocks.push({ kind: r.kind, text: r.text.trim() });
+      }
+    } else if (r.kind === "image") {
+      const i = Number(r.index);
+      if (Number.isInteger(i) && i >= 1 && i <= images.length && !used.has(i)) {
+        used.add(i);
+        blocks.push({
+          kind: "image",
+          url: images[i - 1],
+          caption:
+            typeof r.caption === "string" && r.caption.trim()
+              ? r.caption.trim()
+              : undefined,
+        });
+      }
+    }
+  }
+  // AI 漏排的图片补到末尾，保证客户传的图一张不丢
+  for (let i = 1; i <= images.length; i++) {
+    if (!used.has(i)) blocks.push({ kind: "image", url: images[i - 1] });
+  }
+
+  return parseDetailBlocks(blocks);
 }
 
 /** 采纳一条自动匹配建议 → 写入权威 ProductLink。 */

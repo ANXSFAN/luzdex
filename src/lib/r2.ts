@@ -38,6 +38,11 @@ export async function uploadToR2(
   return `${PUBLIC_URL}/${key}`;
 }
 
+/** URL 是否在本桶公开域名下——服务端按 URL 回读文件前的 SSRF 防线。 */
+export function isR2Url(url: string): boolean {
+  return !!PUBLIC_URL && url.startsWith(PUBLIC_URL + "/");
+}
+
 /** Delete an object given its public URL. No-op for URLs outside our bucket. */
 export async function deleteFromR2(url: string): Promise<void> {
   if (!PUBLIC_URL || !url.startsWith(PUBLIC_URL)) return;

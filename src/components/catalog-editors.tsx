@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { LOCALE_LABELS, LOCALE_ORDER, type AppLocale } from "@/i18n/routing";
 import { useFileDrop } from "@/components/use-file-drop";
+import { confirmDialog } from "@/components/confirm-dialog";
 import { MarkdownInput } from "@/components/markdown-input";
 import {
   updateCategory,
@@ -220,8 +221,15 @@ export function CategoryEditor({
     });
   }
 
-  function del() {
-    if (!window.confirm(`删除分类「${name}」？`)) return;
+  async function del() {
+    if (
+      !(await confirmDialog({
+        message: t("category.deleteConfirm", { name }),
+        confirmText: t("category.deleteCat"),
+        danger: true,
+      }))
+    )
+      return;
     start(async () => {
       try {
         await deleteCategory(category.id);
@@ -432,8 +440,15 @@ export function SeriesEditor({
     });
   }
 
-  function del() {
-    if (!window.confirm(`删除系列「${name}」？产品会变为未归系列。`)) return;
+  async function del() {
+    if (
+      !(await confirmDialog({
+        message: t("series.deleteConfirm", { name }),
+        confirmText: t("common.delete"),
+        danger: true,
+      }))
+    )
+      return;
     start(async () => {
       try {
         await deleteSeries(series.id);

@@ -29,6 +29,7 @@ import { DeleteProductButton } from "@/components/delete-product-button";
 import { BasicInfoEditor } from "@/components/basic-info-editor";
 import { VariantManager } from "@/components/variant-manager";
 import { DuplicateProductButton } from "@/components/duplicate-product-button";
+import { PdfIntakeCard } from "@/components/pdf-intake-card";
 
 export const dynamic = "force-dynamic";
 
@@ -249,6 +250,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     Object.entries(ci).map(([loc, c]) => [
       loc,
       {
+        name: c.name ?? "",
         tagline: c.tagline ?? "",
         description: c.description ?? "",
         highlights: (c.highlights ?? []).map((h) => ({
@@ -429,6 +431,23 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       <div className="mt-6">
         <QrCard url={datasheetUrl} fileBase={product.modelNumber} />
       </div>
+
+      <PdfIntakeCard
+        productId={product.id}
+        occupied={{
+          basics: true,
+          tagline: !!product.tagline,
+          description: !!product.description,
+          luminaireType: !!product.luminaireType,
+          specs: initialSpecs.length > 0,
+          certifications: product.certifications.length > 0,
+          attributes: Object.keys(attrs).length > 0,
+          highlights: initialHighlights.length > 0,
+          boxContents: initialBoxContents.length > 0,
+          install: !!initialInstall,
+          dimensions: !!d,
+        }}
+      />
 
       <BasicInfoEditor
         productId={product.id}

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { confirmDialog } from "@/components/confirm-dialog";
 import {
   CONDITION_KINDS,
   type CompatCondition,
@@ -134,8 +135,15 @@ export function RuleManager({
       }
     });
   }
-  function onDelete(rule: Rule) {
-    if (!window.confirm(`删除规则「${rule.label}」？`)) return;
+  async function onDelete(rule: Rule) {
+    if (
+      !(await confirmDialog({
+        message: t("rule.deleteConfirm", { label: rule.label }),
+        confirmText: t("common.delete"),
+        danger: true,
+      }))
+    )
+      return;
     start(async () => {
       try {
         await deleteRule(rule.id);

@@ -18,10 +18,12 @@ import { MarkdownInput } from "@/components/markdown-input";
 import {
   saveProductShowcase,
   generateShowcaseDraft,
+  generateDetailLayout,
   translateShowcase,
   saveTranslation,
 } from "@/app/admin/products/actions";
 import { LOCALE_LABELS, LOCALE_ORDER } from "@/i18n/routing";
+import { confirmDialog } from "@/components/confirm-dialog";
 import { LUMINAIRE_TYPES } from "@/lib/luminaire";
 import { useFileDrop } from "@/components/use-file-drop";
 
@@ -36,6 +38,7 @@ type Block =
 
 // 每种语言可编辑的内容（语言模式编辑器在源/各译文之间切换时整体加载）
 type LocaleContent = {
+  name: string; // 译名（源语言名在「基本信息」卡维护，此字段仅译文模式用）
   tagline: string;
   description: string;
   highlights: Highlight[];
@@ -49,6 +52,7 @@ type LocaleContent = {
 };
 
 const EMPTY_CONTENT: LocaleContent = {
+  name: "",
   tagline: "",
   description: "",
   highlights: [],
@@ -222,6 +226,7 @@ export function ShowcaseEditor({
   translationStale: boolean;
   initialTranslations: Record<string, LocaleContent>;
 }) {
+  const [transName, setTransName] = useState(""); // 当前译文语言的产品译名
   const [tagline, setTagline] = useState(initialTagline);
   const [variantLabel, setVariantLabel] = useState(initialVariantLabel);
   const [description, setDescription] = useState(initialDescription);
@@ -250,8 +255,60 @@ export function ShowcaseEditor({
   const [genPending, startGen] = useTransition();
   const [transPending, startTrans] = useTransition();
 
+  // AI 图文排版面板：客户传图 + 写描述 → 生成 heading/text/image 块序列
+  const [aiImages, setAiImages] = useState<string[]>([]);
+  const [aiBrief, setAiBrief] = useState("");
+  const [aiUploading, setAiUploading] = useState(false);
+  const [layoutPending, startLayout] = useTransition();
+  const aiPickRef = useRef<HTMLInputElement>(null);
+
+  async function aiAddFiles(files: File[]) {
+    const imgs = files.filter((f) => f.type.startsWith("image/"));
+    if (!imgs.length) return;
+    setAiUploading(true);
+    try {
+      for (const f of imgs) {
+        const url = await uploadImageFile(f);
+        setAiImages((list) => [...list, url]);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "上传失败");
+    } finally {
+      setAiUploading(false);
+    }
+  }
+
+  async function generateLayout() {
+    if (!aiImages.length || !aiBrief.trim()) {
+      toast.error(s("aiLayoutNeed"));
+      return;
+    }
+    if (blocks.length > 0 && !(await confirmDialog({ message: s("aiLayoutConfirm") })))
+      return;
+    startLayout(async () => {
+      try {
+        const result = await generateDetailLayout({
+          productId,
+          images: aiImages,
+          brief: aiBrief,
+        });
+        setBlocks(
+          result.map((b) =>
+            b.kind === "image"
+              ? { kind: "image" as const, url: b.url, caption: b.caption ?? "" }
+              : b
+          )
+        );
+        toast.success(s("aiLayoutDone"));
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "AI 生成失败");
+      }
+    });
+  }
+
   // 源语言内容快照（初始 props），切回源语言时还原
   const sourceContent: LocaleContent = {
+    name: "",
     tagline: initialTagline,
     description: initialDescription,
     highlights: initialHighlights,
@@ -266,6 +323,7 @@ export function ShowcaseEditor({
 
   // 把一份内容载入到可编辑字段（不动源专属字段：变体标签/灯具类型/尺寸 w·h·d·unit）
   function applyContent(c: LocaleContent) {
+    setTransName(c.name);
     setTagline(c.tagline);
     setDescription(c.description);
     setHighlights(c.highlights);
@@ -279,21 +337,16 @@ export function ShowcaseEditor({
   }
 
   // 切换正在编辑的语言（切换会丢弃未保存修改，故确认）
-  function switchLocale(loc: string) {
+  async function switchLocale(loc: string) {
     if (loc === editingLocale) return;
-    if (!window.confirm("切换语言会丢弃当前未保存的修改，确定切换？")) return;
+    if (!(await confirmDialog({ message: s("switchConfirm") }))) return;
     applyContent(loc === baseLocale ? sourceContent : initialTranslations[loc] ?? EMPTY_CONTENT);
     setEditingLocale(loc);
   }
 
   // AI 翻译补全其余语言：读已保存的源语言内容，翻译入库（直接保存、可重跑）。
-  function translate() {
-    if (
-      !window.confirm(
-        "将把【已保存的】源语言内容翻译成其余 8 种语言并入库。请先保存当前内容，再翻译。继续？"
-      )
-    )
-      return;
+  async function translate() {
+    if (!(await confirmDialog({ message: s("transConfirm") }))) return;
     startTrans(async () => {
       try {
         const r = await translateShowcase(productId);
@@ -325,13 +378,8 @@ export function ShowcaseEditor({
   }
 
   // AI 一键生成草稿 → 覆盖当前编辑器内容（人工再改后保存）。
-  function generate() {
-    if (
-      !window.confirm(
-        "将用 AI 生成的草稿覆盖当前展示内容（不会直接入库，仍需点保存）。继续？"
-      )
-    )
-      return;
+  async function generate() {
+    if (!(await confirmDialog({ message: s("genConfirm") }))) return;
     startGen(async () => {
       try {
         const d = await generateShowcaseDraft(productId);
@@ -506,6 +554,7 @@ export function ShowcaseEditor({
           await saveTranslation({
             productId,
             locale: editingLocale,
+            name: transName,
             tagline,
             description,
             highlights: cleanHighlights,
@@ -645,6 +694,21 @@ export function ShowcaseEditor({
         )}
       </div>
       </>
+      )}
+
+      {/* 译名（仅译文模式；源语言名在「基本信息」卡维护） */}
+      {!isSource && (
+        <div className="mt-5">
+          <label className={labelCls}>{s("transName")}</label>
+          <input
+            value={transName}
+            onChange={(e) => setTransName(e.target.value)}
+            className={`${inputCls} mt-2`}
+          />
+          <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
+            {s("transNameHint")}
+          </p>
+        </div>
       )}
 
       {/* Tagline */}
@@ -867,6 +931,86 @@ export function ShowcaseEditor({
             </button>
           </div>
         </div>
+
+        {/* AI 图文排版：传图 + 描述 → 自动生成穿插排版（覆盖块列表，仍需保存） */}
+        {isSource && (
+          <div className="mt-3 rounded-xl border border-dashed border-[var(--color-rule-strong)] bg-[var(--color-surface-sunken)] p-3.5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium text-[var(--color-ink)]">
+                  {s("aiLayoutTitle")}
+                </p>
+                <p className="mt-0.5 text-[11px] text-[var(--color-ink-faint)]">
+                  {s("aiLayoutHint")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={generateLayout}
+                disabled={layoutPending || aiUploading}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-ink)] px-3.5 py-2 text-sm font-medium text-[var(--color-ink)] transition hover:bg-[var(--color-ink)] hover:text-[var(--color-surface)] disabled:opacity-50"
+              >
+                <Sparkles className="h-4 w-4" />
+                {layoutPending ? s("aiLayoutGenning") : s("aiLayoutBtn")}
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {aiImages.map((url, i) => (
+                <div key={`${url}-${i}`} className="group relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-16 w-16 rounded-md border border-[var(--color-rule)] object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAiImages((list) => list.filter((_, j) => j !== i))
+                    }
+                    aria-label="删除"
+                    className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-[var(--color-ink)] text-[var(--color-surface)] group-hover:flex"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => aiPickRef.current?.click()}
+                disabled={aiUploading}
+                className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-[var(--color-rule-strong)] text-[var(--color-ink-muted)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)] disabled:opacity-50"
+              >
+                {aiUploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                <span className="text-[10px]">{s("aiLayoutImgs")}</span>
+              </button>
+              <input
+                ref={aiPickRef}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (aiPickRef.current) aiPickRef.current.value = "";
+                  if (files.length) aiAddFiles(files);
+                }}
+              />
+            </div>
+            <textarea
+              value={aiBrief}
+              onChange={(e) => setAiBrief(e.target.value)}
+              placeholder={s("aiLayoutBriefPh")}
+              rows={3}
+              className={`${inputCls} mt-3 resize-y`}
+            />
+          </div>
+        )}
+
         <div className="mt-3 space-y-2">
           {blocks.length === 0 && (
             <p className="text-[12px] text-[var(--color-ink-faint)]">

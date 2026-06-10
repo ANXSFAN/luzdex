@@ -8,8 +8,29 @@ export type ChatMessage = {
   content: string;
 };
 
+/** OpenRouter 多模态内容块：文本 + 文件（data URL，如 base64 PDF）。 */
+export type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "file"; file: { filename: string; file_data: string } };
+
+export type RichChatMessage = {
+  role: "system" | "user" | "assistant";
+  content: string | ContentPart[];
+};
+
 /** 调 OpenRouter 并要求返回 JSON 对象；解析失败做一次大括号截取容错。 */
 export async function openRouterJSON(messages: ChatMessage[]): Promise<unknown> {
+  return openRouterJSONRich(messages);
+}
+
+/**
+ * openRouterJSON 的多模态版：消息内容可带文件块（PDF 抽取用），
+ * temperature 可调（抽取类任务用低值压创造性）。
+ */
+export async function openRouterJSONRich(
+  messages: RichChatMessage[],
+  opts?: { temperature?: number },
+): Promise<unknown> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("未配置 OPENROUTER_API_KEY，无法调用 AI");
   const model = process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4.5";
@@ -24,7 +45,7 @@ export async function openRouterJSON(messages: ChatMessage[]): Promise<unknown> 
     body: JSON.stringify({
       model,
       messages,
-      temperature: 0.7,
+      temperature: opts?.temperature ?? 0.7,
       response_format: { type: "json_object" },
     }),
   });

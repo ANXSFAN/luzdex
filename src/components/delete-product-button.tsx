@@ -6,6 +6,7 @@ import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { deleteProduct } from "@/app/admin/products/actions";
+import { confirmDialog } from "@/components/confirm-dialog";
 
 export function DeleteProductButton({
   productId,
@@ -18,8 +19,15 @@ export function DeleteProductButton({
   const t = useTranslations();
   const [pending, start] = useTransition();
 
-  function onDelete() {
-    if (!window.confirm(`${t("prod.deleteBtn")}: ${productName}?\n${t("prod.deleteSub")}`))
+  async function onDelete() {
+    if (
+      !(await confirmDialog({
+        title: t("prod.deleteTitle"),
+        message: `${productName}\n${t("prod.deleteSub")}`,
+        confirmText: t("prod.deleteBtn"),
+        danger: true,
+      }))
+    )
       return;
     start(async () => {
       try {

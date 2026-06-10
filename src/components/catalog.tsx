@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,12 +21,14 @@ import {
   Copy as CopyIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/confirm-dialog";
 import { useTranslations } from "next-intl";
 import {
   bulkDeleteProducts,
   createProduct,
   duplicateProduct,
 } from "@/app/admin/products/actions";
+import { createProductFromPdf } from "@/app/admin/products/pdf-actions";
 import {
   assignProductsToCategory,
   assignProductsToSeries,
@@ -535,8 +537,14 @@ export function Catalog({
             </select>
             <span className="mx-1 h-4 w-px bg-[var(--color-rule)]" />
             <button
-              onClick={() => {
-                if (window.confirm(`${t("common.delete")} (${ids.length})?`))
+              onClick={async () => {
+                if (
+                  await confirmDialog({
+                    message: t("catalog.bulkDeleteConfirm", { n: ids.length }),
+                    confirmText: t("common.delete"),
+                    danger: true,
+                  })
+                )
                   run(() => bulkDeleteProducts(ids), t("common.delete"));
               }}
               disabled={pending}
@@ -608,9 +616,42 @@ function NewProductForm({
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
+  const tp = useTranslations("pdf");
   const [name, setName] = useState("");
   const [model, setModel] = useState("");
   const [pending, start] = useTransition();
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const pdfRef = useRef<HTMLInputElement>(null);
+
+  // 从 PDF 新建：传技术文档 → AI 抽取建档并填好字段 → 跳编辑页审核
+  async function fromPdf(file: File) {
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
+      toast.error(tp("onlyPdf"));
+      return;
+    }
+    setPdfBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) {
+        const msg = await res.json().catch(() => null);
+        throw new Error(msg?.error ?? tp("extractFail"));
+      }
+      const { url } = (await res.json()) as { url: string };
+      const id = await createProductFromPdf({
+        pdfUrl: url,
+        fileName: file.name,
+        categoryId,
+        seriesId,
+      });
+      toast.success(tp("createdOk"));
+      router.push(`/admin/products/${id}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : tp("extractFail"));
+      setPdfBusy(false);
+    }
+  }
 
   function submit() {
     if (!name.trim() || !model.trim()) {
@@ -655,6 +696,30 @@ function NewProductForm({
         {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
         {t("catalog.create")}
       </button>
+      <button
+        onClick={() => pdfRef.current?.click()}
+        disabled={pdfBusy || pending}
+        title={tp("fromPdfHint")}
+        className="flex items-center gap-1 rounded-lg border border-[var(--color-rule-strong)] px-3 py-1.5 text-sm text-[var(--color-ink)] transition hover:border-[var(--color-ink)] disabled:opacity-50"
+      >
+        {pdfBusy ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <FileText className="h-3.5 w-3.5" />
+        )}
+        {pdfBusy ? tp("creating") : tp("fromPdf")}
+      </button>
+      <input
+        ref={pdfRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (pdfRef.current) pdfRef.current.value = "";
+          if (f) fromPdf(f);
+        }}
+      />
       <button
         onClick={onClose}
         className="rounded-lg px-2 py-1.5 text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
