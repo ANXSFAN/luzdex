@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { LOCALE_LABELS, LOCALE_ORDER, type AppLocale } from "@/i18n/routing";
 import { useFileDrop } from "@/components/use-file-drop";
+import { MarkdownInput } from "@/components/markdown-input";
 import {
   updateCategory,
   deleteCategory,
@@ -102,12 +103,11 @@ function MultiLang({
         })}
       </div>
       {multiline ? (
-        <textarea
+        <MarkdownInput
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           placeholder={isSrc ? placeholder : LOCALE_LABELS[loc]}
           rows={3}
-          className={`${inputCls} resize-y`}
         />
       ) : (
         <input

@@ -24,7 +24,7 @@ import {
 import { openRouterJSON, type ChatMessage } from "@/lib/ai";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { luminaireLabel } from "@/lib/luminaire";
-import { deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, copyInR2 } from "@/lib/r2";
 import { categoryIdByKind, seriesIdByName, catalogSlug } from "@/lib/catalog";
 
 type Relation = "accessory" | "alternative";
@@ -873,4 +873,213 @@ export async function bulkSetSeries(ids: string[], series: string) {
   });
   revalidatePath("/admin/products");
   return { updated: r.count };
+}
+
+/* ── 变体组（同款不同规格，如 50W/100W/150W） ─────────────────── */
+
+/** 组内仅剩 ≤1 个成员时解散该组（单品没有"变体"可言）。 */
+async function dissolveIfSingleton(variantGroupId: string) {
+  const rest = await prisma.product.findMany({
+    where: { variantGroupId },
+    select: { id: true },
+  });
+  if (rest.length === 1) {
+    await prisma.product.update({
+      where: { id: rest[0].id },
+      data: { variantGroupId: null },
+    });
+  }
+}
+
+/**
+ * 把另一产品并入当前产品的变体组；当前无组则新建（组 key 取当前产品 id，稳定唯一）。
+ * 对方已在别的组时视为「移动」，其旧组只剩单品则自动解散。
+ */
+export async function addVariantMember(input: {
+  productId: string;
+  otherId: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  await assertOwned(input.otherId, factory.id);
+  if (input.productId === input.otherId) throw new Error("不能把产品加入自己");
+
+  const [me, other] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id: input.productId },
+      select: { variantGroupId: true },
+    }),
+    prisma.product.findUnique({
+      where: { id: input.otherId },
+      select: { variantGroupId: true },
+    }),
+  ]);
+  const gid = me?.variantGroupId ?? input.productId;
+  await prisma.$transaction([
+    prisma.product.update({
+      where: { id: input.productId },
+      data: { variantGroupId: gid },
+    }),
+    prisma.product.update({
+      where: { id: input.otherId },
+      data: { variantGroupId: gid },
+    }),
+  ]);
+  if (other?.variantGroupId && other.variantGroupId !== gid) {
+    await dissolveIfSingleton(other.variantGroupId);
+  }
+  revalidatePath(`/admin/products/${input.productId}`);
+  revalidatePath(`/admin/products/${input.otherId}`);
+}
+
+/** 把成员移出变体组；组里只剩一个时顺带解散。 */
+export async function removeVariantMember(input: {
+  productId: string;
+  memberId: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  await assertOwned(input.memberId, factory.id);
+
+  const member = await prisma.product.findUnique({
+    where: { id: input.memberId },
+    select: { variantGroupId: true },
+  });
+  if (!member?.variantGroupId) return;
+  await prisma.product.update({
+    where: { id: input.memberId },
+    data: { variantGroupId: null },
+  });
+  await dissolveIfSingleton(member.variantGroupId);
+  revalidatePath(`/admin/products/${input.productId}`);
+  revalidatePath(`/admin/products/${input.memberId}`);
+}
+
+/** 保存组内某成员的规格标签（前台规格选择按钮文案；空 = 回退型号）。 */
+export async function saveVariantLabel(input: {
+  productId: string;
+  memberId: string;
+  label: string;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  await assertOwned(input.memberId, factory.id);
+  await prisma.product.update({
+    where: { id: input.memberId },
+    data: { variantLabel: input.label.trim() || null },
+  });
+  revalidatePath(`/admin/products/${input.productId}`);
+  revalidatePath(`/admin/products/${input.memberId}`);
+}
+
+/* ── 产品复制（非父子变体模型的配套：快速复制一份再改细节） ───── */
+
+/**
+ * 复制产品：内容字段全量带走（含规格/亮点/图文详情/译文），R2 图片物理复制
+ * （删除互不连坐）；文档/视频/统计不带（datasheet 等资料按型号各自上传）。
+ * asVariant = true 时复制体加入源产品的变体组（源无组则就地建组），用于
+ * 「同款不同规格」工作流。返回新产品 id 供前端跳转。
+ */
+export async function duplicateProduct(input: {
+  productId: string;
+  asVariant?: boolean;
+}): Promise<string> {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+
+  const src = await prisma.product.findUnique({
+    where: { id: input.productId },
+    include: { images: { orderBy: { sortOrder: "asc" } } },
+  });
+  if (!src) throw new Error("产品不存在");
+
+  // 型号 / sourceId 唯一：-COPY、-COPY2、…
+  let modelNumber = `${src.modelNumber}-COPY`;
+  for (let i = 2; ; i++) {
+    const dupe = await prisma.product.findUnique({
+      where: {
+        factoryId_sourceId: { factoryId: factory.id, sourceId: modelNumber },
+      },
+      select: { id: true },
+    });
+    if (!dupe) break;
+    modelNumber = `${src.modelNumber}-COPY${i}`;
+  }
+
+  // slug 全局唯一（与 createProduct 同法）
+  const base = catalogSlug(modelNumber, "product");
+  let slug = base;
+  for (
+    let i = 1;
+    await prisma.product.findUnique({ where: { slug }, select: { id: true } });
+    i++
+  ) {
+    slug = `${base}-${i}`;
+  }
+
+  // R2 图片物理复制（外链原样共享，删除对外链本就 no-op）
+  const coverImage = src.coverImage
+    ? await copyInR2(src.coverImage, "copies")
+    : null;
+  const imageRows = await Promise.all(
+    src.images.map(async (img, i) => ({
+      url: await copyInR2(img.url, "copies"),
+      alt: img.alt,
+      sortOrder: i,
+    }))
+  );
+
+  // 变体组：作为变体复制时与源同组（源无组则以源 id 建组）
+  let variantGroupId: string | null = null;
+  if (input.asVariant) {
+    variantGroupId = src.variantGroupId ?? src.id;
+    if (!src.variantGroupId) {
+      await prisma.product.update({
+        where: { id: src.id },
+        data: { variantGroupId },
+      });
+    }
+  }
+
+  // Prisma Json 列：null 不能直接回写 create，置 undefined 跳过
+  const j = <T>(v: T | null): T | undefined => (v === null ? undefined : v);
+
+  const copy = await prisma.product.create({
+    data: {
+      factoryId: factory.id,
+      sourceId: modelNumber,
+      slug,
+      modelNumber,
+      name: src.name,
+      description: src.description,
+      specs: j(src.specs),
+      certifications: src.certifications,
+      coverImage,
+      category: src.category,
+      series: src.series,
+      categoryId: src.categoryId,
+      seriesId: src.seriesId,
+      attributes: j(src.attributes),
+      tagline: src.tagline,
+      variantLabel: null,
+      variantGroupId,
+      highlights: j(src.highlights),
+      detailBlocks: j(src.detailBlocks),
+      applications: j(src.applications),
+      faq: j(src.faq),
+      luminaireType: src.luminaireType,
+      boxContents: j(src.boxContents),
+      install: j(src.install),
+      dimensions: j(src.dimensions),
+      sourceLocale: src.sourceLocale,
+      contentI18n: j(src.contentI18n),
+      translationStamp: src.translationStamp,
+      images: imageRows.length ? { createMany: { data: imageRows } } : undefined,
+    },
+    select: { id: true },
+  });
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${src.id}`);
+  return copy.id;
 }

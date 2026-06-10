@@ -19,10 +19,13 @@ export function LocaleSwitcher({
   current,
   supported,
   slug,
+  basePath = "/p",
 }: {
   current: AppLocale;
   supported: readonly AppLocale[];
   slug: string;
+  /** 切语言时保持当前页类型：产品页 "/p"（默认），系列页 "/series"。 */
+  basePath?: string;
 }) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -121,7 +124,7 @@ export function LocaleSwitcher({
               ) : (
                 <Link
                   key={loc}
-                  href={`/p/${slug}`}
+                  href={`${basePath}/${slug}`}
                   locale={loc}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 px-3.5 py-2.5 text-[var(--color-ink-soft)] transition hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"

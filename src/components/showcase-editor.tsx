@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { MarkdownInput } from "@/components/markdown-input";
 import {
   saveProductShowcase,
   generateShowcaseDraft,
@@ -702,12 +703,12 @@ export function ShowcaseEditor({
       {/* Description */}
       <div className="mt-5">
         <label className={labelCls}>{s("description")}</label>
-        <textarea
+        <MarkdownInput
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={setDescription}
           placeholder={s("descriptionPh")}
           rows={3}
-          className={`${inputCls} mt-2 resize-y`}
+          className="mt-2"
         />
       </div>
 
@@ -904,15 +905,20 @@ export function ShowcaseEditor({
                       className={inputCls}
                     />
                   </>
-                ) : (
+                ) : b.kind === "heading" ? (
                   <textarea
                     value={b.text}
                     onChange={(e) => updateBlock(i, { text: e.target.value })}
-                    placeholder={
-                      b.kind === "heading" ? s("headingPh") : s("paraPh")
-                    }
-                    rows={b.kind === "heading" ? 1 : 3}
+                    placeholder={s("headingPh")}
+                    rows={1}
                     className={`${inputCls} resize-y`}
+                  />
+                ) : (
+                  <MarkdownInput
+                    value={b.text}
+                    onChange={(v) => updateBlock(i, { text: v })}
+                    placeholder={s("paraPh")}
+                    rows={3}
                   />
                 )}
               </div>

@@ -1,6 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 import { findPublicProductBySlug, parseSpecs, siteUrl } from "@/lib/products";
+import { stripMarkdown } from "@/lib/md";
 import { ProductPdf } from "@/lib/pdf-template";
 import { routing } from "@/i18n/routing";
 
@@ -69,7 +70,7 @@ export async function GET(_req: Request, ctx: RouteContext) {
     ProductPdf({
       name: product.name,
       modelNumber: product.modelNumber,
-      description: product.description,
+      description: product.description ? stripMarkdown(product.description) : null,
       certifications: product.certifications,
       specs: parseSpecs(product.specs),
       coverImageBytes: coverBytes,

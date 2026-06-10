@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { localizedName, parseNameI18n } from "@/lib/catalog";
 
 export type ProductSpec = {
   /** Optional group label, e.g. "Electrical" / "Photometric" */
@@ -14,6 +15,8 @@ export function findPublicProductBySlug(slug: string) {
     where: { slug },
     include: {
       factory: true,
+      // 系列入口「了解更多 · XX系列」需要 slug 构链接（product.series 只是名字镜像）。
+      seriesRef: { select: { slug: true } },
       documents: { orderBy: { sortOrder: "asc" } },
       videos: { orderBy: { sortOrder: "asc" } },
       images: { orderBy: { sortOrder: "asc" } },
@@ -688,17 +691,22 @@ export type VariantOption = {
 };
 
 /**
- * 同系列规格变体（京东式「选规格」）：同 `series`、同租户的所有型号（含当前自己）。
- * 仅当组内 >1 个型号时才返回，单品不显示选择器。运营在后台填 variantLabel 作为
+ * 规格变体（京东式「选规格」）：同租户、同 `variantGroupId` 变体组的所有型号
+ * （含当前自己）。变体组在后台「变体」卡维护——只有真正「同款不同规格」的产品
+ * 才同组；同系列的不同产品（如工矿灯 vs 路灯）不再互为变体。
+ * 仅当组内 >1 个型号时才返回，单品不显示选择器。运营填 variantLabel 作为
  * 短标签（如「100W」「暖光 3000K」），未填则前台回退展示 modelNumber。
  */
 export async function findVariants(product: {
   factoryId: string;
-  series: string | null;
+  variantGroupId: string | null;
 }): Promise<VariantOption[]> {
-  if (!product.series) return [];
+  if (!product.variantGroupId) return [];
   const rows = await prisma.product.findMany({
-    where: { factoryId: product.factoryId, series: product.series },
+    where: {
+      factoryId: product.factoryId,
+      variantGroupId: product.variantGroupId,
+    },
     orderBy: [{ variantLabel: "asc" }, { modelNumber: "asc" }],
     select: { id: true, slug: true, modelNumber: true, variantLabel: true },
   });
@@ -714,17 +722,20 @@ export type VariantComparison = {
 };
 
 /**
- * 同系列变体的「规格并排对比」数据（京东 SKU 对比 / Apple Compare）。
- * 复用 findVariants 的系列聚合，但额外取出每个变体的 specs 供并排成表。
+ * 变体组的「规格并排对比」数据（京东 SKU 对比 / Apple Compare）。
+ * 与 findVariants 同口径按 variantGroupId 聚合，额外取出每个变体的 specs 供并排成表。
  * 仅当组内 >1 个型号时返回，单品不对比。
  */
 export async function findVariantComparison(product: {
   factoryId: string;
-  series: string | null;
+  variantGroupId: string | null;
 }): Promise<VariantComparison[]> {
-  if (!product.series) return [];
+  if (!product.variantGroupId) return [];
   const rows = await prisma.product.findMany({
-    where: { factoryId: product.factoryId, series: product.series },
+    where: {
+      factoryId: product.factoryId,
+      variantGroupId: product.variantGroupId,
+    },
     orderBy: [{ variantLabel: "asc" }, { modelNumber: "asc" }],
     select: {
       id: true,
@@ -870,4 +881,118 @@ export async function findRelatedProducts(
     siblings: siblings.map(toItem),
     accessories: links.map((l) => ({ ...toItem(l.to), relation: l.relation })),
   };
+}
+
+/** 系列页里每个产品的充分展示数据（大区块用）：名/定位/关键参数/认证均已本地化。 */
+export type SeriesProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  modelNumber: string;
+  coverImage: string | null;
+  category: string | null;
+  /** 标题下定位短语带（"·" 分隔），已本地化；无则 null。 */
+  tagline: string | null;
+  /** 关键参数胶囊（功率/光通量/防护…），已本地化，最多取前 4 个。 */
+  highlights: ProductHighlight[];
+  certifications: string[];
+  /** 完整规格表（已本地化，缺译回退源语言），系列对比矩阵用。 */
+  specs: ProductSpec[];
+};
+
+export type SeriesPage = {
+  id: string;
+  slug: string;
+  /** 已按 locale 取译名（缺失回退源 name）。 */
+  name: string;
+  /** 已按 locale 取译文简介（缺失回退源 intro），无简介为 null。 */
+  intro: string | null;
+  coverImage: string | null;
+  accentColor: string | null;
+  /** 有译文的语言（含源语言 es）——切换器只列这些，避免切过去看回退源文。 */
+  translatedLocales: string[];
+  /** 该系列全部产品（同工厂、同 seriesId），内容已本地化。 */
+  products: SeriesProduct[];
+};
+
+/**
+ * 前台「了解更多 · XX系列」页数据：按 slug 定位系列（Series.slug 仅工厂内唯一，
+ * 取首条即可——单工厂展示站无歧义），连带取该系列全部产品供卡片栅格。
+ * 系列名/简介走 nameI18n/introI18n，产品名走 contentI18n，均按 locale 回退源语言。
+ * 纯展示：不返回任何价格/联系/厂家出口信息。
+ */
+export async function findSeriesPage(
+  slug: string,
+  locale: string
+): Promise<SeriesPage | null> {
+  const series = await prisma.series.findFirst({
+    where: { slug },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      nameI18n: true,
+      intro: true,
+      introI18n: true,
+      coverImage: true,
+      factory: { select: { accentColor: true, defaultLocale: true } },
+      products: {
+        orderBy: [{ name: "asc" }],
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          modelNumber: true,
+          coverImage: true,
+          category: true,
+          tagline: true,
+          highlights: true,
+          certifications: true,
+          specs: true,
+          contentI18n: true,
+        },
+      },
+    },
+  });
+  if (!series) return null;
+
+  // 源语言（工厂 defaultLocale）恒有；其余语言以系列名有译文为准（简介可缺，名是切换前提）。
+  const sourceLocale = series.factory?.defaultLocale || "es";
+  const translatedLocales = Array.from(
+    new Set([sourceLocale, ...Object.keys(parseNameI18n(series.nameI18n))])
+  );
+
+  return {
+    id: series.id,
+    slug: series.slug,
+    name: localizedName(series.name, series.nameI18n, locale),
+    intro:
+      localizedText(series.introI18n, locale) || series.intro || null,
+    coverImage: series.coverImage,
+    accentColor: series.factory?.accentColor ?? null,
+    translatedLocales,
+    products: series.products.map((p) => {
+      // 与产品页同口径：内容层译文优先（tr），缺则回退源字段。
+      const tr = parseContentI18n(p.contentI18n)[locale];
+      return {
+        id: p.id,
+        slug: p.slug,
+        name: tr?.name || p.name,
+        modelNumber: p.modelNumber,
+        coverImage: p.coverImage,
+        category: p.category,
+        tagline: tr?.tagline || p.tagline || null,
+        highlights: (tr?.highlights ?? parseHighlights(p.highlights)).slice(0, 4),
+        certifications: p.certifications,
+        specs: tr?.specs?.length ? tr.specs : parseSpecs(p.specs),
+      };
+    }),
+  };
+}
+
+/** 取多语言 Json 文本在某 locale 的译文；缺失返回 null（供 intro 等长文本回退）。 */
+function localizedText(json: unknown, locale: string): string | null {
+  if (!json || typeof json !== "object" || Array.isArray(json)) return null;
+  const v = (json as Record<string, unknown>)[locale];
+  return typeof v === "string" && v.trim() ? v : null;
 }

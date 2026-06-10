@@ -18,6 +18,8 @@ import {
   Circle,
   Plus,
   Check,
+  Layers,
+  ArrowUpRight,
 } from "lucide-react";
 import { Fragment } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -69,6 +71,8 @@ import { ShareButton } from "@/components/share-button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
+import { renderMarkdown } from "@/lib/md";
+import { LuzHubMark } from "@/components/luzhub-mark";
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -368,6 +372,27 @@ export default async function ProductDatasheetPage({
               </div>
             )}
 
+            {/* 系列入口：扫一条灯带能进「了解更多·XX系列」页看全系列。仅当归属系列时出现。 */}
+            {product.seriesRef && (
+              <Link
+                href={getPathname({
+                  href: `/series/${product.seriesRef.slug}`,
+                  locale: locale as AppLocale,
+                })}
+                className="group mt-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-rule-strong)] px-4 py-2 text-[13px] font-medium text-[var(--color-ink-soft)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)] rise-in"
+                data-step="3"
+              >
+                <Layers
+                  className="h-4 w-4 shrink-0 text-[var(--color-accent)]"
+                  strokeWidth={1.5}
+                />
+                <span>{t("seriesPage.discover", { series: product.series ?? "" })}</span>
+                <ArrowUpRight
+                  className="h-3.5 w-3.5 shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  strokeWidth={1.5}
+                />
+              </Link>
+            )}
           </div>
 
           {/* Product image — on mobile this lands right after the title,
@@ -394,15 +419,10 @@ export default async function ProductDatasheetPage({
             <div className="order-4 self-start lg:order-3 lg:col-span-5">
               {description && (
                 <div
-                  className="space-y-3 text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
+                  className="text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
                   data-step="3"
                 >
-                  {description
-                    .split(/\n\s*\n/)
-                    .filter((s) => s.trim().length > 0)
-                    .map((para, i) => (
-                      <p key={i}>{para.trim()}</p>
-                    ))}
+                  {renderMarkdown(description)}
                 </div>
               )}
 
@@ -915,12 +935,12 @@ function DetailContent({ blocks }: { blocks: DetailBlock[] }) {
         }
         if (b.kind === "text") {
           return (
-            <p
+            <div
               key={i}
-              className="max-w-[46rem] whitespace-pre-line text-[15px] leading-[1.8] text-[var(--color-ink-soft)]"
+              className="max-w-[46rem] text-[15px] leading-[1.8] text-[var(--color-ink-soft)]"
             >
-              {b.text}
-            </p>
+              {renderMarkdown(b.text)}
+            </div>
           );
         }
         return (
@@ -1666,16 +1686,5 @@ function FactoryMark({ logoUrl }: { logoUrl: string | null }) {
     /* eslint-disable-next-line @next/next/no-img-element */
     return <img src={logoUrl} alt="" className="h-[18px] w-auto" />;
   }
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      aria-hidden
-      className="text-[var(--color-ink)]"
-    >
-      <rect x="0.5" y="0.5" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1" />
-      <rect x="6.5" y="6.5" width="5" height="5" fill="var(--color-accent)" />
-    </svg>
-  );
+  return <LuzHubMark size={20} />;
 }

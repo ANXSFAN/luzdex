@@ -58,12 +58,13 @@ model Product {
   certifications   String[]       @default([])
   coverImage       String?        @map("cover_image")
   category         String? // 镜像 Category.kind（strip|channel|…），供自动配件匹配/相关产品；权威是 categoryId
-  series           String? // 镜像 Series.name，供同系列聚合/变体；权威是 seriesId
+  series           String? // 镜像 Series.name，供同系列聚合；权威是 seriesId（变体走 variantGroupId）
   categoryId       String?        @map("category_id") // 归属分类（管理实体）
   seriesId         String?        @map("series_id") // 归属系列（管理实体）
   attributes       Json? // { pcbWidth:"10mm", voltage:"24V", watt:14.4 } 自动匹配用
   tagline          String? // 标题下卖点短语带（"·" 分隔几个短语）
-  variantLabel     String?        @map("variant_label") // 同系列内的规格标签，如 "100W" / "暖光 3000K"
+  variantLabel     String?        @map("variant_label") // 变体组内的规格标签，如 "100W" / "暖光 3000K"
+  variantGroupId   String?        @map("variant_group_id") // 变体组 key：同组产品互为「同款不同规格」；null = 无变体
   highlights       Json? // [{ icon, label, value? }] 亮点图标排
   detailBlocks     Json?          @map("detail_blocks") // [{ kind:"heading"|"text"|"image", ... }] 京东式图文长详情
   applications     Json? // [{ icon, title, desc?, image? }] 应用场景「用在哪里」
@@ -94,6 +95,7 @@ model Product {
   @@unique([factoryId, sourceId])
   @@index([factoryId])
   @@index([factoryId, series])
+  @@index([factoryId, variantGroupId])
   @@index([factoryId, category])
   @@index([seriesId])
   @@index([categoryId])

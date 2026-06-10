@@ -17,6 +17,7 @@ import {
   Plus,
   FolderTree,
   Tag,
+  Boxes,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -33,6 +34,8 @@ export type CatalogProduct = {
   coverImage: string | null;
   categoryId: string | null;
   seriesId: string | null;
+  variantGroupId: string | null;
+  variantLabel: string | null;
   videos: number;
   documents: number;
   scans30d: number;
@@ -174,6 +177,26 @@ export function Catalog({
     else if (need === "stale") list = list.filter((p) => p.stale);
     return list;
   }, [products, node, query, need, descSelf]);
+
+  // 同变体组聚簇相邻（整组落在首个成员出现的位置），≥2 个可见成员时框起来。
+  const clusters = useMemo(() => {
+    const out: { key: string; items: CatalogProduct[] }[] = [];
+    const idx = new Map<string, number>();
+    for (const p of panelProducts) {
+      if (p.variantGroupId) {
+        const gi = idx.get(p.variantGroupId);
+        if (gi === undefined) {
+          idx.set(p.variantGroupId, out.length);
+          out.push({ key: "g:" + p.variantGroupId, items: [p] });
+        } else {
+          out[gi].items.push(p);
+        }
+      } else {
+        out.push({ key: p.id, items: [p] });
+      }
+    }
+    return out;
+  }, [panelProducts]);
 
   function run(fn: () => Promise<unknown>, ok: string) {
     start(async () => {
@@ -530,15 +553,38 @@ export function Catalog({
             该节点下没有匹配的产品
           </p>
         ) : (
-          <ul className="mt-4 space-y-1">
-            {panelProducts.map((p) => (
-              <Row
-                key={p.id}
-                p={p}
-                selected={selected.has(p.id)}
-                onToggle={() => toggleSel(p.id)}
-              />
-            ))}
+          <ul className="mt-4 space-y-1.5">
+            {clusters.map((c) =>
+              c.items.length > 1 ? (
+                <li
+                  key={c.key}
+                  className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]/60 p-1.5"
+                >
+                  <div className="flex items-center gap-1.5 px-2 pb-1.5 pt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+                    <Boxes className="h-3.5 w-3.5" />
+                    {t("catalog.variantGroup")} · {c.items.length}
+                  </div>
+                  <ul className="space-y-1">
+                    {c.items.map((p) => (
+                      <Row
+                        key={p.id}
+                        p={p}
+                        inGroup
+                        selected={selected.has(p.id)}
+                        onToggle={() => toggleSel(p.id)}
+                      />
+                    ))}
+                  </ul>
+                </li>
+              ) : (
+                <Row
+                  key={c.key}
+                  p={c.items[0]}
+                  selected={selected.has(c.items[0].id)}
+                  onToggle={() => toggleSel(c.items[0].id)}
+                />
+              ),
+            )}
           </ul>
         )}
       </div>
@@ -618,10 +664,12 @@ function Row({
   p,
   selected,
   onToggle,
+  inGroup = false,
 }: {
   p: CatalogProduct;
   selected: boolean;
   onToggle: () => void;
+  inGroup?: boolean;
 }) {
   const t = useTranslations("admin");
   return (
@@ -629,7 +677,9 @@ function Row({
       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
         selected
           ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
-          : "border-transparent hover:border-[var(--color-rule)] hover:bg-[var(--color-surface-sunken)]"
+          : inGroup
+            ? "border-transparent bg-[var(--color-surface)] hover:border-[var(--color-rule)]"
+            : "border-transparent hover:border-[var(--color-rule)] hover:bg-[var(--color-surface-sunken)]"
       }`}
     >
       <input
@@ -661,6 +711,9 @@ function Row({
             <span className="font-mono text-sm text-[var(--color-ink-muted)]">
               {p.modelNumber}
             </span>
+            {p.variantLabel && (
+              <Badge tone="ink">{p.variantLabel}</Badge>
+            )}
             {p.noImage && <Badge tone="red">{t("catalog.fNoImage")}</Badge>}
             {p.lacksShowcase && <Badge tone="amber">{t("catalog.fNoShowcase")}</Badge>}
             {p.translatedCount === 0 ? (
@@ -698,7 +751,7 @@ function Badge({
   tone,
   children,
 }: {
-  tone: "red" | "amber" | "muted";
+  tone: "red" | "amber" | "muted" | "ink";
   children: React.ReactNode;
 }) {
   const cls =
@@ -706,7 +759,9 @@ function Badge({
       ? "bg-red-50 text-red-600"
       : tone === "amber"
         ? "bg-amber-50 text-amber-700"
-        : "bg-[var(--color-surface-sunken)] text-[var(--color-ink-faint)]";
+        : tone === "ink"
+          ? "bg-[var(--color-ink)] font-mono text-[var(--color-surface)]"
+          : "bg-[var(--color-surface-sunken)] text-[var(--color-ink-faint)]";
   return (
     <span className={`rounded-full px-1.5 py-0.5 text-sm font-medium leading-none ${cls}`}>
       {children}

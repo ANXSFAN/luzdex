@@ -25,6 +25,8 @@ import { GalleryManager } from "@/components/gallery-manager";
 import { SpecsEditor } from "@/components/specs-editor";
 import { DeleteProductButton } from "@/components/delete-product-button";
 import { BasicInfoEditor } from "@/components/basic-info-editor";
+import { VariantManager } from "@/components/variant-manager";
+import { DuplicateProductButton } from "@/components/duplicate-product-button";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +85,8 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         category: true,
         categoryId: true,
         attributes: true,
+        variantLabel: true,
+        variantGroupId: true,
       },
       orderBy: { name: "asc" },
     }),
@@ -147,6 +151,43 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   }));
 
   const datasheetUrl = `${siteUrl()}/p/${product.slug}`;
+
+  // 变体组：当前产品 + 同组候选；其余产品进下拉（标注已在别组的）。
+  const variantMembers = [
+    {
+      id: product.id,
+      modelNumber: product.modelNumber,
+      name: product.name,
+      variantLabel: product.variantLabel,
+    },
+    ...candidates
+      .filter(
+        (c) =>
+          product.variantGroupId != null &&
+          c.variantGroupId === product.variantGroupId
+      )
+      .map((c) => ({
+        id: c.id,
+        modelNumber: c.modelNumber,
+        name: c.name,
+        variantLabel: c.variantLabel,
+      })),
+  ].sort((a, b) =>
+    (a.variantLabel ?? a.modelNumber).localeCompare(
+      b.variantLabel ?? b.modelNumber,
+      undefined,
+      { numeric: true }
+    )
+  );
+  const memberIds = new Set(variantMembers.map((m) => m.id));
+  const variantCandidates = candidates
+    .filter((c) => !memberIds.has(c.id))
+    .map((c) => ({
+      id: c.id,
+      modelNumber: c.modelNumber,
+      name: c.name,
+      grouped: c.variantGroupId != null,
+    }));
 
   const initialHighlights = parseHighlights(product.highlights).map((h) => ({
     icon: h.icon,
@@ -271,15 +312,18 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
             {product.modelNumber}
           </p>
         </div>
-        <a
-          href={datasheetUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex shrink-0 items-center gap-1.5 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-        >
-          预览公开页
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+        <div className="flex shrink-0 items-center gap-4">
+          <DuplicateProductButton productId={product.id} />
+          <a
+            href={datasheetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex shrink-0 items-center gap-1.5 text-xs text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
+          >
+            预览公开页
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
       </div>
 
       {/* Analytics — 30-day overview */}
@@ -409,6 +453,12 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         translatedLocales={translatedLocales}
         translationStale={translationStale}
         initialTranslations={initialTranslations}
+      />
+
+      <VariantManager
+        productId={product.id}
+        members={variantMembers}
+        candidates={variantCandidates}
       />
 
       <ProductRelations

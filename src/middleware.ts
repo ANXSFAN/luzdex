@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-// Auth gates /admin; next-intl rewrites /p/... to the active locale.
+// Auth gates /admin; next-intl rewrites /p/... and /series/... to the active locale.
 export default NextAuth(authConfig).auth((req) => {
   if (req.nextUrl.pathname.startsWith("/admin")) {
     return NextResponse.next();
@@ -18,6 +18,7 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/p/:path*",
+    "/series/:path*",
     "/(es|en|fr|de|it|pt|nl|pl|zh)/:path*",
   ],
 };

@@ -371,8 +371,8 @@ export function ProductPdf({
     // 纯展示定位：PDF 不带任何工厂 / 品牌署名（标题、作者、页眉、字段均不含厂家信息）。
     <Document
       title={`${modelNumber} · ${name}`}
-      creator="Datasheet Portal"
-      producer="Datasheet Portal"
+      creator="LuzHub"
+      producer="LuzHub"
     >
       <Page size="A4" style={styles.page}>
         {/* Top strip — neutral datasheet mark, no brand */}

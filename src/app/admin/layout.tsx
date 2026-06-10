@@ -9,6 +9,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { FactorySwitcher } from "@/components/factory-switcher";
 import { AdminNav } from "@/components/admin-nav";
 import { AdminLanguageSwitcher } from "@/components/admin-language-switcher";
+import { LuzHubMark } from "@/components/luzhub-mark";
 
 export default async function AdminLayout({
   children,
@@ -35,8 +36,9 @@ export default async function AdminLayout({
           <div className="flex h-full flex-col gap-4 px-4 py-4 lg:px-5 lg:py-6">
             <Link
               href="/admin"
-              className="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-ink)] transition hover:opacity-70"
+              className="flex items-center gap-2 font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-ink)] transition hover:opacity-70"
             >
+              <LuzHubMark size={18} />
               {t("brand")}
             </Link>
 

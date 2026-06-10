@@ -178,6 +178,7 @@ type P = {
   modelNumber: string;
   luminaireType: string;
   variantLabel?: string;
+  variantGroup?: string; // 变体组 key：同组 = 同款不同规格（写入 variantGroupId）
   tagline: string;
   certifications: string[];
   attributes: Prisma.InputJsonValue;
@@ -236,6 +237,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "TPPHL20W-CCT-91455",
     luminaireType: "linear",
     variantLabel: "60 cm",
+    variantGroup: "coreplus-evo-tubo",
     tagline: "Selector de potencia · 3CCT 3000/4000/6000K · IP66 · IK10 · Driver Philips Xitanium",
     certifications: ["CE", "RoHS", "ENEC", "IP66", "IK10"],
     attributes: { voltage: "AC 220-240V", watt: 20, length: "600mm" },
@@ -266,6 +268,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "TPPHL40W-CCT-91456",
     luminaireType: "linear",
     variantLabel: "120 cm",
+    variantGroup: "coreplus-evo-tubo",
     tagline: "Selector de potencia · 3CCT 3000/4000/6000K · IP66 · IK10 · Driver Philips Xitanium",
     certifications: ["CE", "RoHS", "ENEC", "IP66", "IK10"],
     attributes: { voltage: "AC 220-240V", watt: 40, length: "1200mm" },
@@ -296,6 +299,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "TPPHL55W-CCT-91457",
     luminaireType: "linear",
     variantLabel: "150 cm",
+    variantGroup: "coreplus-evo-tubo",
     tagline: "Selector de potencia · 3CCT 3000/4000/6000K · IP66 · IK10 · Driver Philips Xitanium",
     certifications: ["CE", "RoHS", "ENEC", "IP66", "IK10"],
     attributes: { voltage: "AC 220-240V", watt: 55, length: "1500mm" },
@@ -497,6 +501,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "GX-24V-60W-91884",
     luminaireType: "other",
     variantLabel: "60 W",
+    variantGroup: "gx-24v",
     tagline: "Tecnología GaN · Regulador manual 4 niveles · Convección natural · IP20",
     certifications: ["CE", "RoHS"],
     attributes: { voltage: "24V", watt: 60, current: "2.5A" },
@@ -525,6 +530,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "GX-24V-100W-91885",
     luminaireType: "other",
     variantLabel: "100 W",
+    variantGroup: "gx-24v",
     tagline: "Tecnología GaN · Regulador manual 4 niveles · Convección natural · IP20",
     certifications: ["CE", "RoHS"],
     attributes: { voltage: "24V", watt: 100, current: "4.1A" },
@@ -553,6 +559,7 @@ const PRODUCTS: (P & { categorySlug: string; seriesSlug: string })[] = [
     modelNumber: "GX-24V-150W-91886",
     luminaireType: "other",
     variantLabel: "150 W",
+    variantGroup: "gx-24v",
     tagline: "Tecnología GaN · Regulador manual 4 niveles · Convección natural · IP20",
     certifications: ["CE", "RoHS"],
     attributes: { voltage: "24V", watt: 150, current: "6.25A" },
@@ -647,6 +654,7 @@ async function main() {
       attributes: p.attributes,
       tagline: p.tagline,
       variantLabel: p.variantLabel ?? null,
+      variantGroupId: p.variantGroup ?? null,
       highlights: p.highlights,
       luminaireType: p.luminaireType,
       sourceLocale: "es",

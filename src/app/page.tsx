@@ -1,5 +1,6 @@
 import { ScanLine, ArrowDownRight } from "lucide-react";
 import { SiteSearch } from "@/components/site-search";
+import { LuzHubMark } from "@/components/luzhub-mark";
 
 export default function Home() {
   return (
@@ -8,9 +9,9 @@ export default function Home() {
       <header className="glass-nav fixed inset-x-0 top-0 z-20 border-b border-[var(--color-rule)]">
         <div className="mx-auto flex h-12 max-w-[1240px] items-center justify-between px-5 sm:px-10">
           <div className="flex items-center gap-2.5">
-            <CloudMark />
+            <LuzHubMark size={20} />
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-              Cloud
+              LuzHub
             </span>
             <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-faint)] sm:inline">
               · Datasheet Portal
@@ -157,7 +158,7 @@ export default function Home() {
         {/* Bottom marginalia */}
         <div className="mt-24 border-t border-[var(--color-rule)] pt-5 rise-in" data-step="6">
           <div className="flex flex-col items-start justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)] sm:flex-row sm:items-center">
-            <span>Cloud · Datasheet Portal · 2026</span>
+            <span>LuzHub · Datasheet Portal · 2026</span>
             <span className="flex items-center gap-3">
               <span className="hidden sm:inline">Access by scan only</span>
               <span className="text-[var(--color-ink-faint)]">·</span>
@@ -195,23 +196,3 @@ function IndexRow({ no, zh, en }: { no: string; zh: string; en: string }) {
   );
 }
 
-function CloudMark() {
-  return (
-    <svg
-      width="20"
-      height="14"
-      viewBox="0 0 20 14"
-      aria-hidden
-      className="text-[var(--color-ink)]"
-    >
-      <path
-        d="M14.8 12.8H4.4c-2.1 0-3.9-1.6-3.9-3.8 0-1.9 1.4-3.5 3.2-3.8 0.3-2.6 2.5-4.6 5.2-4.6 2.4 0 4.4 1.6 5 3.7 0.2 0 0.4-0.1 0.6-0.1 2.2 0 4 1.8 4 4 0 2.6-2 4.6-4.7 4.6Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.1"
-        strokeLinejoin="round"
-      />
-      <circle cx="9.5" cy="7" r="1.6" fill="currentColor" />
-    </svg>
-  );
-}

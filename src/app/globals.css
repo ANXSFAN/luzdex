@@ -16,11 +16,12 @@
   --color-rule: #d2d2d7;
   --color-rule-strong: #86868b;
 
-  /* Accent — a restrained warm orange-red, fitting for a lighting brand
-     (the mood is light/warmth, not cold tech-blue). Per-tenant white-label
-     colour (factory.accentColor) overrides --color-accent at runtime when set. */
-  --color-accent: #d98368;
-  --color-accent-soft: #be6649;
+  /* Accent — LuzHub brand terracotta (logo palette: Charcoal #403B38 /
+     Terracotta #CC7353 / Amber #DCA15F / Cream #FDF8F2). Warm light, not
+     cold tech-blue. Per-tenant white-label colour (factory.accentColor)
+     overrides --color-accent at runtime when set. */
+  --color-accent: #cc7353;
+  --color-accent-soft: #b25f41;
 
   /* Radius scale — Apple */
   --radius: 10px;
@@ -41,6 +42,10 @@
   --font-mono:
     var(--font-mono), ui-monospace, "SF Mono", "Cascadia Mono", "Menlo",
     monospace;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -354,6 +359,9 @@ section {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {

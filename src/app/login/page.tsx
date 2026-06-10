@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { LuzHubMark } from "@/components/luzhub-mark";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,11 +35,14 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface-sunken)] px-6">
       <div className="w-full max-w-sm rounded-3xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-8 shadow-[0_8px_40px_rgba(0,0,0,0.06)] sm:p-10">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          Datasheet Admin
-        </p>
-        <h1 className="headline-lg mt-2 text-[26px] text-[var(--color-ink)]">
-          资料站后台
+        <div className="flex items-center gap-2.5">
+          <LuzHubMark size={22} />
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
+            LuzHub Admin
+          </p>
+        </div>
+        <h1 className="headline-lg mt-3 text-[26px] text-[var(--color-ink)]">
+          LuzHub 后台
         </h1>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
