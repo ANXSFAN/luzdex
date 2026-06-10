@@ -3,20 +3,22 @@ import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { parseConditions } from "@/lib/compat";
+import { localizedName } from "@/lib/catalog";
 import { RuleManager } from "@/components/rule-manager";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminRulesPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "admin.page" });
 
   const [categories, rules] = factory
     ? await Promise.all([
         prisma.category.findMany({
           where: { factoryId: factory.id },
           orderBy: { sortOrder: "asc" },
-          select: { id: true, name: true, parentId: true },
+          select: { id: true, name: true, nameI18n: true, parentId: true },
         }),
         prisma.compatRule.findMany({
           where: { factoryId: factory.id },
@@ -26,7 +28,7 @@ export default async function AdminRulesPage() {
     : [[], []];
 
   const catNames: Record<string, string> = {};
-  for (const c of categories) catNames[c.id] = c.name;
+  for (const c of categories) catNames[c.id] = localizedName(c.name, c.nameI18n, locale);
 
   return (
     <div>
@@ -52,7 +54,11 @@ export default async function AdminRulesPage() {
           </div>
         ) : (
           <RuleManager
-            categories={categories}
+            categories={categories.map((c) => ({
+              id: c.id,
+              name: catNames[c.id],
+              parentId: c.parentId,
+            }))}
             catNames={catNames}
             rules={rules.map((r) => ({
               id: r.id,

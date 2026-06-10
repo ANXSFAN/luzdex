@@ -12,7 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createCategory } from "@/app/admin/products/catalog-actions";
 import { CategoryEditor } from "@/components/catalog-editors";
 
@@ -35,9 +35,14 @@ export function CategoryManager({
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
+  const locale = useLocale();
   const [selId, setSelId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [pending, start] = useTransition();
+
+  // 树标签按后台语言显示译名（缺译回退源名）；右侧编辑器仍编辑全部语言。
+  const disp = (c: Cat) =>
+    c.nameI18n[locale]?.trim() ? c.nameI18n[locale] : c.name;
 
   const childrenOf = new Map<string | null, Cat[]>();
   for (const c of categories) {
@@ -115,7 +120,7 @@ export function CategoryManager({
             onClick={() => setSelId(cat.id)}
             className="flex min-w-0 flex-1 items-center gap-1.5 py-1.5 text-left text-sm"
           >
-            <span className="truncate">{cat.name}</span>
+            <span className="truncate">{disp(cat)}</span>
             {cat.kind && (
               <span className="shrink-0 rounded bg-[var(--color-surface-sunken)] px-1 text-sm text-[var(--color-ink-faint)]">
                 {cat.kind}
@@ -188,7 +193,7 @@ export function CategoryManager({
             category={activeCat}
             categories={categories.map((c) => ({
               id: c.id,
-              name: c.name,
+              name: disp(c),
               parentId: c.parentId,
             }))}
             onDeleted={() => setSelId(null)}

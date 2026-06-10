@@ -4,13 +4,14 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { getAdminLocale } from "@/lib/admin-locale";
-import { productReadiness } from "@/lib/products";
+import { productReadiness, localizedProductName } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin" });
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "admin" });
 
   if (!factory) {
     return (
@@ -83,7 +84,9 @@ export default async function AdminDashboardPage() {
     else if (r.stale) stale++;
   }
 
-  const nameById = new Map(products.map((p) => [p.id, p.name]));
+  const nameById = new Map(
+    products.map((p) => [p.id, localizedProductName(p.name, p.contentI18n, locale)])
+  );
   const top = topScans
     .map((g) => ({ id: g.productId, name: nameById.get(g.productId) ?? "—", scans: g._count._all }))
     .filter((t) => t.scans > 0);

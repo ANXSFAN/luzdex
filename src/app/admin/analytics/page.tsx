@@ -10,6 +10,7 @@ import {
   parseDetailBlocks,
   parseContentI18n,
   contentSourceHash,
+  localizedProductName,
 } from "@/lib/products";
 import { routing, LOCALE_LABELS, type AppLocale } from "@/i18n/routing";
 
@@ -59,6 +60,9 @@ export default async function AdminAnalyticsPage() {
     : [];
   const productIds = products.map((p) => p.id);
   const productById = new Map(products.map((p) => [p.id, p]));
+  // 显示名按后台语言取译名（不动 p.name 源字段——contentSourceHash 用它算指纹）
+  const dispName = (p: { name: string; contentI18n: unknown }) =>
+    localizedProductName(p.name, p.contentI18n, locale);
 
   // 内容覆盖度：每个产品是否有展示内容、译文是否齐全 / 过期
   const coverage = products.map((p) => {
@@ -228,7 +232,7 @@ export default async function AdminAnalyticsPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm text-[var(--color-ink)]">
-                        {p.name}
+                        {dispName(p)}
                       </p>
                       <p className="truncate font-mono text-[11px] text-[var(--color-ink-muted)]">
                         {p.modelNumber}
@@ -337,7 +341,7 @@ export default async function AdminAnalyticsPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-[var(--color-ink)]">
-                          {p.name}
+                          {dispName(p)}
                         </p>
                         <p className="truncate font-mono text-[11px] text-[var(--color-ink-muted)]">
                           {p.modelNumber}

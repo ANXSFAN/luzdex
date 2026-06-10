@@ -15,7 +15,9 @@ import {
   parseContentI18n,
   contentSourceHash,
   parseSpecs,
+  localizedProductName,
 } from "@/lib/products";
+import { getAdminLocale } from "@/lib/admin-locale";
 import { suggestByRules, parseConditions, type CompatRuleData } from "@/lib/compat";
 import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
@@ -74,8 +76,10 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   ]);
   if (!product) notFound();
 
-  // 配件关系 + 规则引擎建议（同工厂候选池）
-  const [candidates, ruleCats, rawRules] = await Promise.all([
+  const adminLocale = await getAdminLocale();
+
+  // 配件关系 + 规则引擎建议（同工厂候选池）。候选名按后台语言取译名展示。
+  const [rawCandidates, ruleCats, rawRules] = await Promise.all([
     prisma.product.findMany({
       where: { factoryId: product.factoryId, id: { not: product.id } },
       select: {
@@ -87,6 +91,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         attributes: true,
         variantLabel: true,
         variantGroupId: true,
+        contentI18n: true,
       },
       orderBy: { name: "asc" },
     }),
@@ -99,13 +104,23 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       orderBy: { priority: "desc" },
     }),
   ]);
+  const candidates = rawCandidates.map((c) => ({
+    ...c,
+    name: localizedProductName(c.name, c.contentI18n, adminLocale),
+  }));
+  const candI18nById = new Map(rawCandidates.map((c) => [c.id, c.contentI18n]));
+
   const attrs = parseAttributes(product.attributes);
   const links = product.linksOut.map((l) => ({
     linkId: l.id,
     toId: l.toId,
     relation: l.relation,
     modelNumber: l.to.modelNumber,
-    name: l.to.name,
+    name: localizedProductName(
+      l.to.name,
+      candI18nById.get(l.toId) ?? null,
+      adminLocale
+    ),
     category: l.to.category,
   }));
   const excludeIds = new Set<string>([product.id, ...links.map((l) => l.toId)]);
@@ -157,7 +172,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     {
       id: product.id,
       modelNumber: product.modelNumber,
-      name: product.name,
+      name: localizedProductName(product.name, product.contentI18n, adminLocale),
       variantLabel: product.variantLabel,
     },
     ...candidates
@@ -307,7 +322,9 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
 
       <div className="mt-4 flex items-start justify-between gap-4">
         <div>
-          <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{product.name}</h1>
+          <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">
+            {localizedProductName(product.name, product.contentI18n, adminLocale)}
+          </h1>
           <p className="mt-1 font-mono text-sm text-[var(--color-ink-muted)]">
             {product.modelNumber}
           </p>
@@ -477,7 +494,10 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         videos={product.videos}
       />
 
-      <DeleteProductButton productId={product.id} productName={product.name} />
+      <DeleteProductButton
+        productId={product.id}
+        productName={localizedProductName(product.name, product.contentI18n, adminLocale)}
+      />
     </div>
   );
 }

@@ -996,3 +996,12 @@ function localizedText(json: unknown, locale: string): string | null {
   const v = (json as Record<string, unknown>)[locale];
   return typeof v === "string" && v.trim() ? v : null;
 }
+
+/** 后台展示用：按管理界面语言取产品译名（contentI18n），缺译回退源 name。 */
+export function localizedProductName(
+  name: string,
+  contentI18n: unknown,
+  locale: string
+): string {
+  return parseContentI18n(contentI18n)[locale]?.name || name;
+}

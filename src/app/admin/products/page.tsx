@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { getTranslations } from "next-intl/server";
-import { productReadiness } from "@/lib/products";
-import { parseNameI18n } from "@/lib/catalog";
+import { productReadiness, localizedProductName } from "@/lib/products";
+import { parseNameI18n, localizedName } from "@/lib/catalog";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { QrExportButton } from "@/components/qr-export-button";
 import { Catalog } from "@/components/catalog";
@@ -96,7 +96,8 @@ export default async function AdminCatalogPage({
     const r = productReadiness({ ...p, imageCount: p._count.images });
     return {
       id: p.id,
-      name: p.name,
+      // 列表按后台语言显示译名（缺译回退源名）；编辑器内仍编辑源字段。
+      name: localizedProductName(p.name, p.contentI18n, locale),
       modelNumber: p.modelNumber,
       coverImage: p.coverImage,
       categoryId: p.categoryId,
@@ -149,7 +150,7 @@ export default async function AdminCatalogPage({
         <Catalog
           categories={categories.map((c) => ({
             id: c.id,
-            name: c.name,
+            name: localizedName(c.name, c.nameI18n, locale),
             nameI18n: parseNameI18n(c.nameI18n),
             image: c.image,
             icon: c.icon,
@@ -158,7 +159,7 @@ export default async function AdminCatalogPage({
           }))}
           series={series.map((s) => ({
             id: s.id,
-            name: s.name,
+            name: localizedName(s.name, s.nameI18n, locale),
             nameI18n: parseNameI18n(s.nameI18n),
             categoryId: s.categoryId,
             intro: s.intro,

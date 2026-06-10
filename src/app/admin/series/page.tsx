@@ -2,14 +2,15 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { getAdminLocale } from "@/lib/admin-locale";
-import { parseNameI18n } from "@/lib/catalog";
+import { parseNameI18n, localizedName } from "@/lib/catalog";
 import { SeriesManager } from "@/components/series-manager";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSeriesPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "admin.page" });
 
   const [series, categories, counts] = factory
     ? await Promise.all([
@@ -29,7 +30,7 @@ export default async function AdminSeriesPage() {
         prisma.category.findMany({
           where: { factoryId: factory.id },
           orderBy: { sortOrder: "asc" },
-          select: { id: true, name: true },
+          select: { id: true, name: true, nameI18n: true },
         }),
         prisma.product.groupBy({
           by: ["seriesId"],
@@ -70,7 +71,10 @@ export default async function AdminSeriesPage() {
             introI18n: parseNameI18n(s.introI18n),
             coverImage: s.coverImage,
           }))}
-          categories={categories}
+          categories={categories.map((c) => ({
+            id: c.id,
+            name: localizedName(c.name, c.nameI18n, locale),
+          }))}
           serCounts={serCounts}
         />
       )}

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Tag, Plus, Loader2, ImageOff } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createSeries } from "@/app/admin/products/catalog-actions";
 import { SeriesEditor } from "@/components/catalog-editors";
 
@@ -30,9 +30,13 @@ export function SeriesManager({
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
+  const locale = useLocale();
   const [selId, setSelId] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  // 列表标签按后台语言显示译名（缺译回退源名）；右侧编辑器仍编辑全部语言。
+  const disp = (s: Ser) =>
+    s.nameI18n[locale]?.trim() ? s.nameI18n[locale] : s.name;
   const catName = (id: string | null) =>
     id ? categories.find((c) => c.id === id)?.name ?? "—" : t("series.noCategory");
   const active = selId ? series.find((s) => s.id === selId) ?? null : null;
@@ -101,7 +105,7 @@ export function SeriesManager({
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-[var(--color-ink)]">{s.name}</p>
+                      <p className="truncate text-sm text-[var(--color-ink)]">{disp(s)}</p>
                       <p className="truncate text-sm text-[var(--color-ink-muted)]">
                         {catName(s.categoryId)}
                       </p>
