@@ -39,12 +39,25 @@ const SYSTEM =
   "Natural, consumer-facing tone. Never add contact info, prices, or any " +
   "seller/manufacturer/procurement wording. Output ONLY the JSON object.";
 
-// 与 src/lib/products.ts 的 contentSourceHash 保持一致（同字段、同 djb2 算法）
+// 与 src/lib/products.ts 的 specsWithoutKeys 保持一致：指纹口径剥掉字典 key
+function specsWithoutKeys(specs: unknown): unknown {
+  if (!Array.isArray(specs)) return specs;
+  return specs.map((row) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return row;
+    const { key: _key, ...rest } = row as Record<string, unknown>;
+    void _key;
+    return rest;
+  });
+}
+
+// 与 src/lib/products.ts 的 contentSourceHash 保持一致（同字段、同顺序、同 djb2 算法）。
+// 少一个字段戳就永远对不上 → 全部产品被误标「译文过期」。
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function srcHash(p: any): string {
   const s = JSON.stringify([
     p.name, p.description, p.tagline, p.highlights, p.applications,
-    p.faq, p.boxContents, p.install, p.dimensions, p.detailBlocks, p.sourceLocale,
+    p.faq, p.boxContents, p.install, p.dimensions, p.detailBlocks,
+    specsWithoutKeys(p.specs), p.sourceLocale,
   ]);
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
@@ -122,6 +135,7 @@ async function main() {
       detailBlocks: true,
       specs: true,
       sourceLocale: true,
+      contentI18n: true,
       documents: { select: { title: true }, orderBy: { sortOrder: "asc" } },
       videos: { select: { title: true }, orderBy: { sortOrder: "asc" } },
     },
@@ -143,27 +157,54 @@ async function main() {
       install: p.install ?? null,
       dimensions: p.dimensions ?? null,
       detailBlocks: p.detailBlocks ?? [],
-      specs: p.specs ?? [],
+      // 字典 key 不属于可翻译内容，发给 AI 前剥掉（防 AI 改坏/回传带 key）
+      specs: specsWithoutKeys(p.specs ?? []),
       docTitles: p.documents.map((d) => d.title),
       videoTitles: p.videos.map((v) => v.title),
     };
     const srcJson = JSON.stringify(source);
     const targets = LOCALES.filter((l) => l !== from);
 
+    // 源里非空的板块译文必须都在，缺板块按失败算（防 AI 偷工减料丢场景/详情等）
+    const requiredKeys = Object.entries(source)
+      .filter(([, v]) =>
+        Array.isArray(v) ? v.length > 0 : typeof v === "string" ? !!v.trim() : v != null
+      )
+      .map(([k]) => k);
+    const isComplete = (val: unknown) => {
+      if (!val || typeof val !== "object" || Array.isArray(val)) return false;
+      const r = val as Record<string, unknown>;
+      return requiredKeys.every((k) => {
+        const v = r[k];
+        if (v == null) return false;
+        if (Array.isArray(v)) return v.length > 0;
+        if (typeof v === "string") return !!v.trim();
+        return true;
+      });
+    };
+
     const results = await Promise.all(
       targets.map(async (loc) => {
-        try {
-          return [loc, await translateTo(srcJson, from, loc)] as const;
-        } catch (e) {
-          console.log(
-            `  · ${p.slug} → ${loc} 失败: ${e instanceof Error ? e.message : e}`
-          );
-          return [loc, null] as const;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            const val = await translateTo(srcJson, from, loc);
+            if (isComplete(val)) return [loc, val] as const;
+            console.log(`  · ${p.slug} → ${loc} 译文缺板块，重试 ${attempt + 1}/2`);
+          } catch (e) {
+            console.log(
+              `  · ${p.slug} → ${loc} 失败: ${e instanceof Error ? e.message : e}`
+            );
+          }
         }
+        return [loc, null] as const;
       })
     );
 
-    const contentI18n: Record<string, unknown> = {};
+    // 合并写入：失败语言保留已有旧译文，不被整体覆盖清空
+    const contentI18n: Record<string, unknown> =
+      p.contentI18n && typeof p.contentI18n === "object" && !Array.isArray(p.contentI18n)
+        ? { ...(p.contentI18n as Record<string, unknown>) }
+        : {};
     let ok = 0;
     for (const [loc, val] of results) {
       if (val) {
@@ -175,7 +216,8 @@ async function main() {
       where: { id: p.id },
       data: {
         contentI18n: contentI18n as Prisma.InputJsonObject,
-        translationStamp: srcHash(p),
+        // 部分失败不盖戳，让后台「译文过期/未译」继续提示重跑
+        ...(ok === targets.length ? { translationStamp: srcHash(p) } : {}),
       },
     });
     console.log(`✓ ${p.slug} — 翻译 ${ok}/${targets.length} 种语言`);

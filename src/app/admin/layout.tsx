@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
@@ -17,9 +18,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // 第二道门控：中间件失效/被绕过时兜底，未登录绝不渲染任何后台数据
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
   const locale = await getAdminLocale();
-  const [session, factories, activeFactory, messages, t] = await Promise.all([
-    auth(),
+  const [factories, activeFactory, messages, t] = await Promise.all([
     prisma.factory.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, brandShort: true },

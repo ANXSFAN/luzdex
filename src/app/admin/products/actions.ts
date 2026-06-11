@@ -287,7 +287,8 @@ const LANG_NAMES: Record<AppLocale, string> = {
  * AI 把源语言展示内容翻译成其余 8 种语言，写入 `contentI18n`（直接入库、可重跑）。
  * 「填一种语言 → 其余 AI 补全」：读已保存的源字段，逐语言并行翻译。
  * 红线写进 prompt：只译文字、保结构/数字/图标/URL，禁联系/价格/厂家/采购词。
- * specs 不翻译（保持源语言，避免语言相关启发式失效）。
+ * 译文包做完整性校验：源里非空的板块（场景/图文详情/盒内清单/安装/FAQ…）译文必须
+ * 都在，缺板块视为该语言失败并重试一次；失败语言保留旧译文（合并写入，不整体覆盖）。
  */
 export async function translateShowcase(productId: string) {
   const factory = await authedFactory();
@@ -308,7 +309,9 @@ export async function translateShowcase(productId: string) {
       detailBlocks: true,
       specs: true,
       sourceLocale: true,
+      contentI18n: true,
       documents: { select: { title: true }, orderBy: { sortOrder: "asc" } },
+      videos: { select: { title: true }, orderBy: { sortOrder: "asc" } },
     },
   });
   if (!product) throw await adminErr("productNotFound");
@@ -332,11 +335,39 @@ export async function translateShowcase(productId: string) {
       return rest;
     }),
     docTitles: product.documents.map((d) => d.title),
+    videoTitles: product.videos.map((v) => v.title),
   };
 
   const sourceLocale = normalizeLocale(product.sourceLocale) ?? "es";
   const targets = routing.locales.filter((l) => l !== sourceLocale);
   const srcJson = JSON.stringify(source);
+
+  // 源里非空的板块，译文包必须同样非空——AI 偶发丢板块（场景/图文详情/盒内清单等）
+  // 时不能当成功入库，否则前台该语言整块回退源语言。
+  const requiredKeys = (
+    [
+      ["name", !!source.name.trim()],
+      ["description", !!source.description.trim()],
+      ["tagline", !!source.tagline.trim()],
+      ["highlights", source.highlights.length > 0],
+      ["applications", source.applications.length > 0],
+      ["faq", source.faq.length > 0],
+      ["boxContents", source.boxContents.length > 0],
+      ["install", !!source.install],
+      ["dimensions", !!source.dimensions],
+      ["detailBlocks", source.detailBlocks.length > 0],
+      ["specs", source.specs.length > 0],
+      ["docTitles", source.docTitles.length > 0],
+      ["videoTitles", source.videoTitles.length > 0],
+    ] as const
+  )
+    .filter(([, has]) => has)
+    .map(([k]) => k);
+  const missingKeys = (lc: LocalizedContent) =>
+    requiredKeys.filter((k) => {
+      const v = lc[k as keyof LocalizedContent];
+      return v == null || (Array.isArray(v) && v.length === 0);
+    });
 
   const system: ChatMessage = {
     role: "system",
@@ -349,31 +380,38 @@ export async function translateShowcase(productId: string) {
       "For specs translate 'group', 'label', and any descriptive words in 'value' " +
       "(e.g. material names, '已通过' → 'passed'); but keep numbers, measurements, " +
       "units and codes unchanged (e.g. 50000, IP66, AC 100-277V, lm/W, K, Ra, °, Ø75). " +
-      "Translate each string in 'docTitles' (document titles). " +
+      "Translate each string in 'docTitles' (document titles) and " +
+      "'videoTitles' (video titles). " +
       "Natural, consumer-facing tone. Never add contact info, prices, or any " +
       "seller/manufacturer/procurement wording. Output ONLY the JSON object.",
   };
 
   const results = await Promise.all(
     targets.map(async (loc) => {
-      try {
-        const raw = await openRouterJSON([
-          system,
-          {
-            role: "user",
-            content:
-              `Translate from ${LANG_NAMES[sourceLocale]} to ${LANG_NAMES[loc]}. ` +
-              `Return the same JSON shape with text translated:\n${srcJson}`,
-          },
-        ]);
-        return [loc, parseLocalizedContent(raw)] as const;
-      } catch {
-        return [loc, null] as const;
+      // 完整性不达标（缺板块）按失败算，重试一次
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const raw = await openRouterJSON([
+            system,
+            {
+              role: "user",
+              content:
+                `Translate from ${LANG_NAMES[sourceLocale]} to ${LANG_NAMES[loc]}. ` +
+                `Return the same JSON shape with text translated:\n${srcJson}`,
+            },
+          ]);
+          const lc = parseLocalizedContent(raw);
+          if (missingKeys(lc).length === 0) return [loc, lc] as const;
+        } catch {
+          /* retry */
+        }
       }
+      return [loc, null] as const;
     })
   );
 
-  const contentI18n: Record<string, LocalizedContent> = {};
+  // 合并写入：失败语言保留已有旧译文，不被整体覆盖清空
+  const contentI18n = parseContentI18n(product.contentI18n);
   let ok = 0;
   for (const [loc, lc] of results) {
     if (lc) {
@@ -386,21 +424,26 @@ export async function translateShowcase(productId: string) {
     where: { id: productId },
     data: {
       contentI18n,
-      // 记录本次翻译所基于的源内容指纹，供"过期"检测
-      translationStamp: contentSourceHash({
-        name: product.name,
-        description: product.description,
-        tagline: product.tagline,
-        highlights: product.highlights,
-        applications: product.applications,
-        faq: product.faq,
-        boxContents: product.boxContents,
-        install: product.install,
-        dimensions: product.dimensions,
-        detailBlocks: product.detailBlocks,
-        specs: product.specs,
-        sourceLocale: product.sourceLocale,
-      }),
+      // 记录本次翻译所基于的源内容指纹，供"过期"检测。
+      // 只有全部目标语言都翻成功才盖戳；部分失败保留旧戳，让「译文过期/未译」继续提示重跑。
+      ...(ok === targets.length
+        ? {
+            translationStamp: contentSourceHash({
+              name: product.name,
+              description: product.description,
+              tagline: product.tagline,
+              highlights: product.highlights,
+              applications: product.applications,
+              faq: product.faq,
+              boxContents: product.boxContents,
+              install: product.install,
+              dimensions: product.dimensions,
+              detailBlocks: product.detailBlocks,
+              specs: product.specs,
+              sourceLocale: product.sourceLocale,
+            }),
+          }
+        : {}),
     },
   });
 
@@ -449,6 +492,9 @@ export async function saveTranslation(input: {
     if (input.name.trim()) built.name = input.name.trim();
   } else if (prev.name) built.name = prev.name;
   if (prev.specs?.length) built.specs = prev.specs; // 保留规格译文
+  // 文档/视频标题译文不归这个编辑器管，保存时原样保留，防止整包重建时丢失
+  if (prev.docTitles?.length) built.docTitles = prev.docTitles;
+  if (prev.videoTitles?.length) built.videoTitles = prev.videoTitles;
   if (input.description.trim()) built.description = input.description.trim();
   if (input.tagline.trim()) built.tagline = input.tagline.trim();
   const hl = parseHighlights(input.highlights);
