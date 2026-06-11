@@ -14,13 +14,14 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { confirmDialog } from "@/components/confirm-dialog";
 import { MultiLang } from "@/components/multi-lang";
 import {
   type AttrDef,
   ATTR_KEY_RE,
   ATTR_TYPES,
+  attrLabel,
 } from "@/lib/attribute-defaults";
 import {
   createAttribute,
@@ -103,6 +104,7 @@ function AttrRow({
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
+  const locale = useLocale(); // 后台界面语言；列表显示名跟随它取译名
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(attr.name);
   const [nameI18n, setNameI18n] = useState<Record<string, string>>(attr.nameI18n);
@@ -144,7 +146,7 @@ function AttrRow({
   async function remove() {
     if (
       !(await confirmDialog({
-        message: t("attr.deleteConfirm", { name: attr.name }),
+        message: t("attr.deleteConfirm", { name: attrLabel(attr, locale) }),
         confirmText: t("common.delete"),
         danger: true,
       }))
@@ -176,7 +178,7 @@ function AttrRow({
             className={`h-4 w-4 shrink-0 text-[var(--color-ink-faint)] transition-transform ${open ? "" : "-rotate-90"}`}
           />
           <span className="truncate text-sm font-medium text-[var(--color-ink)]">
-            {attr.name}
+            {attrLabel(attr, locale)}
           </span>
           <span className="rounded bg-[var(--color-surface-sunken)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--color-ink-muted)]">
             {attr.key}
