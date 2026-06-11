@@ -23,6 +23,7 @@ import { prisma } from "@/lib/prisma";
 import {
   findSeriesPage,
   buildVariantMatrix,
+  siteUrl,
   type SeriesProduct,
   type ProductHighlight,
 } from "@/lib/products";
@@ -79,9 +80,32 @@ export async function generateMetadata({
   const series = await findSeriesPage(slug, locale);
   if (!series) return { title: "Series not found" };
   // 纯展示定位：标题只留系列名，不带任何工厂 / 品牌信息。
+  const title = series.name;
+  const description =
+    stripMarkdown(series.intro).slice(0, 200) || undefined;
+  // 分享卡图片：系列主视觉优先，无则取系列内第一张产品封面。
+  const image =
+    series.coverImage ??
+    series.products.find((p) => p.coverImage)?.coverImage ??
+    undefined;
+  const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  const url = `${siteUrl()}${localePrefix}/series/${series.slug}`;
   return {
-    title: series.name,
+    title,
+    description,
     robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+    },
   };
 }
 

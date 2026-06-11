@@ -32,6 +32,7 @@ import { localizedName } from "@/lib/catalog";
 import {
   findPublicProductBySlug,
   findRelatedProducts,
+  siteUrl,
   findVariants,
   findVariantComparison,
   buildVariantMatrix,
@@ -72,7 +73,7 @@ import { ShareButton } from "@/components/share-button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
-import { renderMarkdown } from "@/lib/md";
+import { renderMarkdown, stripMarkdown } from "@/lib/md";
 import { LuzHubMark } from "@/components/luzhub-mark";
 
 interface PageProps {
@@ -92,13 +93,40 @@ export async function generateViewport({ params }: PageProps): Promise<Viewport>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
   const product = await findPublicProductBySlug(slug);
   if (!product) return { title: "Product not found" };
   // 纯展示定位：标题不带任何工厂/品牌信息，只留产品名 + 型号。
+  const locale = normalizeLocale(rawLocale) ?? routing.defaultLocale;
+  const tr = parseContentI18n(product.contentI18n)[locale];
+  const name = tr?.name || product.name;
+  const title = `${name} · ${product.modelNumber}`;
+  // 分享卡描述：卖点带优先，缺了取描述纯文本截断；两者都无则省略。
+  const description =
+    tr?.tagline ||
+    product.tagline ||
+    stripMarkdown(tr?.description || product.description).slice(0, 200) ||
+    undefined;
+  // 分享卡图片：封面优先，无封面取图库第一张（R2 绝对 URL，直接可用）。
+  const image = product.coverImage ?? product.images[0]?.url ?? undefined;
+  const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  const url = `${siteUrl()}${localePrefix}/p/${product.slug}`;
   return {
-    title: `${product.name} · ${product.modelNumber}`,
+    title,
+    description,
     robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+    },
   };
 }
 
