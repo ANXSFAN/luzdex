@@ -17,7 +17,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LuzHub · Datasheet Portal",
+  title: "Luzdex · Datasheet Portal",
   description: "Product specifications, documents, and media — served via QR scan.",
   robots: { index: false, follow: false },
 };

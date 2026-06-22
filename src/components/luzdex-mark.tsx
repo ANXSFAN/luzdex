@@ -1,9 +1,9 @@
 /**
- * LuzHub 品牌标识（来自 logo asset sheet）：
+ * Luzdex 品牌标识（来自 logo asset sheet）：
  * 炭黑 #403B38 的 L 形主体 + 陶土 #CC7353 的上扬笔画 + 琥珀 #DCA15F 四角星点。
  * mono 模式整体走 currentColor（深底/单色场景）。纯 SVG，服务端组件可用。
  */
-export function LuzHubMark({
+export function LuzdexMark({
   size = 18,
   mono = false,
   className,

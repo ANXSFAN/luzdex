@@ -32,7 +32,7 @@ import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 import { renderMarkdown, stripMarkdown } from "@/lib/md";
-import { LuzHubMark } from "@/components/luzhub-mark";
+import { LuzdexMark } from "@/components/luzdex-mark";
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -674,5 +674,5 @@ function HighlightStack({ h }: { h: ProductHighlight }) {
 
 // 平台品牌标识（与产品页 FactoryMark 无 logo 形态一致）。
 function DatasheetMark() {
-  return <LuzHubMark size={20} />;
+  return <LuzdexMark size={20} />;
 }

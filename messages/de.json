@@ -1,6 +1,6 @@
 {
   "admin": {
-    "brand": "LuzHub-Admin",
+    "brand": "Luzdex-Admin",
     "nav": {
       "overview": "Übersicht",
       "products": "Produkte",
@@ -601,7 +601,7 @@
   },
   "product": {
     "header": {
-      "datasheetTag": "LuzHub",
+      "datasheetTag": "Luzdex",
       "ref": "Ref · {ref}",
       "rev": "Rev · {date}"
     },

@@ -1,6 +1,6 @@
 {
   "admin": {
-    "brand": "Panel LuzHub",
+    "brand": "Panel Luzdex",
     "nav": {
       "overview": "Przegląd",
       "products": "Produkty",
@@ -601,7 +601,7 @@
   },
   "product": {
     "header": {
-      "datasheetTag": "LuzHub",
+      "datasheetTag": "Luzdex",
       "ref": "Ref · {ref}",
       "rev": "Rev · {date}"
     },

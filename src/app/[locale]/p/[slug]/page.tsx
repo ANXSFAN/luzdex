@@ -74,7 +74,7 @@ import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 import { renderMarkdown, stripMarkdown } from "@/lib/md";
-import { LuzHubMark } from "@/components/luzhub-mark";
+import { LuzdexMark } from "@/components/luzdex-mark";
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -1735,5 +1735,5 @@ function FactoryMark({ logoUrl }: { logoUrl: string | null }) {
     /* eslint-disable-next-line @next/next/no-img-element */
     return <img src={logoUrl} alt="" className="h-[18px] w-auto" />;
   }
-  return <LuzHubMark size={20} />;
+  return <LuzdexMark size={20} />;
 }

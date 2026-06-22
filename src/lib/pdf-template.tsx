@@ -10,29 +10,30 @@ import {
   Font,
 } from "@react-pdf/renderer";
 import type { ProductSpec } from "@/lib/products";
+import {
+  interRegular,
+  interMedium,
+  interSemiBold,
+  jetBrainsMonoMedium,
+} from "@/lib/pdf-fonts";
 
-/** Inter for body/sans, JetBrains Mono for tabular numerics & codes. */
+/**
+ * Inter for body/sans, JetBrains Mono for tabular numerics & codes.
+ * 字体以 base64 内置(见 pdf-fonts.ts)——之前实时拉 fonts.gstatic.com,
+ * Google 下架带版本号的 ttf 后渲染整体 500。内置后不依赖外网。
+ */
 Font.register({
   family: "Inter",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa0pL7SUc.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.ttf",
-      fontWeight: 600,
-    },
+    { src: interRegular, fontWeight: 400 },
+    { src: interMedium, fontWeight: 500 },
+    { src: interSemiBold, fontWeight: 600 },
   ],
 });
 
 Font.register({
   family: "JetBrainsMono",
-  src: "https://fonts.gstatic.com/s/jetbrainsmono/v25/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.ttf",
+  src: jetBrainsMonoMedium,
   fontWeight: 500,
 });
 
@@ -371,8 +372,8 @@ export function ProductPdf({
     // 纯展示定位：PDF 不带任何工厂 / 品牌署名（标题、作者、页眉、字段均不含厂家信息）。
     <Document
       title={`${modelNumber} · ${name}`}
-      creator="LuzHub"
-      producer="LuzHub"
+      creator="Luzdex"
+      producer="Luzdex"
     >
       <Page size="A4" style={styles.page}>
         {/* Top strip — neutral datasheet mark, no brand */}

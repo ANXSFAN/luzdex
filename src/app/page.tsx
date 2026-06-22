@@ -1,6 +1,6 @@
 import { ScanLine, ArrowDownRight } from "lucide-react";
 import { SiteSearch } from "@/components/site-search";
-import { LuzHubMark } from "@/components/luzhub-mark";
+import { LuzdexMark } from "@/components/luzdex-mark";
 
 export default function Home() {
   return (
@@ -9,9 +9,9 @@ export default function Home() {
       <header className="glass-nav fixed inset-x-0 top-0 z-20 border-b border-[var(--color-rule)]">
         <div className="mx-auto flex h-12 max-w-[1240px] items-center justify-between px-5 sm:px-10">
           <div className="flex items-center gap-2.5">
-            <LuzHubMark size={20} />
+            <LuzdexMark size={20} />
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-              LuzHub
+              Luzdex
             </span>
             <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-faint)] sm:inline">
               · Datasheet Portal
@@ -158,7 +158,7 @@ export default function Home() {
         {/* Bottom marginalia */}
         <div className="mt-24 border-t border-[var(--color-rule)] pt-5 rise-in" data-step="6">
           <div className="flex flex-col items-start justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)] sm:flex-row sm:items-center">
-            <span>LuzHub · Datasheet Portal · 2026</span>
+            <span>Luzdex · Datasheet Portal · 2026</span>
             <span className="flex items-center gap-3">
               <span className="hidden sm:inline">Access by scan only</span>
               <span className="text-[var(--color-ink-faint)]">·</span>

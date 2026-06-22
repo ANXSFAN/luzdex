@@ -10,7 +10,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { FactorySwitcher } from "@/components/factory-switcher";
 import { AdminNav } from "@/components/admin-nav";
 import { AdminLanguageSwitcher } from "@/components/admin-language-switcher";
-import { LuzHubMark } from "@/components/luzhub-mark";
+import { LuzdexMark } from "@/components/luzdex-mark";
 import { ConfirmHost } from "@/components/confirm-dialog";
 
 export default async function AdminLayout({
@@ -43,7 +43,7 @@ export default async function AdminLayout({
               href="/admin"
               className="flex items-center gap-2 font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-ink)] transition hover:opacity-70"
             >
-              <LuzHubMark size={18} />
+              <LuzdexMark size={18} />
               {t("brand")}
             </Link>
 
