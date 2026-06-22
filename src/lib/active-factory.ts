@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 
@@ -13,16 +14,21 @@ export type ActiveFactory = NonNullable<
   Awaited<ReturnType<typeof prisma.factory.findFirst>>
 >;
 
-/** 当前操作工厂：cookie 指定优先，否则回退到最早创建的一家。可能为 null（库里没有工厂）。 */
-export async function getActiveFactory(): Promise<ActiveFactory | null> {
-  const store = await cookies();
-  const id = store.get(COOKIE)?.value;
-  if (id) {
-    const f = await prisma.factory.findUnique({ where: { id } });
-    if (f) return f;
-  }
-  return prisma.factory.findFirst({ orderBy: { createdAt: "asc" } });
-}
+/**
+ * 当前操作工厂：cookie 指定优先，否则回退到最早创建的一家。可能为 null（库里没有工厂）。
+ * 用 React.cache 包裹：同一次请求里 layout + page 各调一遍时只查一次库（去重鉴权/导航重复成本）。
+ */
+export const getActiveFactory = cache(
+  async (): Promise<ActiveFactory | null> => {
+    const store = await cookies();
+    const id = store.get(COOKIE)?.value;
+    if (id) {
+      const f = await prisma.factory.findUnique({ where: { id } });
+      if (f) return f;
+    }
+    return prisma.factory.findFirst({ orderBy: { createdAt: "asc" } });
+  },
+);
 
 /** 仅取 id 的便捷版（同步路由 / 导入用）。 */
 export async function getActiveFactoryId(): Promise<string | null> {
