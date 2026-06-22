@@ -20,6 +20,7 @@ import {
   parseSpecs,
   parseAttributes,
   contentSourceHash,
+  recomputeReadiness,
   type ProductAttributes,
   type LocalizedContent,
 } from "@/lib/products";
@@ -174,6 +175,7 @@ export async function saveProductShowcase(input: {
     },
   });
 
+  await recomputeReadiness(input.productId);
   revalidatePath(`/admin/products/${input.productId}`);
 }
 
@@ -196,6 +198,8 @@ export async function saveProductBasics(input: {
     where: { id: input.productId },
     data: { name, modelNumber },
   });
+  // name 在 contentSourceHash 内：改名 → 译文过期，stale 需重算
+  await recomputeReadiness(input.productId);
   revalidatePath(`/admin/products/${input.productId}`);
 }
 
@@ -447,6 +451,8 @@ export async function translateShowcase(productId: string) {
     },
   });
 
+  // 译文 + 可能的新翻译戳变了：translatedCount(读时算) 与 stale 都受影响
+  await recomputeReadiness(productId);
   revalidatePath(`/admin/products/${productId}`);
   return { ok, total: targets.length };
 }
@@ -587,6 +593,8 @@ export async function autofillMissingShowcase() {
           detailBlocks: draft.detailBlocks,
         },
       });
+      // 先按新展示内容刷一遍（万一下面翻译抛错也不会留下过期的就绪度）
+      await recomputeReadiness(p.id);
       const r = await translateShowcase(p.id);
       translated += r.ok;
       done++;
@@ -887,6 +895,8 @@ export async function saveProductSpecs(input: {
     data: { specs, certifications },
   });
 
+  // specs 在 contentSourceHash 内：改规格 → 译文可能过期，stale 需重算
+  await recomputeReadiness(input.productId);
   revalidatePath(`/admin/products/${input.productId}`);
 }
 
@@ -1257,6 +1267,8 @@ export async function duplicateProduct(input: {
     select: { id: true },
   });
 
+  // 复制体带走了源的全部内容/译文：按拷贝后的实际内容算就绪度
+  await recomputeReadiness(copy.id);
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${src.id}`);
   return copy.id;

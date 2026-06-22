@@ -691,6 +691,50 @@ export function productReadiness(p: {
   return { noImage, lacksShowcase, translatedCount, stale };
 }
 
+/**
+ * 重算并写回产品的就绪度派生列（lacksShowcase / stale）——列表查询直接读这两列，
+ * 不必再逐行加载 specs/contentI18n 全量内容并算哈希。
+ * 在任何改动「源内容 / 译文 / 翻译戳」的写入【之后、事务之外】调用；可批量传 id 数组。
+ * noImage / translatedCount 不入此列——它们读时算（COUNT 整数 + contentI18n key 数，便宜）。
+ * 判定复用 productReadiness，与详情页/Dashboard 同一套逻辑，杜绝漂移。
+ */
+export async function recomputeReadiness(
+  ids: string | string[],
+): Promise<void> {
+  const list = (Array.isArray(ids) ? ids : [ids]).filter(Boolean);
+  if (list.length === 0) return;
+  const rows = await prisma.product.findMany({
+    where: { id: { in: list } },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      tagline: true,
+      highlights: true,
+      applications: true,
+      faq: true,
+      boxContents: true,
+      install: true,
+      dimensions: true,
+      detailBlocks: true,
+      specs: true,
+      sourceLocale: true,
+      contentI18n: true,
+      translationStamp: true,
+    },
+  });
+  await Promise.all(
+    rows.map((p) => {
+      // coverImage/imageCount 只影响 noImage（读时算），这里给占位值不参与落库
+      const r = productReadiness({ ...p, coverImage: null, imageCount: 0 });
+      return prisma.product.update({
+        where: { id: p.id },
+        data: { lacksShowcase: r.lacksShowcase, stale: r.stale },
+      });
+    }),
+  );
+}
+
 /** 解析整个 `contentI18n` 列：{ [locale]: LocalizedContent }。 */
 export function parseContentI18n(
   json: unknown

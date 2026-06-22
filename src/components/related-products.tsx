@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { getPathname } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { RelatedItem, RelatedAccessory } from "@/lib/products";
+import { thumbOf } from "@/lib/images";
 
 const KNOWN_CATS = new Set(["strip", "channel", "power", "connector", "accessory"]);
 
@@ -101,8 +102,13 @@ function Card({
         {item.coverImage ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={item.coverImage}
+            src={thumbOf(item.coverImage) ?? item.coverImage}
+            onError={(e) => {
+              if (item.coverImage && e.currentTarget.src !== item.coverImage)
+                e.currentTarget.src = item.coverImage;
+            }}
             alt={item.name}
+            loading="lazy"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           />
         ) : (

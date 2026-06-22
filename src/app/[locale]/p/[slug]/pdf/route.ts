@@ -24,7 +24,27 @@ function fmtDate(d: Date) {
   }).format(d);
 }
 
-async function fetchCoverBytes(url: string | null): Promise<Uint8Array | null> {
+/**
+ * @react-pdf/renderer 只能解码 PNG / JPEG，且必须告知正确 format。按 magic bytes
+ * 判定真实格式：传错（如把 PNG 当 jpg）会解码失败、PDF 里只剩一个空框。
+ * webp / avif / gif / svg 等返回 null（react-pdf 渲染不了，宁可不画也别留空框）。
+ */
+function detectImageFormat(b: Uint8Array): "png" | "jpg" | null {
+  if (
+    b.length >= 4 &&
+    b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47
+  ) {
+    return "png";
+  }
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) {
+    return "jpg";
+  }
+  return null;
+}
+
+async function fetchCover(
+  url: string | null,
+): Promise<{ data: Uint8Array; format: "png" | "jpg" } | null> {
   if (!url) return null;
   try {
     const res = await fetch(url, {
@@ -32,8 +52,9 @@ async function fetchCoverBytes(url: string | null): Promise<Uint8Array | null> {
       headers: { Accept: "image/*" },
     });
     if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    return new Uint8Array(buf);
+    const data = new Uint8Array(await res.arrayBuffer());
+    const format = detectImageFormat(data);
+    return format ? { data, format } : null;
   } catch {
     return null;
   }
@@ -56,8 +77,8 @@ export async function GET(_req: Request, ctx: RouteContext) {
   const docRef = makeDocRef(product.slug);
   const updated = fmtDate(product.syncedAt);
 
-  const [coverBytes, qrDataUrl] = await Promise.all([
-    fetchCoverBytes(product.coverImage),
+  const [cover, qrDataUrl] = await Promise.all([
+    fetchCover(product.coverImage),
     QRCode.toDataURL(url, {
       margin: 0,
       width: 240,
@@ -73,7 +94,7 @@ export async function GET(_req: Request, ctx: RouteContext) {
       description: product.description ? stripMarkdown(product.description) : null,
       certifications: product.certifications,
       specs: parseSpecs(product.specs),
-      coverImageBytes: coverBytes,
+      coverImage: cover,
       documents: product.documents.map((d) => ({
         title: d.title,
         fileName: d.fileName,

@@ -768,6 +768,7 @@
     "fileTooLarge25m": "Datei zu groß (max. 25 MB)",
     "unsupportedFileType": "Nicht unterstützter Dateityp",
     "imageOnly": "Bitte eine Bilddatei hochladen",
+    "imageTooLarge": "Bild zu groß (max. 4 MB) — bitte zuerst komprimieren oder verkleinern",
     "videoNotFound": "Video nicht gefunden",
     "aiNoKey": "OPENROUTER_API_KEY nicht konfiguriert — KI nicht verfügbar",
     "aiEmpty": "KI lieferte eine leere Antwort",

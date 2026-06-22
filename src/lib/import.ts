@@ -2,6 +2,7 @@ import "server-only";
 import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 import type { ProductSpec, ProductAttributes } from "@/lib/products";
+import { recomputeReadiness } from "@/lib/products";
 import { listAttributes } from "@/lib/attributes";
 
 /**
@@ -473,6 +474,7 @@ export async function commitPlan(
 
   let created = 0;
   let updated = 0;
+  const touchedIds: string[] = []; // 本批新建/更新的产品，事务后统一刷就绪度
 
   // 事务外预取已占用的全局 slug，减少事务内查询；事务内仍兜底唯一化。
   const takenSlugs = new Set(
@@ -534,6 +536,7 @@ export async function commitPlan(
           created++;
         }
         modelToId.set(p.model, productId);
+        touchedIds.push(productId);
 
         // 图片：该型号在图片 sheet 出现才重建（幂等）
         if (images) {
@@ -577,6 +580,9 @@ export async function commitPlan(
     },
     { timeout: 60_000, maxWait: 10_000 },
   );
+
+  // 事务提交后再刷就绪度（在事务内对同批行做副作用写会和行锁打架）
+  await recomputeReadiness(touchedIds);
 
   const job = await prisma.importJob.create({
     data: {

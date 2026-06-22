@@ -768,6 +768,7 @@
     "fileTooLarge25m": "Bestand te groot (max. 25 MB)",
     "unsupportedFileType": "Niet-ondersteund bestandstype",
     "imageOnly": "Upload een afbeeldingsbestand",
+    "imageTooLarge": "Afbeelding te groot (max. 4 MB) — comprimeer of verklein deze eerst",
     "videoNotFound": "Video niet gevonden",
     "aiNoKey": "OPENROUTER_API_KEY niet geconfigureerd — AI niet beschikbaar",
     "aiEmpty": "AI gaf een leeg antwoord terug",

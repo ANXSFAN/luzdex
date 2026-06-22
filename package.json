@@ -14,6 +14,8 @@
     "db:backfill-showcase": "tsx prisma/backfill-showcase.ts",
     "db:backfill-catalog": "tsx prisma/backfill-catalog.ts",
     "db:backfill-attributes": "tsx prisma/backfill-attributes.ts",
+    "db:backfill-readiness": "tsx prisma/backfill-readiness.ts",
+    "db:backfill-images": "tsx prisma/backfill-images.ts",
     "db:translate-all": "tsx prisma/translate-all.ts",
     "db:studio": "prisma studio"
   },
@@ -38,6 +40,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-dropzone": "^15.0.0",
+    "sharp": "^0.35.2",
     "sonner": "^2.0.7",
     "xlsx": "^0.18.5",
     "zod": "^4.3.6"

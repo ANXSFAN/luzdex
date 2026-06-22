@@ -11,6 +11,7 @@ import {
   parseInstall,
   parseDimensionsJson,
   parseAttributes,
+  recomputeReadiness,
   type ProductSpec,
   type ProductHighlight,
   type BoxItem,
@@ -373,6 +374,8 @@ async function applyDraft(input: {
   }
 
   await prisma.product.update({ where: { id: input.productId }, data });
+  // PDF 抽取填充了多个源字段（含 specs/highlights 等）：刷就绪度
+  await recomputeReadiness(input.productId);
   revalidatePath(`/admin/products/${input.productId}`);
   revalidatePath("/admin/products");
   return { applied: fields.length };

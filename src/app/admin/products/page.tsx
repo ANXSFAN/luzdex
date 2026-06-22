@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { getTranslations } from "next-intl/server";
-import { productReadiness, localizedProductName } from "@/lib/products";
+import { localizedProductName, parseContentI18n } from "@/lib/products";
 import { parseNameI18n, localizedName } from "@/lib/catalog";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { QrExportButton } from "@/components/qr-export-button";
@@ -56,6 +56,8 @@ export default async function AdminCatalogPage({
         prisma.product.findMany({
           where: { factoryId: factory.id },
           orderBy: { name: "asc" },
+          // 列表只取展示所需 + 预存的就绪度列；不再拉 specs/各内容字段逐行算哈希。
+          // contentI18n 仍需要：用于按后台语言显示译名 + 数已翻译语言（translatedCount）。
           select: {
             id: true,
             name: true,
@@ -66,19 +68,9 @@ export default async function AdminCatalogPage({
             variantGroupId: true,
             variantLabel: true,
             updatedAt: true,
-            highlights: true,
-            applications: true,
-            detailBlocks: true,
             contentI18n: true,
-            translationStamp: true,
-            description: true,
-            tagline: true,
-            faq: true,
-            boxContents: true,
-            install: true,
-            dimensions: true,
-            specs: true,
-            sourceLocale: true,
+            lacksShowcase: true, // 预存：卖点/场景/图文都空
+            stale: true, // 预存：译文过期
             _count: { select: { documents: true, videos: true, images: true } },
           },
         }),
@@ -93,7 +85,6 @@ export default async function AdminCatalogPage({
   const scanByProduct = new Map(scanGroups.map((g) => [g.productId, g._count._all]));
 
   const rows = products.map((p) => {
-    const r = productReadiness({ ...p, imageCount: p._count.images });
     return {
       id: p.id,
       // 列表按后台语言显示译名（缺译回退源名）；编辑器内仍编辑源字段。
@@ -108,10 +99,11 @@ export default async function AdminCatalogPage({
       documents: p._count.documents,
       scans30d: scanByProduct.get(p.id) ?? 0,
       updatedAt: p.updatedAt.toISOString(),
-      noImage: r.noImage,
-      lacksShowcase: r.lacksShowcase,
-      translatedCount: r.translatedCount,
-      stale: r.stale,
+      // noImage / translatedCount 读时算（便宜）；lacksShowcase / stale 读预存列。
+      noImage: !p.coverImage && p._count.images === 0,
+      lacksShowcase: p.lacksShowcase,
+      translatedCount: Object.keys(parseContentI18n(p.contentI18n)).length,
+      stale: p.stale,
     };
   });
 

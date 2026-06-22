@@ -26,6 +26,7 @@ import { LOCALE_LABELS, LOCALE_ORDER } from "@/i18n/routing";
 import { confirmDialog } from "@/components/confirm-dialog";
 import { LUMINAIRE_TYPES } from "@/lib/luminaire";
 import { useFileDrop } from "@/components/use-file-drop";
+import { MAX_IMAGE_BYTES } from "@/lib/upload-rules";
 
 type Highlight = { icon: string; label: string; value: string };
 type Application = { icon: string; title: string; desc: string; image: string };
@@ -117,9 +118,14 @@ function ImageUrlField({
   const ref = useRef<HTMLInputElement>(null);
   const sIcons = useTranslations("show");
   const tc = useTranslations("admin.common");
+  const te = useTranslations("err");
   const [busy, setBusy] = useState(false);
 
   async function uploadOne(file: File) {
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error(te("imageTooLarge"));
+      return;
+    }
     setBusy(true);
     try {
       const url = await uploadImageFile(file);
@@ -255,6 +261,7 @@ export function ShowcaseEditor({
   const tr = useTranslations("prod");
   const s = useTranslations("show");
   const tc = useTranslations("admin.common");
+  const te = useTranslations("err");
   const uiLocale = useLocale();
   const [pending, start] = useTransition();
   const [genPending, startGen] = useTransition();
@@ -268,7 +275,15 @@ export function ShowcaseEditor({
   const aiPickRef = useRef<HTMLInputElement>(null);
 
   async function aiAddFiles(files: File[]) {
-    const imgs = files.filter((f) => f.type.startsWith("image/"));
+    const imgs = files
+      .filter((f) => f.type.startsWith("image/"))
+      .filter((f) => {
+        if (f.size > MAX_IMAGE_BYTES) {
+          toast.error(te("imageTooLarge"));
+          return false;
+        }
+        return true;
+      });
     if (!imgs.length) return;
     setAiUploading(true);
     try {

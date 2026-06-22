@@ -768,6 +768,7 @@
     "fileTooLarge25m": "文件过大（上限 25MB）",
     "unsupportedFileType": "不支持的文件类型",
     "imageOnly": "请上传图片文件",
+    "imageTooLarge": "图片太大（最大 4 MB）— 请先压缩或缩小尺寸",
     "videoNotFound": "视频不存在",
     "aiNoKey": "未配置 OPENROUTER_API_KEY，无法调用 AI",
     "aiEmpty": "AI 返回为空",

@@ -68,6 +68,7 @@ import {
 import { ProductGallery } from "@/components/product-gallery";
 import { RelatedProducts } from "@/components/related-products";
 import { PdfDownloadLink } from "@/components/pdf-download-link";
+import { displayOf } from "@/lib/images";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ShareButton } from "@/components/share-button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
@@ -999,7 +1000,7 @@ function DetailContent({ blocks }: { blocks: DetailBlock[] }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={b.url}
+              src={displayOf(b.url) ?? b.url}
               alt={b.caption ?? ""}
               loading="lazy"
               className="h-auto w-full object-cover"
@@ -1031,7 +1032,7 @@ function ApplicationsGrid({ items }: { items: Application[] }) {
               <div className="relative aspect-[4/3] w-full overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={a.image}
+                  src={displayOf(a.image) ?? a.image}
                   alt={a.title}
                   loading="lazy"
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"

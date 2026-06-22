@@ -768,6 +768,7 @@
     "fileTooLarge25m": "File too large (25 MB max)",
     "unsupportedFileType": "Unsupported file type",
     "imageOnly": "Please upload an image file",
+    "imageTooLarge": "Image too large (4 MB max) — compress or resize it first",
     "videoNotFound": "Video not found",
     "aiNoKey": "OPENROUTER_API_KEY is not configured — AI is unavailable",
     "aiEmpty": "AI returned an empty response",

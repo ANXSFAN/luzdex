@@ -768,6 +768,7 @@
     "fileTooLarge25m": "Plik zbyt duży (maks. 25 MB)",
     "unsupportedFileType": "Nieobsługiwany typ pliku",
     "imageOnly": "Prześlij plik graficzny",
+    "imageTooLarge": "Obraz za duży (maks. 4 MB) — najpierw skompresuj lub zmniejsz",
     "videoNotFound": "Wideo nie istnieje",
     "aiNoKey": "Brak konfiguracji OPENROUTER_API_KEY — AI niedostępne",
     "aiEmpty": "AI zwróciło pustą odpowiedź",

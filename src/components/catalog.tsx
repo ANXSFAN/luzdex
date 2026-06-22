@@ -30,6 +30,7 @@ import {
 } from "@/app/admin/products/actions";
 import { createProductFromPdf } from "@/app/admin/products/pdf-actions";
 import { uploadDirect } from "@/lib/upload-direct";
+import { thumbOf } from "@/lib/images";
 import {
   assignProductsToCategory,
   assignProductsToSeries,
@@ -778,7 +779,17 @@ function Row({
         <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-md border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
           {p.coverImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={p.coverImage} alt="" className="h-full w-full object-cover" />
+            <img
+              src={thumbOf(p.coverImage) ?? p.coverImage}
+              onError={(e) => {
+                if (p.coverImage && e.currentTarget.src !== p.coverImage)
+                  e.currentTarget.src = p.coverImage;
+              }}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-[var(--color-ink-faint)]">
               <ImageOff className="h-4 w-4" />

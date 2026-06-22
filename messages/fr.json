@@ -768,6 +768,7 @@
     "fileTooLarge25m": "Fichier trop volumineux (25 Mo max)",
     "unsupportedFileType": "Type de fichier non pris en charge",
     "imageOnly": "Veuillez téléverser un fichier image",
+    "imageTooLarge": "Image trop volumineuse (4 Mo max) — compressez-la ou redimensionnez-la d'abord",
     "videoNotFound": "Vidéo introuvable",
     "aiNoKey": "OPENROUTER_API_KEY non configurée — IA indisponible",
     "aiEmpty": "L'IA a renvoyé une réponse vide",

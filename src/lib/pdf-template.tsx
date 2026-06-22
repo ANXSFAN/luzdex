@@ -297,7 +297,8 @@ export type PdfProductInput = {
   description: string | null;
   certifications: string[];
   specs: ProductSpec[];
-  coverImageBytes: Uint8Array | null;
+  /** 封面图字节 + 真实格式（route 已按 magic bytes 判定；react-pdf 只认 png/jpg）。 */
+  coverImage: { data: Uint8Array; format: "png" | "jpg" } | null;
   documents: { title: string; fileName: string; fileUrl: string }[];
   url: string;
   /** Document reference code; renamed from `ref` to avoid React ref semantics. */
@@ -359,7 +360,7 @@ export function ProductPdf({
   description,
   certifications,
   specs,
-  coverImageBytes,
+  coverImage,
   documents,
   url,
   docRef,
@@ -419,12 +420,12 @@ export function ProductPdf({
           </View>
         </View>
 
-        {/* Hero figure */}
-        {coverImageBytes && (
+        {/* Hero figure — 仅在拿到可渲染的封面(png/jpg)时才画，避免留空框 */}
+        {coverImage && (
           <View style={styles.heroBlock}>
             {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image
-              src={{ data: Buffer.from(coverImageBytes), format: "jpg" }}
+              src={{ data: Buffer.from(coverImage.data), format: coverImage.format }}
               style={[styles.heroImage, { height: 220 }]}
             />
             <Text style={styles.heroCaption}>

@@ -1,11 +1,35 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ComponentProps } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Expand, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { displayOf, thumbOf } from "@/lib/images";
 
 type GalleryImage = { url: string; alt?: string | null };
+
+/**
+ * next/image 包装：优先渲染派生的 WebP 变体(preferred),加载失败时回退到原图(original)。
+ * 变体理论上回填后必存,这只是兜底——避免极端情况(回填未跑/变体丢失)裂图。
+ * 用 key=preferred 让换图时重置 errored 状态。
+ */
+function SmartImage({
+  preferred,
+  original,
+  ...props
+}: { preferred: string; original: string } & Omit<ComponentProps<typeof Image>, "src">) {
+  const [errored, setErrored] = useState(false);
+  return (
+    // alt 由调用方经 props 传入(linter 看不到 spread)
+    // eslint-disable-next-line jsx-a11y/alt-text
+    <Image
+      src={errored ? original : preferred}
+      onError={() => setErrored(true)}
+      {...props}
+    />
+  );
+}
 
 export function ProductGallery({
   images,
@@ -54,9 +78,10 @@ export function ProductGallery({
         aria-label={t("zoom")}
         className="apple-tile group relative block aspect-[16/10] w-full cursor-zoom-in touch-pan-y select-none overflow-hidden border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]"
       >
-        <Image
+        <SmartImage
           key={current.url}
-          src={current.url}
+          preferred={displayOf(current.url) ?? current.url}
+          original={current.url}
           alt={current.alt ?? fallbackAlt}
           fill
           sizes="(max-width: 1024px) 100vw, 720px"
@@ -119,8 +144,10 @@ export function ProductGallery({
                     : "border-[var(--color-rule)] hover:border-[var(--color-rule-strong)]"
                 }`}
               >
-                <Image
-                  src={img.url}
+                <SmartImage
+                  key={img.url}
+                  preferred={thumbOf(img.url) ?? img.url}
+                  original={img.url}
                   alt={img.alt ?? `${fallbackAlt} ${i + 1}`}
                   fill
                   sizes="120px"
@@ -290,7 +317,10 @@ function Lightbox({
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={current.url}
+          src={displayOf(current.url) ?? current.url}
+          onError={(e) => {
+            if (e.currentTarget.src !== current.url) e.currentTarget.src = current.url;
+          }}
           alt={current.alt ?? fallbackAlt}
           draggable={false}
           onClick={toggleZoom}
@@ -343,7 +373,10 @@ function Lightbox({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={img.url}
+                src={thumbOf(img.url) ?? img.url}
+                onError={(e) => {
+                  if (e.currentTarget.src !== img.url) e.currentTarget.src = img.url;
+                }}
                 alt={img.alt ?? `${fallbackAlt} ${i + 1}`}
                 className="h-full w-full object-cover"
               />

@@ -21,6 +21,7 @@ import {
   setProductCover,
 } from "@/app/admin/products/actions";
 import { useFileDrop } from "@/components/use-file-drop";
+import { MAX_IMAGE_BYTES } from "@/lib/upload-rules";
 
 type GalleryImage = { id: string; url: string; alt: string | null };
 
@@ -76,6 +77,10 @@ export function GalleryManager({
   }
 
   async function uploadCoverFile(file: File) {
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error(t("err.imageTooLarge"));
+      return;
+    }
     setUploading(true);
     try {
       const { url } = await uploadImage(file);
@@ -91,13 +96,16 @@ export function GalleryManager({
 
   async function addFiles(files: File[]) {
     if (files.length === 0) return;
+    const ok = files.filter((f) => f.size <= MAX_IMAGE_BYTES);
+    if (ok.length < files.length) toast.error(t("err.imageTooLarge"));
+    if (ok.length === 0) return;
     setUploading(true);
     try {
-      for (const file of files) {
+      for (const file of ok) {
         const { url } = await uploadImage(file);
         await addProductImage({ productId, url });
       }
-      toast.success(t("prod.imagesAdded", { n: files.length }));
+      toast.success(t("prod.imagesAdded", { n: ok.length }));
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error && err.message ? err.message : t("admin.common.uploadFail"));
