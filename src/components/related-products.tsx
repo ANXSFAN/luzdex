@@ -5,6 +5,7 @@ import { getPathname } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { RelatedItem, RelatedAccessory } from "@/lib/products";
 import { thumbOf } from "@/lib/images";
+import { FallbackImage } from "@/components/fallback-image";
 
 const KNOWN_CATS = new Set(["strip", "channel", "power", "connector", "accessory"]);
 
@@ -100,13 +101,9 @@ function Card({
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
         {item.coverImage ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <FallbackImage
             src={thumbOf(item.coverImage) ?? item.coverImage}
-            onError={(e) => {
-              if (item.coverImage && e.currentTarget.src !== item.coverImage)
-                e.currentTarget.src = item.coverImage;
-            }}
+            fallbackSrc={item.coverImage}
             alt={item.name}
             loading="lazy"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
