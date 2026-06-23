@@ -1,4 +1,4 @@
-// 给存量图片回填 display(_lg) / thumb(_thumb) 两份 WebP 变体。
+// 给存量图片回填 display(_lg)/thumb(_thumb) WebP + pdf(_pdf.jpg) 变体。
 // 只往 R2 **新增**变体对象,绝不改数据库、不删原图——对生产数据零风险。
 // 幂等:已存在 _lg 变体的图跳过,可安全重复运行。
 // 来源:产品封面 + 画廊图 + detailBlocks/applications/contentI18n 里嵌的图片 URL(深度遍历)。
@@ -64,7 +64,7 @@ async function main() {
   }
 
   // 过滤:只处理本桶下、文件名是 UUID+栅格扩展名的"我方上传图"
-  const targets: { url: string; vk: { lg: string; thumb: string } }[] = [];
+  const targets: { url: string; vk: { lg: string; thumb: string; pdf: string } }[] = [];
   for (const url of urls) {
     if (!url.startsWith(PUBLIC_URL + "/")) continue;
     const key = url.slice(PUBLIC_URL.length + 1);
@@ -83,9 +83,12 @@ async function main() {
     while (idx < targets.length) {
       const t = targets[idx++];
       try {
-        // 幂等:_lg 已存在就跳过
-        const head = await fetch(`${PUBLIC_URL}/${t.vk.lg}`, { method: "HEAD" });
-        if (head.ok) {
+        // 幂等:_lg 与 _pdf 都已存在才跳过(缺哪个补哪个，兼容旧回填只生成了 WebP 的图)
+        const [lgHead, pdfHead] = await Promise.all([
+          fetch(`${PUBLIC_URL}/${t.vk.lg}`, { method: "HEAD" }),
+          fetch(`${PUBLIC_URL}/${t.vk.pdf}`, { method: "HEAD" }),
+        ]);
+        if (lgHead.ok && pdfHead.ok) {
           skipped++;
           continue;
         }
@@ -96,11 +99,14 @@ async function main() {
           continue;
         }
         const buf = Buffer.from(await res.arrayBuffer());
-        const { lg, thumb } = await makeImageVariants(buf);
-        await Promise.all([
-          putR2(t.vk.lg, lg, "image/webp"),
-          putR2(t.vk.thumb, thumb, "image/webp"),
-        ]);
+        const { lg, thumb, pdf } = await makeImageVariants(buf);
+        const ups: Promise<void>[] = [];
+        if (!lgHead.ok) {
+          ups.push(putR2(t.vk.lg, lg, "image/webp"));
+          ups.push(putR2(t.vk.thumb, thumb, "image/webp"));
+        }
+        if (!pdfHead.ok) ups.push(putR2(t.vk.pdf, pdf, "image/jpeg"));
+        await Promise.all(ups);
         made++;
         if (made % 20 === 0) console.log(`  ...已生成 ${made}`);
       } catch (e) {

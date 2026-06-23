@@ -85,7 +85,7 @@ export function ProductGallery({
           alt={current.alt ?? fallbackAlt}
           fill
           sizes="(max-width: 1024px) 100vw, 720px"
-          className="apple-tile-img object-cover"
+          className="apple-tile-img object-contain"
           priority
         />
         <span className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 [@media(hover:none)]:opacity-100">

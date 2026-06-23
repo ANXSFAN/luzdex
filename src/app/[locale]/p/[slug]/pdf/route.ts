@@ -1,6 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 import { findPublicProductBySlug, parseSpecs, siteUrl } from "@/lib/products";
+import { pdfOf } from "@/lib/images";
 import { stripMarkdown } from "@/lib/md";
 import { ProductPdf } from "@/lib/pdf-template";
 import { routing } from "@/i18n/routing";
@@ -42,10 +43,9 @@ function detectImageFormat(b: Uint8Array): "png" | "jpg" | null {
   return null;
 }
 
-async function fetchCover(
-  url: string | null,
+async function fetchOne(
+  url: string,
 ): Promise<{ data: Uint8Array; format: "png" | "jpg" } | null> {
-  if (!url) return null;
   try {
     const res = await fetch(url, {
       next: { revalidate: 3600 },
@@ -58,6 +58,22 @@ async function fetchCover(
   } catch {
     return null;
   }
+}
+
+/**
+ * 封面：优先取缩小白底 JPEG 变体(_pdf.jpg)——体积小、react-pdf 直接能解；
+ * 变体不存在(老图未回填 / 外链)时回退原图。原图 WebP/avif 仍会被 detectImageFormat 拦掉。
+ */
+async function fetchCover(
+  url: string | null,
+): Promise<{ data: Uint8Array; format: "png" | "jpg" } | null> {
+  if (!url) return null;
+  const preferred = pdfOf(url);
+  if (preferred && preferred !== url) {
+    const v = await fetchOne(preferred);
+    if (v) return v;
+  }
+  return fetchOne(url);
 }
 
 interface RouteContext {

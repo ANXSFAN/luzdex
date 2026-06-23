@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   heroBlock: { marginTop: 22 },
   heroImage: {
     width: "100%",
-    objectFit: "cover",
+    objectFit: "contain",
     borderWidth: 0.6,
     borderColor: COLOR.rule,
   },

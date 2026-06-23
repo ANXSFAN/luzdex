@@ -15,11 +15,15 @@
 const UPLOAD_IMG_RE =
   /\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(?:png|jpe?g|webp|gif|avif)$/i;
 
-function deriveVariant(url: string | null | undefined, suffix: string): string | null {
+function deriveVariant(
+  url: string | null | undefined,
+  suffix: string,
+  ext = "webp",
+): string | null {
   if (!url) return url ?? null;
   const m = UPLOAD_IMG_RE.exec(url);
   if (!m) return url; // 外链 / 已是变体 / 非我方上传 → 原样
-  return url.slice(0, m.index) + `/${m[1]}${suffix}.webp`;
+  return url.slice(0, m.index) + `/${m[1]}${suffix}.${ext}`;
 }
 
 /** display 变体（长边 ~1600 的 WebP）：前台主图 / 详情大图用。 */
@@ -32,9 +36,16 @@ export function thumbOf(url: string | null | undefined): string | null {
   return deriveVariant(url, "_thumb");
 }
 
-/** 给定原图的 R2 key（如 `xxxx.png`），返回两份变体的 key。供上传 / 回填生成时用。 */
-export function variantKeys(originalKey: string): { lg: string; thumb: string } | null {
+/** pdf 变体（长边 ~1400 的白底 JPEG）：PDF 嵌封面用（react-pdf 不吃 WebP）。 */
+export function pdfOf(url: string | null | undefined): string | null {
+  return deriveVariant(url, "_pdf", "jpg");
+}
+
+/** 给定原图的 R2 key（如 `xxxx.png`），返回各变体的 key。供上传 / 回填生成时用。 */
+export function variantKeys(
+  originalKey: string,
+): { lg: string; thumb: string; pdf: string } | null {
   const m = /^([0-9a-f-]{36})\.(?:png|jpe?g|webp|gif|avif)$/i.exec(originalKey);
   if (!m) return null;
-  return { lg: `${m[1]}_lg.webp`, thumb: `${m[1]}_thumb.webp` };
+  return { lg: `${m[1]}_lg.webp`, thumb: `${m[1]}_thumb.webp`, pdf: `${m[1]}_pdf.jpg` };
 }

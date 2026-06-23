@@ -46,16 +46,17 @@ export async function POST(request: NextRequest) {
 
   const url = await uploadToR2(key, buffer, type);
 
-  // 图片:旁路生成 display(_lg) / thumb(_thumb) 两份 WebP 变体,渲染时按需取(见 lib/images.ts)。
-  // 原图保持不变(PDF 封面 / 重处理用)。失败不阻断上传——消费端有 onError 回退原图兜底。
+  // 图片:旁路生成 display(_lg)/thumb(_thumb) WebP + pdf(_pdf.jpg) 三份变体,渲染时按需取(见 lib/images.ts)。
+  // 原图保持不变(下载 / 重处理用)。失败不阻断上传——消费端有 onError / 回退原图兜底。
   if (kind === "image") {
     const vk = variantKeys(key);
     if (vk) {
       try {
-        const { lg, thumb } = await makeImageVariants(buffer);
+        const { lg, thumb, pdf } = await makeImageVariants(buffer);
         await Promise.all([
           uploadToR2(vk.lg, lg, "image/webp"),
           uploadToR2(vk.thumb, thumb, "image/webp"),
+          uploadToR2(vk.pdf, pdf, "image/jpeg"),
         ]);
       } catch (e) {
         console.warn("image variant generation failed:", (e as Error)?.message);
