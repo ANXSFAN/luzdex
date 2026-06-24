@@ -287,6 +287,14 @@ const LANG_NAMES: Record<AppLocale, string> = {
   zh: "Chinese",
 };
 
+// 单个源字段的 djb2 指纹（口径与 contentSourceHash 一致）。增量翻译据此判断字段是否变更。
+function fieldFp(v: unknown): string {
+  const s = JSON.stringify(v ?? null);
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(16);
+}
+
 /**
  * AI 把源语言展示内容翻译成其余 8 种语言，写入 `contentI18n`（直接入库、可重跑）。
  * 「填一种语言 → 其余 AI 补全」：读已保存的源字段，逐语言并行翻译。
@@ -314,6 +322,7 @@ export async function translateShowcase(productId: string) {
       specs: true,
       sourceLocale: true,
       contentI18n: true,
+      translationFp: true,
       documents: { select: { title: true }, orderBy: { sortOrder: "asc" } },
       videos: { select: { title: true }, orderBy: { sortOrder: "asc" } },
     },
@@ -344,7 +353,15 @@ export async function translateShowcase(productId: string) {
 
   const sourceLocale = normalizeLocale(product.sourceLocale) ?? "es";
   const targets = routing.locales.filter((l) => l !== sourceLocale);
-  const srcJson = JSON.stringify(source);
+
+  // 增量翻译:各字段当前指纹 vs 上次翻译时存下的各语言字段指纹,只翻对不上的字段。
+  const srcByField = source as unknown as Record<string, unknown>;
+  const storedFp =
+    product.translationFp &&
+    typeof product.translationFp === "object" &&
+    !Array.isArray(product.translationFp)
+      ? (product.translationFp as Record<string, Record<string, string>>)
+      : {};
 
   // 源里非空的板块，译文包必须同样非空——AI 偶发丢板块（场景/图文详情/盒内清单等）
   // 时不能当成功入库，否则前台该语言整块回退源语言。
@@ -367,8 +384,13 @@ export async function translateShowcase(productId: string) {
   )
     .filter(([, has]) => has)
     .map(([k]) => k);
-  const missingKeys = (lc: LocalizedContent) =>
-    requiredKeys.filter((k) => {
+  // 当前源各字段指纹（只算源里非空的字段）。
+  const curFp: Record<string, string> = {};
+  for (const k of requiredKeys) curFp[k] = fieldFp(srcByField[k]);
+
+  // 译文包里指定字段缺失/空 = AI 漏译，需重试。
+  const missingFields = (lc: LocalizedContent, keys: readonly string[]) =>
+    keys.filter((k) => {
       const v = lc[k as keyof LocalizedContent];
       return v == null || (Array.isArray(v) && v.length === 0);
     });
@@ -392,7 +414,18 @@ export async function translateShowcase(productId: string) {
 
   const results = await Promise.all(
     targets.map(async (loc) => {
-      // 完整性不达标（缺板块）按失败算，重试一次
+      // 只翻「指纹对不上」的字段:源改过 或 该语言从没翻过。其余沿用旧译文。
+      const changed = requiredKeys.filter((k) => storedFp[loc]?.[k] !== curFp[k]);
+      // 全字段都已最新 → 跳过 AI 调用（增量的核心:不重复花 token）。
+      if (changed.length === 0) {
+        return { loc, lc: null as LocalizedContent | null, translated: [] as string[] };
+      }
+
+      const partial: Record<string, unknown> = {};
+      for (const k of changed) partial[k] = srcByField[k];
+      const partialJson = JSON.stringify(partial);
+
+      // 完整性不达标（缺所发字段）按失败算，重试一次
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           const raw = await openRouterJSON([
@@ -401,33 +434,55 @@ export async function translateShowcase(productId: string) {
               role: "user",
               content:
                 `Translate from ${LANG_NAMES[sourceLocale]} to ${LANG_NAMES[loc]}. ` +
-                `Return the same JSON shape with text translated:\n${srcJson}`,
+                `Return the same JSON shape with text translated:\n${partialJson}`,
             },
           ]);
           const lc = parseLocalizedContent(raw);
-          if (missingKeys(lc).length === 0) return [loc, lc] as const;
+          if (missingFields(lc, changed).length === 0) {
+            return { loc, lc, translated: changed };
+          }
         } catch {
           /* retry */
         }
       }
-      return [loc, null] as const;
+      return { loc, lc: null as LocalizedContent | null, translated: [] as string[] };
     })
   );
 
-  // 合并写入：失败语言保留已有旧译文，不被整体覆盖清空
+  // 逐语言合并:本轮新译字段覆盖旧译文;未变字段沿用旧译;源已删除字段丢弃(回退源语言);
+  // 变了但本轮没翻成的字段保留旧译兜底、指纹不更新(下次继续重翻)。
   const contentI18n = parseContentI18n(product.contentI18n);
+  const newFp: Record<string, Record<string, string>> = {};
   let ok = 0;
-  for (const [loc, lc] of results) {
-    if (lc) {
-      contentI18n[loc] = lc;
-      ok++;
+  for (const { loc, lc, translated } of results) {
+    const prev = (contentI18n[loc] ?? {}) as Record<string, unknown>;
+    const prevFp = storedFp[loc] ?? {};
+    const lcRec = (lc ?? {}) as Record<string, unknown>;
+    const mp: Record<string, unknown> = {};
+    const fp: Record<string, string> = {};
+    for (const k of requiredKeys) {
+      if (translated.includes(k) && lcRec[k] !== undefined) {
+        mp[k] = lcRec[k];
+        fp[k] = curFp[k];
+      } else if (prevFp[k] === curFp[k] && prev[k] !== undefined) {
+        mp[k] = prev[k]; // 未变,沿用旧译文
+        fp[k] = curFp[k];
+      } else if (prev[k] !== undefined) {
+        mp[k] = prev[k]; // 变了没翻成:留旧译兜底,指纹不更新
+      }
     }
+    if (Object.keys(mp).length > 0) contentI18n[loc] = mp as LocalizedContent;
+    else delete contentI18n[loc];
+    newFp[loc] = fp;
+    // 该语言所有源字段指纹都对上 = 完整翻译。
+    if (requiredKeys.every((k) => fp[k] === curFp[k])) ok++;
   }
 
   await prisma.product.update({
     where: { id: productId },
     data: {
       contentI18n,
+      translationFp: newFp,
       // 记录本次翻译所基于的源内容指纹，供"过期"检测。
       // 只有全部目标语言都翻成功才盖戳；部分失败保留旧戳，让「译文过期/未译」继续提示重跑。
       ...(ok === targets.length

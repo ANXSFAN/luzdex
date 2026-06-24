@@ -99,6 +99,7 @@ model Product {
   sourceLocale     String?        @default("es") @map("source_locale") // 源语言（人工填写的语言）；AI 据此翻译其余语言
   contentI18n      Json?          @map("content_i18n") // { [locale]: { name?, description?, tagline?, highlights?, ... } } 各语言译文，缺则回退源字段
   translationStamp String?        @map("translation_stamp") // 上次翻译时的源内容指纹；与当前源不一致 = 译文已过期
+  translationFp    Json?          @map("translation_fp") // { [locale]: { [field]: 源字段指纹 } } 上次翻译各字段的源指纹；增量翻译只翻指纹对不上的字段
   // ── 就绪度派生列（预存,避免列表逐行算哈希）。由 recomputeReadiness() 在每次内容/译文写入后刷新；
   //    存量行靠 prisma/backfill-readiness.ts 回填。noImage/translatedCount 仍读时算（便宜）。
   lacksShowcase    Boolean        @default(true) @map("lacks_showcase") // 卖点/场景/图文长详情都空
