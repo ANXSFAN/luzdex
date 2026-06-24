@@ -497,7 +497,8 @@
     "videoNeedFields": "Podaj tytuł i adres URL wideo",
     "videoAdded": "Wideo dodane",
     "docAdded": "Dokument dodany",
-    "addFail": "Dodawanie nie powiodło się"
+    "addFail": "Dodawanie nie powiodło się",
+    "renamed": "Zmieniono nazwę"
   },
   "more": {
     "qrTitle": "Skanuj / QR",

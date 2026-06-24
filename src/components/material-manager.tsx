@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Film, Trash2, Upload, Loader2, Plus } from "lucide-react";
+import { FileText, Film, Trash2, Upload, Loader2, Plus, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useFileDrop } from "@/components/use-file-drop";
@@ -48,6 +48,85 @@ export function MaterialManager({ productId, documents, videos }: Props) {
     <div className="mt-10 space-y-10">
       <VideoSection productId={productId} videos={videos} />
       <DocumentSection productId={productId} documents={documents} />
+    </div>
+  );
+}
+
+// 内联重命名：默认展示标题 + 铅笔；进入编辑态变输入框，Enter/√ 保存、Esc/× 取消。
+// onSave 返回 true 才退出编辑态，失败留在原地让用户重试。
+function EditableTitle({
+  value,
+  onSave,
+}: {
+  value: string;
+  onSave: (title: string) => Promise<boolean>;
+}) {
+  const tc = useTranslations("admin.common");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+
+  async function commit() {
+    const title = draft.trim();
+    if (!title || title === value) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    const ok = await onSave(title);
+    setSaving(false);
+    if (ok) setEditing(false);
+  }
+
+  if (!editing) {
+    return (
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <span className="truncate text-sm text-[var(--color-ink)]">{value}</span>
+        <button
+          onClick={() => {
+            setDraft(value);
+            setEditing(true);
+          }}
+          title={tc("edit")}
+          className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-2">
+      <input
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") setEditing(false);
+        }}
+        className="form-input min-w-0 flex-1 !py-1 text-sm"
+      />
+      <button
+        onClick={commit}
+        disabled={saving}
+        title={tc("save")}
+        className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)] disabled:opacity-50"
+      >
+        {saving ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Check className="h-3.5 w-3.5" />
+        )}
+      </button>
+      <button
+        onClick={() => setEditing(false)}
+        title={tc("cancel")}
+        className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
@@ -130,6 +209,21 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
     }
   }
 
+  async function handleRename(id: string, title: string) {
+    const res = await fetch(`/api/videos/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+    if (res.ok) {
+      toast.success(t("renamed"));
+      router.refresh();
+      return true;
+    }
+    toast.error(tc("saveFail"));
+    return false;
+  }
+
   return (
     <section>
       <SectionTitle>{t("videos")}</SectionTitle>
@@ -138,9 +232,9 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
           {videos.map((v) => (
             <li key={v.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <Film className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
-                <span className="truncate text-sm text-[var(--color-ink)]">{v.title}</span>
+                <EditableTitle value={v.title} onSave={(title) => handleRename(v.id, title)} />
               </div>
               <button
                 onClick={() => handleDelete(v.id)}
@@ -263,6 +357,21 @@ function DocumentSection({
     }
   }
 
+  async function handleRename(id: string, title: string) {
+    const res = await fetch(`/api/documents/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+    if (res.ok) {
+      toast.success(t("renamed"));
+      router.refresh();
+      return true;
+    }
+    toast.error(tc("saveFail"));
+    return false;
+  }
+
   return (
     <section>
       <SectionTitle>{t("documents")}</SectionTitle>
@@ -271,13 +380,13 @@ function DocumentSection({
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
           {documents.map((d) => (
             <li key={d.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <FileText className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
-                <span className="truncate text-sm text-[var(--color-ink)]">{d.title}</span>
-                <span className="shrink-0 font-mono text-xs text-[var(--color-ink-muted)]">
-                  {fmtSize(d.fileSize)}
-                </span>
+                <EditableTitle value={d.title} onSave={(title) => handleRename(d.id, title)} />
               </div>
+              <span className="shrink-0 font-mono text-xs text-[var(--color-ink-muted)]">
+                {fmtSize(d.fileSize)}
+              </span>
               <button
                 onClick={() => handleDelete(d.id)}
                 className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"

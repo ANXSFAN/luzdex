@@ -497,7 +497,8 @@
     "videoNeedFields": "请填写标题和视频链接",
     "videoAdded": "视频已添加",
     "docAdded": "文档已添加",
-    "addFail": "添加失败"
+    "addFail": "添加失败",
+    "renamed": "已重命名"
   },
   "more": {
     "qrTitle": "扫码访问 / QR",

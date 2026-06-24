@@ -497,7 +497,8 @@
     "videoNeedFields": "Escribe un título y la URL del vídeo",
     "videoAdded": "Vídeo añadido",
     "docAdded": "Documento añadido",
-    "addFail": "Error al añadir"
+    "addFail": "Error al añadir",
+    "renamed": "Renombrado"
   },
   "more": {
     "qrTitle": "Escanear / QR",
