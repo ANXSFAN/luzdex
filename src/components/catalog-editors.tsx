@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { useFileDrop } from "@/components/use-file-drop";
 import { confirmDialog } from "@/components/confirm-dialog";
 import { MultiLang } from "@/components/multi-lang";
+import type { AppLocale } from "@/i18n/routing";
 import {
   updateCategory,
   deleteCategory,
@@ -72,9 +73,13 @@ export function CategoryEditor({
   const [image, setImage] = useState(category.image ?? "");
   const [icon, setIcon] = useState(category.icon ?? "");
   const [parentId, setParentId] = useState(category.parentId ?? "");
+  const [srcLoc, setSrcLoc] = useState<AppLocale>("es");
   const [uploading, setUploading] = useState(false);
   const [pending, start] = useTransition();
   const [translating, startTr] = useTransition();
+
+  // 当前选中语言即翻译源。
+  const srcText = (srcLoc === "es" ? name : nameI18n[srcLoc] ?? "").trim();
 
   // 父级选项：排除自己与自己的后代
   const descendants = (() => {
@@ -140,11 +145,12 @@ export function CategoryEditor({
   }
 
   function translate() {
-    if (!name.trim()) return toast.error(t("category.needNameFirst"));
+    if (!srcText) return toast.error(t("category.needNameFirst"));
     startTr(async () => {
       try {
-        const r = await translateCategory(category.id);
-        setNameI18n(r);
+        const r = await translateCategory(category.id, srcLoc, srcText);
+        setName(r.name);
+        setNameI18n(r.nameI18n);
         toast.success(t("category.transDone"));
         router.refresh();
       } catch (e) {
@@ -242,6 +248,8 @@ export function CategoryEditor({
               i18n={nameI18n}
               setI18n={setNameI18n}
               placeholder=""
+              loc={srcLoc}
+              onLoc={setSrcLoc}
             />
           </div>
 
@@ -310,9 +318,14 @@ export function SeriesEditor({
   );
   const [categoryId, setCategoryId] = useState(series.categoryId ?? "");
   const [cover, setCover] = useState(series.coverImage ?? "");
+  const [srcLoc, setSrcLoc] = useState<AppLocale>("es");
   const [uploading, setUploading] = useState(false);
   const [pending, start] = useTransition();
   const [translating, startTr] = useTransition();
+
+  // 当前选中语言即翻译源（名称 + 简介共用）。
+  const nameSrc = (srcLoc === "es" ? name : nameI18n[srcLoc] ?? "").trim();
+  const introSrc = (srcLoc === "es" ? intro : introI18n[srcLoc] ?? "").trim();
 
   async function uploadOne(f: File) {
     setUploading(true);
@@ -358,11 +371,13 @@ export function SeriesEditor({
   }
 
   function translate() {
-    if (!name.trim()) return toast.error(t("series.needNameFirst"));
+    if (!nameSrc) return toast.error(t("series.needNameFirst"));
     startTr(async () => {
       try {
-        const r = await translateSeries(series.id);
+        const r = await translateSeries(series.id, srcLoc, nameSrc, introSrc);
+        setName(r.name);
         setNameI18n(r.nameI18n);
+        setIntro(r.intro);
         setIntroI18n(r.introI18n);
         toast.success(t("series.transDone"));
         router.refresh();
@@ -462,6 +477,8 @@ export function SeriesEditor({
                 i18n={nameI18n}
                 setI18n={setNameI18n}
                 placeholder=""
+                loc={srcLoc}
+                onLoc={setSrcLoc}
               />
             </div>
           </div>
@@ -475,6 +492,8 @@ export function SeriesEditor({
                 setI18n={setIntroI18n}
                 placeholder={t("series.introPh")}
                 multiline
+                loc={srcLoc}
+                onLoc={setSrcLoc}
               />
             </div>
           </div>

@@ -9,7 +9,10 @@ const SRC: AppLocale = "es"; // 源语言（与产品源语言一致）
 const inputCls =
   "w-full rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-ink)]";
 
-/** 9 语言可切换的单值编辑：源语言(es)编辑 source，其余编辑 i18n[loc]。 */
+/**
+ * 9 语言可切换的单值编辑：es 存 source，其余存 i18n[loc]。
+ * 选中语言可受控（loc/onLoc）——让外层把「当前编辑的语言」当作翻译源。
+ */
 export function MultiLang({
   source,
   setSource,
@@ -17,6 +20,8 @@ export function MultiLang({
   setI18n,
   placeholder,
   multiline,
+  loc: locProp,
+  onLoc,
 }: {
   source: string;
   setSource: (v: string) => void;
@@ -24,8 +29,12 @@ export function MultiLang({
   setI18n: (m: Record<string, string>) => void;
   placeholder?: string;
   multiline?: boolean;
+  loc?: AppLocale;
+  onLoc?: (l: AppLocale) => void;
 }) {
-  const [loc, setLoc] = useState<AppLocale>(SRC);
+  const [locState, setLocState] = useState<AppLocale>(SRC);
+  const loc = locProp ?? locState;
+  const setLoc = onLoc ?? setLocState;
   const isSrc = loc === SRC;
   const value = isSrc ? source : i18n[loc] ?? "";
   const onChange = (v: string) => {

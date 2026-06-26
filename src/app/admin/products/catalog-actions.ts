@@ -162,28 +162,83 @@ export async function deleteCategory(id: string) {
   revalidate();
 }
 
-/** AI 把分类名（源语言 es）翻译到其余 8 种语言，写入 nameI18n。 */
-export async function translateCategory(id: string) {
-  const factory = await authedFactory();
-  const cat = await assertCategoryOwned(id, factory.id);
-  const targets = routing.locales.filter((l) => l !== "es");
+const LOCALE_NAMES: Record<string, string> = {
+  es: "Spanish",
+  en: "English",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  pt: "Portuguese",
+  nl: "Dutch",
+  pl: "Polish",
+  zh: "Chinese",
+};
+
+/**
+ * 从任意源语言把若干文本字段翻成其余语言。返回 { 字段: { locale: 文本 } }，
+ * 其中也含源语言本身（=原文），便于调用方按 name(es) / i18n(其余) 拆分回填。
+ * 空字段跳过，不调用 AI 时按字段返回仅含源语言的映射。
+ */
+async function aiTranslate(
+  sourceLocale: string,
+  fields: { key: string; text: string }[],
+): Promise<Record<string, Record<string, string>>> {
+  const filled = fields.filter((f) => f.text.trim());
+  const out: Record<string, Record<string, string>> = {};
+  for (const f of filled) out[f.key] = { [sourceLocale]: f.text.trim() };
+  const targets = routing.locales.filter((l) => l !== sourceLocale);
+  if (!filled.length || !targets.length) return out;
+
   const sys: ChatMessage = {
     role: "system",
     content:
-      "You translate a product-category name for a consumer LED lighting catalog. " +
-      "Output ONLY a JSON object mapping locale code to the translated name. " +
-      "Keep names short, natural and consumer-facing. No extra text.",
+      "You translate short product-catalog copy for a consumer LED lighting catalog. " +
+      "Output ONLY a JSON object mapping each field key to an object of {locale: translation}. " +
+      "Natural, short, consumer-facing. No contact info, no prices. No extra text.",
   };
   const user: ChatMessage = {
     role: "user",
-    content: `Source (Spanish) category name: "${cat.name}". Translate to: ${targets.join(", ")}. Return e.g. {"en":"...","zh":"..."}`,
+    content:
+      `Source language: ${LOCALE_NAMES[sourceLocale] ?? sourceLocale}.\n` +
+      filled.map((f) => `${f.key}: ${JSON.stringify(f.text.trim())}`).join("\n") +
+      `\nTranslate every field into these locales: ${targets.join(", ")}.\n` +
+      `Return shape: {"${filled[0].key}":{"en":"...","zh":"..."}}`,
   };
   const raw = (await openRouterJSON([sys, user])) as Record<string, unknown>;
+  for (const f of filled) {
+    const m = raw[f.key];
+    if (m && typeof m === "object" && !Array.isArray(m)) {
+      for (const l of targets) {
+        const v = (m as Record<string, unknown>)[l];
+        if (typeof v === "string" && v.trim()) out[f.key][l] = v.trim();
+      }
+    }
+  }
+  return out;
+}
+
+/** AI 把分类名从任意源语言翻到其余语言；es 落 name 列，其余落 nameI18n。 */
+export async function translateCategory(
+  id: string,
+  sourceLocale: string,
+  name: string,
+) {
+  const factory = await authedFactory();
+  await assertCategoryOwned(id, factory.id);
+  if (!routing.locales.includes(sourceLocale as never))
+    throw await adminErr("catNameRequired");
+  const text = name.trim();
+  if (!text) throw await adminErr("catNameRequired");
+
+  const res = await aiTranslate(sourceLocale, [{ key: "name", text }]);
+  const map = res.name ?? { [sourceLocale]: text };
+  const esName = map.es || text;
   const nameI18n: Record<string, string> = {};
-  for (const l of targets) if (typeof raw[l] === "string") nameI18n[l] = raw[l] as string;
-  await prisma.category.update({ where: { id }, data: { nameI18n } });
+  for (const l of routing.locales) if (l !== "es" && map[l]) nameI18n[l] = map[l];
+
+  await prisma.category.update({ where: { id }, data: { name: esName, nameI18n } });
   revalidate();
-  return nameI18n;
+  return { name: esName, nameI18n };
 }
 
 export async function reorderCategories(orderedIds: string[]) {
@@ -283,39 +338,42 @@ export async function updateSeries(
   revalidate();
 }
 
-/** AI 把系列名 + 简介（源语言 es）翻译到其余 8 种语言，写入 nameI18n / introI18n。 */
-export async function translateSeries(id: string) {
+/** AI 把系列名 + 简介从任意源语言翻到其余语言；es 落 name/intro 列，其余落 i18n。 */
+export async function translateSeries(
+  id: string,
+  sourceLocale: string,
+  name: string,
+  intro: string,
+) {
   const factory = await authedFactory();
   const ser = await prisma.series.findUnique({ where: { id } });
   if (!ser || ser.factoryId !== factory.id) throw await adminErr("seriesNotFound");
-  const targets = routing.locales.filter((l) => l !== "es");
-  const sys: ChatMessage = {
-    role: "system",
-    content:
-      "You translate product-series copy for a consumer LED lighting catalog. " +
-      "Output ONLY a JSON object of shape {\"name\":{locale:translated},\"intro\":{locale:translated}}. " +
-      "Natural, consumer-facing. No contact info / prices. No extra text.",
-  };
-  const user: ChatMessage = {
-    role: "user",
-    content:
-      `Source (Spanish):\nname: "${ser.name}"\nintro: ${JSON.stringify(ser.intro ?? "")}\n` +
-      `Translate to locales: ${targets.join(", ")}.`,
-  };
-  const raw = (await openRouterJSON([sys, user])) as {
-    name?: Record<string, unknown>;
-    intro?: Record<string, unknown>;
-  };
+  if (!routing.locales.includes(sourceLocale as never))
+    throw await adminErr("seriesNameRequired");
+  const nm = name.trim();
+  if (!nm) throw await adminErr("seriesNameRequired");
+
+  const res = await aiTranslate(sourceLocale, [
+    { key: "name", text: nm },
+    { key: "intro", text: intro.trim() },
+  ]);
+  const nameMap = res.name ?? { [sourceLocale]: nm };
+  const introMap = res.intro ?? {};
+  const esName = nameMap.es || nm;
+  const esIntro = introMap.es ?? "";
   const nameI18n: Record<string, string> = {};
   const introI18n: Record<string, string> = {};
-  for (const l of targets) {
-    if (typeof raw.name?.[l] === "string") nameI18n[l] = raw.name[l] as string;
-    if (ser.intro && typeof raw.intro?.[l] === "string")
-      introI18n[l] = raw.intro[l] as string;
+  for (const l of routing.locales) {
+    if (l === "es") continue;
+    if (nameMap[l]) nameI18n[l] = nameMap[l];
+    if (introMap[l]) introI18n[l] = introMap[l];
   }
-  await prisma.series.update({ where: { id }, data: { nameI18n, introI18n } });
+  await prisma.series.update({
+    where: { id },
+    data: { name: esName, nameI18n, intro: esIntro || null, introI18n },
+  });
   revalidate();
-  return { nameI18n, introI18n };
+  return { name: esName, nameI18n, intro: esIntro, introI18n };
 }
 
 export async function deleteSeries(id: string) {
