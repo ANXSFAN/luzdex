@@ -418,7 +418,9 @@
     "transDoneCount": "Tradotte {ok}/{total} lingue",
     "genDone": "Bozza IA inserita: rivedi, modifica e salva",
     "savedOk": "Contenuto salvato",
-    "transSavedOk": "Traduzione {lang} salvata"
+    "transSavedOk": "Traduzione {lang} salvata",
+    "transFromConfirm": "Tradurre da {lang} e sovrascrivere tutte le altre lingue. Continuare?",
+    "editLangHint": "Modifica nella scheda lingua corrente; «Traduzione IA» aggiorna le altre lingue da quella attuale."
   },
   "pdf": {
     "title": "Compilazione automatica da PDF",

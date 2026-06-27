@@ -418,7 +418,9 @@
     "transDoneCount": "Translated {ok}/{total} languages",
     "genDone": "AI draft filled in — review, tweak, then save",
     "savedOk": "Showcase content saved",
-    "transSavedOk": "{lang} translation saved"
+    "transSavedOk": "{lang} translation saved",
+    "transFromConfirm": "Translate from {lang} and overwrite all other languages. Continue?",
+    "editLangHint": "Edit in whichever language tab you're on; “AI translate” refreshes all other languages from the current one."
   },
   "pdf": {
     "title": "Auto-fill from PDF",

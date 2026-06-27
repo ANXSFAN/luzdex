@@ -418,7 +418,9 @@
     "transDoneCount": "{ok}/{total} langues traduites",
     "genDone": "Brouillon IA inséré — relisez, ajustez puis enregistrez",
     "savedOk": "Contenu enregistré",
-    "transSavedOk": "Traduction {lang} enregistrée"
+    "transSavedOk": "Traduction {lang} enregistrée",
+    "transFromConfirm": "Traduire depuis {lang} et écraser toutes les autres langues. Continuer ?",
+    "editLangHint": "Modifiez dans l'onglet de langue actuel ; « Traduction IA » met à jour les autres langues à partir de celle-ci."
   },
   "pdf": {
     "title": "Remplissage auto depuis PDF",

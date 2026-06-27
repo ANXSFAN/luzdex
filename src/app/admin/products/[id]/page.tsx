@@ -26,10 +26,11 @@ import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
 import { ProductRelations } from "@/components/product-relations";
 import { ShowcaseEditor } from "@/components/showcase-editor";
+import { ProductI18nProvider, ProductLocaleBar } from "@/components/product-i18n";
 import { GalleryManager } from "@/components/gallery-manager";
 import { SpecsEditor } from "@/components/specs-editor";
 import { DeleteProductButton } from "@/components/delete-product-button";
-import { BasicInfoEditor } from "@/components/basic-info-editor";
+import { BasicInfoEditor, ProductModelEditor } from "@/components/basic-info-editor";
 import { VariantManager } from "@/components/variant-manager";
 import { DuplicateProductButton } from "@/components/duplicate-product-button";
 import { PdfIntakeCard } from "@/components/pdf-intake-card";
@@ -301,6 +302,29 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     !!product.translationStamp &&
     contentSourceHash(product) !== product.translationStamp;
 
+  // 当前基准语言（主字段语言）；各卡片在「非基准语言」tab 下读写下列各语言译文包。
+  const sourceLocale = product.sourceLocale ?? "es";
+  const nameTranslations: Record<string, string> = {};
+  const specsTranslations: Record<
+    string,
+    { group: string; label: string; value: string; unit: string; key: string }[]
+  > = {};
+  const docTitleTrans: Record<string, string[]> = {};
+  const videoTitleTrans: Record<string, string[]> = {};
+  for (const [loc, c] of Object.entries(ci)) {
+    if (c.name) nameTranslations[loc] = c.name;
+    if (c.specs?.length)
+      specsTranslations[loc] = c.specs.map((sp) => ({
+        group: sp.group ?? "",
+        label: sp.label,
+        value: sp.value,
+        unit: sp.unit ?? "",
+        key: "",
+      }));
+    if (c.docTitles?.length) docTitleTrans[loc] = c.docTitles;
+    if (c.videoTitles?.length) videoTitleTrans[loc] = c.videoTitles;
+  }
+
   // 30-day buckets, days[29] = today
   const buckets = new Map<string, number>();
   for (const s of scans) {
@@ -464,10 +488,22 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         }}
       />
 
+      <ProductModelEditor
+        productId={product.id}
+        initialModelNumber={product.modelNumber}
+      />
+
+      <ProductI18nProvider baseLocale={sourceLocale}>
+      <ProductLocaleBar
+        productId={product.id}
+        translatedLocales={translatedLocales}
+        translationStale={translationStale}
+      />
+
       <BasicInfoEditor
         productId={product.id}
         initialName={product.name}
-        initialModelNumber={product.modelNumber}
+        nameTranslations={nameTranslations}
       />
 
       <GalleryManager
@@ -485,6 +521,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         initialSpecs={initialSpecs}
         initialCerts={product.certifications}
         attrDefs={attrDefs}
+        specsTranslations={specsTranslations}
       />
 
       <ShowcaseEditor
@@ -501,9 +538,6 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         initialInstallMethod={initialInstall?.method ?? ""}
         initialInstallSteps={initialInstall?.steps ?? []}
         initialDim={initialDim}
-        initialSourceLocale={product.sourceLocale ?? "es"}
-        translatedLocales={translatedLocales}
-        translationStale={translationStale}
         initialTranslations={initialTranslations}
       />
 
@@ -528,12 +562,15 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         productId={product.id}
         documents={product.documents}
         videos={product.videos}
+        docTitleTrans={docTitleTrans}
+        videoTitleTrans={videoTitleTrans}
       />
 
       <DeleteProductButton
         productId={product.id}
         productName={localizedProductName(product.name, product.contentI18n, adminLocale)}
       />
+      </ProductI18nProvider>
     </div>
   );
 }

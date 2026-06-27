@@ -418,7 +418,9 @@
     "transDoneCount": "已翻译 {ok}/{total} 种语言",
     "genDone": "AI 草稿已填入，请过目修改后保存",
     "savedOk": "展示内容已保存",
-    "transSavedOk": "已保存 {lang} 译文"
+    "transSavedOk": "已保存 {lang} 译文",
+    "transFromConfirm": "将以【{lang}】的当前内容为准，翻译并覆盖其余所有语言。继续？",
+    "editLangHint": "在哪个语言 tab 下就编辑该语言；点「AI 翻译」会以当前语言为准刷新其余所有语言。"
   },
   "pdf": {
     "title": "从 PDF 自动填充",

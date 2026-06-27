@@ -418,7 +418,9 @@
     "transDoneCount": "{ok}/{total} talen vertaald",
     "genDone": "AI-concept ingevuld — controleer, pas aan en sla op",
     "savedOk": "Inhoud opgeslagen",
-    "transSavedOk": "Vertaling {lang} opgeslagen"
+    "transSavedOk": "Vertaling {lang} opgeslagen",
+    "transFromConfirm": "Vertalen vanuit {lang} en alle andere talen overschrijven. Doorgaan?",
+    "editLangHint": "Bewerk in het huidige taaltabblad; “AI-vertaling” werkt alle andere talen vanuit de huidige bij."
   },
   "pdf": {
     "title": "Automatisch invullen vanuit PDF",

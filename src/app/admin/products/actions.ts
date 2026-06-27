@@ -185,18 +185,27 @@ export async function saveProductShowcase(input: {
  */
 export async function saveProductBasics(input: {
   productId: string;
-  name: string;
-  modelNumber: string;
+  name?: string;
+  modelNumber?: string;
 }) {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
-  const name = input.name.trim();
-  const modelNumber = input.modelNumber.trim();
-  if (!name) throw await adminErr("nameRequired");
-  if (!modelNumber) throw await adminErr("modelRequired");
+  // 名称（分语言，主字段）与型号（语言无关）可分开保存，只更新传入的字段
+  const data: { name?: string; modelNumber?: string } = {};
+  if (input.name !== undefined) {
+    const name = input.name.trim();
+    if (!name) throw await adminErr("nameRequired");
+    data.name = name;
+  }
+  if (input.modelNumber !== undefined) {
+    const modelNumber = input.modelNumber.trim();
+    if (!modelNumber) throw await adminErr("modelRequired");
+    data.modelNumber = modelNumber;
+  }
+  if (Object.keys(data).length === 0) return;
   await prisma.product.update({
     where: { id: input.productId },
-    data: { name, modelNumber },
+    data,
   });
   // name 在 contentSourceHash 内：改名 → 译文过期，stale 需重算
   await recomputeReadiness(input.productId);
@@ -302,7 +311,7 @@ function fieldFp(v: unknown): string {
  * 译文包做完整性校验：源里非空的板块（场景/图文详情/盒内清单/安装/FAQ…）译文必须
  * 都在，缺板块视为该语言失败并重试一次；失败语言保留旧译文（合并写入，不整体覆盖）。
  */
-export async function translateShowcase(productId: string) {
+export async function translateShowcase(productId: string, fromLocaleInput?: string) {
   const factory = await authedFactory();
   await assertOwned(productId, factory.id);
 
@@ -323,11 +332,20 @@ export async function translateShowcase(productId: string) {
       sourceLocale: true,
       contentI18n: true,
       translationFp: true,
-      documents: { select: { title: true }, orderBy: { sortOrder: "asc" } },
-      videos: { select: { title: true }, orderBy: { sortOrder: "asc" } },
+      documents: { select: { id: true, title: true }, orderBy: { sortOrder: "asc" } },
+      videos: { select: { id: true, title: true }, orderBy: { sortOrder: "asc" } },
     },
   });
   if (!product) throw await adminErr("productNotFound");
+
+  // 「以当前语言为基准翻译」：当前 tab 语言若不是主字段语言，先把它的内容提升为主字段
+  // （它成为新基准），随后递归走标准「从源翻译」刷新其余所有语言。没有固定源语言之说。
+  const curSrc = normalizeLocale(product.sourceLocale) ?? "es";
+  const fromLoc = normalizeLocale(fromLocaleInput) ?? curSrc;
+  if (fromLoc !== curSrc) {
+    await promoteLocaleToSource(productId, product, fromLoc);
+    return translateShowcase(productId);
+  }
 
   // 组装源语言内容包（含结构，AI 只改文字）
   const source = {
@@ -583,6 +601,153 @@ export async function saveTranslation(input: {
     data: { contentI18n: all },
   });
   revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 局部更新某语言译文包的指定字段（名称 / 规格 / 文档标题 / 视频标题），其余字段原样保留。
+ * 供基本信息、规格、素材三张卡片在「非主语言」tab 下保存；空值=清空（前台回退主字段）。
+ * 不动 translationStamp（手改译文不算源内容变更）。
+ */
+export async function patchTranslation(input: {
+  productId: string;
+  locale: string;
+  name?: string;
+  specs?: unknown;
+  docTitles?: string[];
+  videoTitles?: string[];
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  const loc = normalizeLocale(input.locale);
+  if (!loc) throw await adminErr("unknownLocale");
+
+  const product = await prisma.product.findUnique({
+    where: { id: input.productId },
+    select: { contentI18n: true, sourceLocale: true },
+  });
+  if (!product) throw await adminErr("productNotFound");
+  if (loc === (normalizeLocale(product.sourceLocale) ?? "es")) {
+    throw await adminErr("useSourceSave");
+  }
+
+  const all = parseContentI18n(product.contentI18n);
+  const next: LocalizedContent = { ...(all[loc] ?? {}) };
+
+  if (input.name !== undefined) {
+    if (input.name.trim()) next.name = input.name.trim();
+    else delete next.name;
+  }
+  if (input.specs !== undefined) {
+    // 译文规格不存字典 key（key 属源结构，剥掉防漂移）
+    const sp = parseSpecs(input.specs).map((s) => {
+      const { key: _key, ...rest } = s;
+      void _key;
+      return rest;
+    });
+    if (sp.length) next.specs = sp;
+    else delete next.specs;
+  }
+  if (input.docTitles !== undefined) {
+    const arr = input.docTitles.map((t) => t.trim());
+    if (arr.some(Boolean)) next.docTitles = arr;
+    else delete next.docTitles;
+  }
+  if (input.videoTitles !== undefined) {
+    const arr = input.videoTitles.map((t) => t.trim());
+    if (arr.some(Boolean)) next.videoTitles = arr;
+    else delete next.videoTitles;
+  }
+
+  all[loc] = next;
+  await prisma.product.update({
+    where: { id: input.productId },
+    data: { contentI18n: all },
+  });
+  await recomputeReadiness(input.productId);
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 把某语言的译文「提升」为主字段（成为新基准），并从 contentI18n 移除该语言。
+ * 供 translateShowcase「以当前语言为基准」用：当前 tab 语言先入主字段，再标准翻译刷新其余。
+ * specs 字典 key 按行序尽量沿用旧主字段；文档/视频标题按 sortOrder 顺序写回各自表。
+ */
+async function promoteLocaleToSource(
+  productId: string,
+  product: {
+    name: string;
+    description: string | null;
+    tagline: string | null;
+    highlights: unknown;
+    applications: unknown;
+    faq: unknown;
+    boxContents: unknown;
+    install: unknown;
+    dimensions: unknown;
+    detailBlocks: unknown;
+    specs: unknown;
+    contentI18n: unknown;
+    documents: { id: string; title: string }[];
+    videos: { id: string; title: string }[];
+  },
+  fromLoc: string,
+) {
+  const all = parseContentI18n(product.contentI18n);
+  const tr = all[fromLoc];
+  // 该语言无任何译文：没内容可提升，仅切换源语言标记
+  if (!tr) {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { sourceLocale: fromLoc },
+    });
+    return;
+  }
+
+  // specs：译文不带字典 key，按行序沿用旧主字段的 key（新增行无 key）
+  const oldSpecs = parseSpecs(product.specs);
+  const specs = (tr.specs ?? oldSpecs).map((s, i) => {
+    const key = oldSpecs[i]?.key;
+    return key ? { ...s, key } : s;
+  });
+
+  delete all[fromLoc]; // 该语言成为主字段，不再留在译文包里
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: {
+      name: tr.name?.trim() || product.name,
+      description: (tr.description?.trim() || product.description) ?? null,
+      tagline: (tr.tagline?.trim() || product.tagline) ?? null,
+      highlights: tr.highlights ?? parseHighlights(product.highlights),
+      applications: tr.applications ?? parseApplications(product.applications),
+      faq: tr.faq ?? parseFaq(product.faq),
+      boxContents: tr.boxContents ?? parseBoxContents(product.boxContents),
+      install: tr.install ?? parseInstall(product.install) ?? {},
+      dimensions: tr.dimensions ?? parseDimensionsJson(product.dimensions) ?? {},
+      detailBlocks: tr.detailBlocks ?? parseDetailBlocks(product.detailBlocks),
+      specs,
+      sourceLocale: fromLoc,
+      contentI18n: all,
+    },
+  });
+
+  // 文档/视频标题译文按 sortOrder 顺序写回各自表（缺/空则保留原标题）
+  await Promise.all([
+    ...product.documents.map((d, i) => {
+      const t = tr.docTitles?.[i]?.trim();
+      return t
+        ? prisma.document.update({ where: { id: d.id }, data: { title: t } })
+        : null;
+    }),
+    ...product.videos.map((v, i) => {
+      const t = tr.videoTitles?.[i]?.trim();
+      return t
+        ? prisma.video.update({ where: { id: v.id }, data: { title: t } })
+        : null;
+    }),
+  ]);
+
+  await recomputeReadiness(productId);
 }
 
 /** 判断一个产品是否"缺展示内容"（卖点/场景/图文都空）。 */
@@ -952,6 +1117,29 @@ export async function saveProductSpecs(input: {
 
   // specs 在 contentSourceHash 内：改规格 → 译文可能过期，stale 需重算
   await recomputeReadiness(input.productId);
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 单独保存认证徽章（语言无关，存主字段）：供规格卡在任意语言 tab 下增删认证。
+ * 认证不在 contentSourceHash 内，改它不影响译文过期判断，无需重算就绪度。
+ */
+export async function saveProductCerts(input: {
+  productId: string;
+  certifications: unknown;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+  const certifications = Array.isArray(input.certifications)
+    ? input.certifications
+        .map((c) => String(c).trim())
+        .filter(Boolean)
+        .slice(0, 24)
+    : [];
+  await prisma.product.update({
+    where: { id: input.productId },
+    data: { certifications },
+  });
   revalidatePath(`/admin/products/${input.productId}`);
 }
 

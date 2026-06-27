@@ -418,7 +418,9 @@
     "transDoneCount": "{ok}/{total} Sprachen übersetzt",
     "genDone": "KI-Entwurf eingefügt — prüfen, anpassen, speichern",
     "savedOk": "Inhalt gespeichert",
-    "transSavedOk": "Übersetzung {lang} gespeichert"
+    "transSavedOk": "Übersetzung {lang} gespeichert",
+    "transFromConfirm": "Aus {lang} übersetzen und alle anderen Sprachen überschreiben. Fortfahren?",
+    "editLangHint": "Bearbeiten Sie in der aktuellen Sprach-Registerkarte; „KI-Übersetzung“ aktualisiert die anderen Sprachen daraus."
   },
   "pdf": {
     "title": "Automatisch aus PDF füllen",

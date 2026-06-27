@@ -6,6 +6,8 @@ import { FileText, Film, Trash2, Upload, Loader2, Plus, Pencil, Check, X } from 
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useFileDrop } from "@/components/use-file-drop";
+import { useProductLocale } from "@/components/product-i18n";
+import { patchTranslation } from "@/app/admin/products/actions";
 
 interface DocumentItem {
   id: string;
@@ -24,6 +26,9 @@ interface Props {
   productId: string;
   documents: DocumentItem[];
   videos: VideoItem[];
+  // 各语言的文档/视频标题译文（按 sortOrder 顺序，与列表对齐）
+  docTitleTrans: Record<string, string[]>;
+  videoTitleTrans: Record<string, string[]>;
 }
 
 async function uploadFile(file: File) {
@@ -43,11 +48,32 @@ function fmtSize(b: number) {
   return b < 1048576 ? `${Math.round(b / 1024)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 }
 
-export function MaterialManager({ productId, documents, videos }: Props) {
+export function MaterialManager({
+  productId,
+  documents,
+  videos,
+  docTitleTrans,
+  videoTitleTrans,
+}: Props) {
+  const { editingLocale, isBase } = useProductLocale();
+  const docTrans = isBase ? [] : docTitleTrans[editingLocale] ?? [];
+  const videoTrans = isBase ? [] : videoTitleTrans[editingLocale] ?? [];
   return (
     <div className="mt-10 space-y-10">
-      <VideoSection productId={productId} videos={videos} />
-      <DocumentSection productId={productId} documents={documents} />
+      <VideoSection
+        productId={productId}
+        videos={videos}
+        isBase={isBase}
+        locale={editingLocale}
+        titleTrans={videoTrans}
+      />
+      <DocumentSection
+        productId={productId}
+        documents={documents}
+        isBase={isBase}
+        locale={editingLocale}
+        titleTrans={docTrans}
+      />
     </div>
   );
 }
@@ -139,7 +165,19 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function VideoSection({ productId, videos }: { productId: string; videos: VideoItem[] }) {
+function VideoSection({
+  productId,
+  videos,
+  isBase,
+  locale,
+  titleTrans,
+}: {
+  productId: string;
+  videos: VideoItem[];
+  isBase: boolean;
+  locale: string;
+  titleTrans: string[];
+}) {
   const router = useRouter();
   const t = useTranslations("misc");
   const tc = useTranslations("admin.common");
@@ -209,19 +247,35 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
     }
   }
 
-  async function handleRename(id: string, title: string) {
-    const res = await fetch(`/api/videos/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
-    });
-    if (res.ok) {
+  // 主语言：改实际标题（API）；其余语言：把该语言标题译文存入 contentI18n
+  async function handleRename(id: string, newTitle: string) {
+    if (isBase) {
+      const res = await fetch(`/api/videos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      if (res.ok) {
+        toast.success(t("renamed"));
+        router.refresh();
+        return true;
+      }
+      toast.error(tc("saveFail"));
+      return false;
+    }
+    const idx = videos.findIndex((v) => v.id === id);
+    const arr = videos.map((v, i) =>
+      i === idx ? newTitle : titleTrans[i] ?? v.title,
+    );
+    try {
+      await patchTranslation({ productId, locale, videoTitles: arr });
       toast.success(t("renamed"));
       router.refresh();
       return true;
+    } catch {
+      toast.error(tc("saveFail"));
+      return false;
     }
-    toast.error(tc("saveFail"));
-    return false;
   }
 
   return (
@@ -230,63 +284,70 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
 
       {videos.length > 0 && (
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
-          {videos.map((v) => (
+          {videos.map((v, i) => (
             <li key={v.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <Film className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
-                <EditableTitle value={v.title} onSave={(title) => handleRename(v.id, title)} />
+                <EditableTitle
+                  value={isBase ? v.title : titleTrans[i] ?? v.title}
+                  onSave={(title) => handleRename(v.id, title)}
+                />
               </div>
-              <button
-                onClick={() => handleDelete(v.id)}
-                className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {isBase && (
+                <button
+                  onClick={() => handleDelete(v.id)}
+                  className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      <div
-        {...dropProps}
-        className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
-          dragging
-            ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
-            : "border-[var(--color-rule)]"
-        }`}
-      >
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={t("videoTitle")}
-          className="form-input"
-        />
-        <div className="flex gap-2">
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder={t("videoUrl")}
-            className="form-input min-w-0 flex-1"
-          />
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 text-xs transition hover:bg-[var(--color-surface-sunken)] disabled:opacity-50"
-          >
-            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            {t("upload")}
-          </button>
-          <input ref={fileRef} type="file" accept="video/*" hidden onChange={handlePickVideo} />
-        </div>
-        <button
-          onClick={handleAdd}
-          disabled={saving}
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+      {isBase && (
+        <div
+          {...dropProps}
+          className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
+            dragging
+              ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
+              : "border-[var(--color-rule)]"
+          }`}
         >
-          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-          {t("addVideo")}
-        </button>
-      </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t("videoTitle")}
+            className="form-input"
+          />
+          <div className="flex gap-2">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={t("videoUrl")}
+              className="form-input min-w-0 flex-1"
+            />
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 text-xs transition hover:bg-[var(--color-surface-sunken)] disabled:opacity-50"
+            >
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              {t("upload")}
+            </button>
+            <input ref={fileRef} type="file" accept="video/*" hidden onChange={handlePickVideo} />
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={saving}
+            className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+            {t("addVideo")}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
@@ -294,9 +355,15 @@ function VideoSection({ productId, videos }: { productId: string; videos: VideoI
 function DocumentSection({
   productId,
   documents,
+  isBase,
+  locale,
+  titleTrans,
 }: {
   productId: string;
   documents: DocumentItem[];
+  isBase: boolean;
+  locale: string;
+  titleTrans: string[];
 }) {
   const router = useRouter();
   const t = useTranslations("misc");
@@ -357,19 +424,35 @@ function DocumentSection({
     }
   }
 
-  async function handleRename(id: string, title: string) {
-    const res = await fetch(`/api/documents/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
-    });
-    if (res.ok) {
+  // 主语言：改实际标题（API）；其余语言：把该语言标题译文存入 contentI18n
+  async function handleRename(id: string, newTitle: string) {
+    if (isBase) {
+      const res = await fetch(`/api/documents/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      if (res.ok) {
+        toast.success(t("renamed"));
+        router.refresh();
+        return true;
+      }
+      toast.error(tc("saveFail"));
+      return false;
+    }
+    const idx = documents.findIndex((d) => d.id === id);
+    const arr = documents.map((d, i) =>
+      i === idx ? newTitle : titleTrans[i] ?? d.title,
+    );
+    try {
+      await patchTranslation({ productId, locale, docTitles: arr });
       toast.success(t("renamed"));
       router.refresh();
       return true;
+    } catch {
+      toast.error(tc("saveFail"));
+      return false;
     }
-    toast.error(tc("saveFail"));
-    return false;
   }
 
   return (
@@ -378,50 +461,57 @@ function DocumentSection({
 
       {documents.length > 0 && (
         <ul className="mb-4 divide-y divide-[var(--color-rule)] overflow-hidden rounded-xl border border-[var(--color-rule)]">
-          {documents.map((d) => (
+          {documents.map((d, i) => (
             <li key={d.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <FileText className="h-4 w-4 shrink-0 text-[var(--color-ink-muted)]" />
-                <EditableTitle value={d.title} onSave={(title) => handleRename(d.id, title)} />
+                <EditableTitle
+                  value={isBase ? d.title : titleTrans[i] ?? d.title}
+                  onSave={(title) => handleRename(d.id, title)}
+                />
               </div>
               <span className="shrink-0 font-mono text-xs text-[var(--color-ink-muted)]">
                 {fmtSize(d.fileSize)}
               </span>
-              <button
-                onClick={() => handleDelete(d.id)}
-                className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {isBase && (
+                <button
+                  onClick={() => handleDelete(d.id)}
+                  className="shrink-0 text-[var(--color-ink-muted)] transition hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      <div
-        {...dropProps}
-        className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
-          dragging
-            ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
-            : "border-[var(--color-rule)]"
-        }`}
-      >
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={t("docTitle")}
-          className="form-input"
-        />
-        <button
-          onClick={() => fileRef.current?.click()}
-          disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+      {isBase && (
+        <div
+          {...dropProps}
+          className={`space-y-2 rounded-xl border border-dashed p-4 transition ${
+            dragging
+              ? "border-[var(--color-ink)] bg-[var(--color-surface-sunken)]"
+              : "border-[var(--color-rule)]"
+          }`}
         >
-          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-          {t("pickUpload")}
-        </button>
-        <input ref={fileRef} type="file" hidden onChange={handlePickDoc} />
-      </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t("docTitle")}
+            className="form-input"
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={busy}
+            className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-2 text-xs text-white transition hover:bg-[#424245] disabled:opacity-50"
+          >
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            {t("pickUpload")}
+          </button>
+          <input ref={fileRef} type="file" hidden onChange={handlePickDoc} />
+        </div>
+      )}
     </section>
   );
 }

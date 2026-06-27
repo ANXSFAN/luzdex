@@ -9,7 +9,6 @@ import {
   ArrowDown,
   GripVertical,
   Sparkles,
-  Languages,
   Upload,
   Loader2,
 } from "lucide-react";
@@ -19,11 +18,11 @@ import {
   saveProductShowcase,
   generateShowcaseDraft,
   generateDetailLayout,
-  translateShowcase,
   saveTranslation,
 } from "@/app/admin/products/actions";
-import { LOCALE_LABELS, LOCALE_ORDER } from "@/i18n/routing";
+import { LOCALE_LABELS } from "@/i18n/routing";
 import { confirmDialog } from "@/components/confirm-dialog";
+import { useProductLocale } from "@/components/product-i18n";
 import { LUMINAIRE_TYPES } from "@/lib/luminaire";
 import { useFileDrop } from "@/components/use-file-drop";
 import { MAX_IMAGE_BYTES } from "@/lib/upload-rules";
@@ -192,7 +191,30 @@ function ImageUrlField({
   );
 }
 
-export function ShowcaseEditor({
+type ShowcaseProps = {
+  productId: string;
+  initialTagline: string;
+  initialVariantLabel: string;
+  initialDescription: string;
+  initialLuminaireType: string;
+  initialHighlights: Highlight[];
+  initialBlocks: Block[];
+  initialApplications: Application[];
+  initialFaq: Faq[];
+  initialBoxContents: BoxItem[];
+  initialInstallMethod: string;
+  initialInstallSteps: string[];
+  initialDim: { w: string; h: string; d: string; unit: string; cutout: string };
+  initialTranslations: Record<string, LocaleContent>;
+};
+
+// 切语言 = 换一份内容：用 key 重挂载内层、按当前语言初始化，省去 effect 重置 state。
+export function ShowcaseEditor(props: ShowcaseProps) {
+  const { editingLocale } = useProductLocale();
+  return <ShowcaseEditorInner key={editingLocale} {...props} />;
+}
+
+function ShowcaseEditorInner({
   productId,
   initialTagline,
   initialVariantLabel,
@@ -206,58 +228,42 @@ export function ShowcaseEditor({
   initialInstallMethod,
   initialInstallSteps,
   initialDim,
-  initialSourceLocale,
-  translatedLocales,
-  translationStale,
   initialTranslations,
-}: {
-  productId: string;
-  initialTagline: string;
-  initialVariantLabel: string;
-  initialDescription: string;
-  initialLuminaireType: string;
-  initialHighlights: Highlight[];
-  initialBlocks: Block[];
-  initialApplications: Application[];
-  initialFaq: Faq[];
-  initialBoxContents: BoxItem[];
-  initialInstallMethod: string;
-  initialInstallSteps: string[];
-  initialDim: {
-    w: string;
-    h: string;
-    d: string;
-    unit: string;
-    cutout: string;
-  };
-  initialSourceLocale: string;
-  translatedLocales: string[];
-  translationStale: boolean;
-  initialTranslations: Record<string, LocaleContent>;
-}) {
-  const [transName, setTransName] = useState(""); // 当前译文语言的产品译名
-  const [tagline, setTagline] = useState(initialTagline);
+}: ShowcaseProps) {
+  const { editingLocale, isBase, baseLocale } = useProductLocale();
+  const isSource = isBase; // 下游沿用 isSource 命名：主语言 = 可改全部结构
+  // 按当前语言初始化：主语言用源 props，其余语言用该语言译文（缺则空，前台回退主字段）
+  const init: LocaleContent = isBase
+    ? {
+        name: "",
+        tagline: initialTagline,
+        description: initialDescription,
+        highlights: initialHighlights,
+        blocks: initialBlocks,
+        applications: initialApplications,
+        faq: initialFaq,
+        boxContents: initialBoxContents,
+        installMethod: initialInstallMethod,
+        installSteps: initialInstallSteps,
+        dimCutout: initialDim.cutout,
+      }
+    : initialTranslations[editingLocale] ?? EMPTY_CONTENT;
+  const [tagline, setTagline] = useState(init.tagline);
   const [variantLabel, setVariantLabel] = useState(initialVariantLabel);
-  const [description, setDescription] = useState(initialDescription);
+  const [description, setDescription] = useState(init.description);
   const [luminaireType, setLuminaireType] = useState(initialLuminaireType);
-  const [highlights, setHighlights] = useState<Highlight[]>(initialHighlights);
-  const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
-  const [applications, setApplications] =
-    useState<Application[]>(initialApplications);
-  const [faq, setFaq] = useState<Faq[]>(initialFaq);
-  const [boxContents, setBoxContents] = useState<BoxItem[]>(initialBoxContents);
-  const [installMethod, setInstallMethod] = useState(initialInstallMethod);
-  const [installSteps, setInstallSteps] =
-    useState<string[]>(initialInstallSteps);
+  const [highlights, setHighlights] = useState<Highlight[]>(init.highlights);
+  const [blocks, setBlocks] = useState<Block[]>(init.blocks);
+  const [applications, setApplications] = useState<Application[]>(init.applications);
+  const [faq, setFaq] = useState<Faq[]>(init.faq);
+  const [boxContents, setBoxContents] = useState<BoxItem[]>(init.boxContents);
+  const [installMethod, setInstallMethod] = useState(init.installMethod);
+  const [installSteps, setInstallSteps] = useState<string[]>(init.installSteps);
   const [dimW, setDimW] = useState(initialDim.w);
   const [dimH, setDimH] = useState(initialDim.h);
   const [dimD, setDimD] = useState(initialDim.d);
   const [dimUnit, setDimUnit] = useState(initialDim.unit);
-  const [dimCutout, setDimCutout] = useState(initialDim.cutout);
-  const [sourceLocale, setSourceLocale] = useState(initialSourceLocale || "es");
-  const baseLocale = initialSourceLocale || "es";
-  const [editingLocale, setEditingLocale] = useState(baseLocale);
-  const isSource = editingLocale === baseLocale;
+  const [dimCutout, setDimCutout] = useState(init.dimCutout);
   const tr = useTranslations("prod");
   const s = useTranslations("show");
   const tc = useTranslations("admin.common");
@@ -265,7 +271,6 @@ export function ShowcaseEditor({
   const uiLocale = useLocale();
   const [pending, start] = useTransition();
   const [genPending, startGen] = useTransition();
-  const [transPending, startTrans] = useTransition();
 
   // AI 图文排版面板：客户传图 + 写描述 → 生成 heading/text/image 块序列
   const [aiImages, setAiImages] = useState<string[]>([]);
@@ -322,57 +327,6 @@ export function ShowcaseEditor({
         toast.success(s("aiLayoutDone"));
       } catch (e) {
         toast.error(e instanceof Error ? e.message : tc("aiFail"));
-      }
-    });
-  }
-
-  // 源语言内容快照（初始 props），切回源语言时还原
-  const sourceContent: LocaleContent = {
-    name: "",
-    tagline: initialTagline,
-    description: initialDescription,
-    highlights: initialHighlights,
-    blocks: initialBlocks,
-    applications: initialApplications,
-    faq: initialFaq,
-    boxContents: initialBoxContents,
-    installMethod: initialInstallMethod,
-    installSteps: initialInstallSteps,
-    dimCutout: initialDim.cutout,
-  };
-
-  // 把一份内容载入到可编辑字段（不动源专属字段：变体标签/灯具类型/尺寸 w·h·d·unit）
-  function applyContent(c: LocaleContent) {
-    setTransName(c.name);
-    setTagline(c.tagline);
-    setDescription(c.description);
-    setHighlights(c.highlights);
-    setBlocks(c.blocks);
-    setApplications(c.applications);
-    setFaq(c.faq);
-    setBoxContents(c.boxContents);
-    setInstallMethod(c.installMethod);
-    setInstallSteps(c.installSteps);
-    setDimCutout(c.dimCutout);
-  }
-
-  // 切换正在编辑的语言（切换会丢弃未保存修改，故确认）
-  async function switchLocale(loc: string) {
-    if (loc === editingLocale) return;
-    if (!(await confirmDialog({ message: s("switchConfirm") }))) return;
-    applyContent(loc === baseLocale ? sourceContent : initialTranslations[loc] ?? EMPTY_CONTENT);
-    setEditingLocale(loc);
-  }
-
-  // AI 翻译补全其余语言：读已保存的源语言内容，翻译入库（直接保存、可重跑）。
-  async function translate() {
-    if (!(await confirmDialog({ message: s("transConfirm") }))) return;
-    startTrans(async () => {
-      try {
-        const r = await translateShowcase(productId);
-        toast.success(s("transDoneCount", { ok: r.ok, total: r.total }));
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : tc("transFail"));
       }
     });
   }
@@ -567,14 +521,13 @@ export function ShowcaseEditor({
             boxContents: cleanBox,
             install: cleanInstall,
             dimensions: cleanDim,
-            sourceLocale,
+            sourceLocale: baseLocale,
           });
           toast.success(s("savedOk"));
         } else {
           await saveTranslation({
             productId,
             locale: editingLocale,
-            name: transName,
             tagline,
             description,
             highlights: cleanHighlights,
@@ -610,128 +563,26 @@ export function ShowcaseEditor({
         </span>
       </div>
 
-      {/* 语言模式：切换正在编辑的语言（源语言可改全部；译文逐语言审校） */}
-      <div className="mt-4 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
-          {s("editLang")}
-        </span>
-        {LOCALE_ORDER.map((loc) => {
-          const isCur = loc === editingLocale;
-          const isSrc = loc === baseLocale;
-          const has = isSrc || translatedLocales.includes(loc);
-          return (
-            <button
-              key={loc}
-              type="button"
-              onClick={() => switchLocale(loc)}
-              className={`rounded-full border px-2.5 py-1 text-[12px] transition ${
-                isCur
-                  ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-surface)]"
-                  : has
-                    ? "border-[var(--color-rule-strong)] text-[var(--color-ink-soft)] hover:border-[var(--color-ink)]"
-                    : "border-[var(--color-rule)] text-[var(--color-ink-faint)] hover:border-[var(--color-ink)]"
-              }`}
-            >
-              {LOCALE_LABELS[loc]}
-            </button>
-          );
-        })}
-      </div>
-      {!isSource && (
-        <p className="mt-2 text-[11px] text-[var(--color-ink-faint)]">
-          {s("auditNote")}
-        </p>
-      )}
-
+      {/* AI 一键生成草稿（仅主语言：生成的是当前基准语言的展示文案） */}
       {isSource && (
-      <>
-      {/* AI 一键生成草稿 */}
-      <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--color-rule-strong)] bg-[var(--color-surface-sunken)] p-3.5">
-        <div className="min-w-0">
-          <p className="text-[13px] font-medium text-[var(--color-ink)]">
-            {s("aiGenTitle")}
-          </p>
-          <p className="mt-0.5 text-[11px] text-[var(--color-ink-faint)]">
-            {s("aiGenHint")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={generate}
-          disabled={genPending}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-ink)] px-3.5 py-2 text-sm font-medium text-[var(--color-ink)] transition hover:bg-[var(--color-ink)] hover:text-[var(--color-surface)] disabled:opacity-50"
-        >
-          <Sparkles className="h-4 w-4" />
-          {genPending ? s("aiGenning") : s("aiGenBtn")}
-        </button>
-      </div>
-
-      {/* AI 翻译补全其余语言 */}
-      <div className="mt-3 rounded-xl border border-dashed border-[var(--color-rule-strong)] bg-[var(--color-surface-sunken)] p-3.5">
-        <div className="flex items-center justify-between gap-4">
+        <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--color-rule-strong)] bg-[var(--color-surface-sunken)] p-3.5">
           <div className="min-w-0">
             <p className="text-[13px] font-medium text-[var(--color-ink)]">
-              {s("aiTransTitle")}
+              {s("aiGenTitle")}
             </p>
             <p className="mt-0.5 text-[11px] text-[var(--color-ink-faint)]">
-              {s("aiTransHint")}
+              {s("aiGenHint")}
             </p>
           </div>
           <button
             type="button"
-            onClick={translate}
-            disabled={transPending}
+            onClick={generate}
+            disabled={genPending}
             className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-ink)] px-3.5 py-2 text-sm font-medium text-[var(--color-ink)] transition hover:bg-[var(--color-ink)] hover:text-[var(--color-surface)] disabled:opacity-50"
           >
-            <Languages className="h-4 w-4" />
-            {transPending ? s("aiTransing") : s("aiTransBtn")}
+            <Sparkles className="h-4 w-4" />
+            {genPending ? s("aiGenning") : s("aiGenBtn")}
           </button>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-[11px] text-[var(--color-ink-muted)]">
-            {s("sourceLang")}
-            <select
-              value={sourceLocale}
-              onChange={(e) => setSourceLocale(e.target.value)}
-              className="rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-2 py-1 text-[13px] text-[var(--color-ink)] outline-none focus:border-[var(--color-ink)]"
-            >
-              {LOCALE_ORDER.map((l) => (
-                <option key={l} value={l}>
-                  {LOCALE_LABELS[l]}
-                </option>
-              ))}
-            </select>
-          </label>
-          {translatedLocales.length > 0 && (
-            <span className="text-[11px] text-[var(--color-ink-faint)]">
-              {s("translated")}
-              {translatedLocales
-                .map((l) => LOCALE_LABELS[l as keyof typeof LOCALE_LABELS] ?? l)
-                .join(" · ")}
-            </span>
-          )}
-        </div>
-        {translationStale && (
-          <p className="mt-2.5 rounded-lg bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
-            {s("staleWarn")}
-          </p>
-        )}
-      </div>
-      </>
-      )}
-
-      {/* 译名（仅译文模式；源语言名在「基本信息」卡维护） */}
-      {!isSource && (
-        <div className="mt-5">
-          <label className={labelCls}>{s("transName")}</label>
-          <input
-            value={transName}
-            onChange={(e) => setTransName(e.target.value)}
-            className={`${inputCls} mt-2`}
-          />
-          <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
-            {s("transNameHint")}
-          </p>
         </div>
       )}
 

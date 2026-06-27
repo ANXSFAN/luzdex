@@ -418,7 +418,9 @@
     "transDoneCount": "Traducidos {ok}/{total} idiomas",
     "genDone": "Borrador de IA insertado; revísalo y guarda",
     "savedOk": "Contenido guardado",
-    "transSavedOk": "Traducción {lang} guardada"
+    "transSavedOk": "Traducción {lang} guardada",
+    "transFromConfirm": "Traducir desde {lang} y sobrescribir todos los demás idiomas. ¿Continuar?",
+    "editLangHint": "Edita en la pestaña de idioma en la que estés; «Traducción IA» actualiza los demás idiomas a partir del actual."
   },
   "pdf": {
     "title": "Autorrellenar desde PDF",

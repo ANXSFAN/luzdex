@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2, ArrowUp, ArrowDown, X, BookMarked } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { saveProductSpecs } from "@/app/admin/products/actions";
+import {
+  saveProductSpecs,
+  patchTranslation,
+  saveProductCerts,
+} from "@/app/admin/products/actions";
+import { useProductLocale } from "@/components/product-i18n";
 import type { AttrDefLite } from "@/lib/attribute-defaults";
 
 type SpecRow = { group: string; label: string; value: string; unit: string; key: string };
@@ -15,19 +21,40 @@ const inputBase = inputCls.replace("w-full ", "");
 const labelCls =
   "font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]";
 
-export function SpecsEditor({
-  productId,
-  initialSpecs,
-  initialCerts,
-  attrDefs,
-}: {
+type SpecsProps = {
   productId: string;
   initialSpecs: SpecRow[];
   initialCerts: string[];
   attrDefs: AttrDefLite[];
-}) {
+  // 各语言规格译文（含 group/label/value/unit，不含字典 key）
+  specsTranslations: Record<string, SpecRow[]>;
+};
+
+// 切语言 = 换一份内容：用 key 重挂载内层、按当前语言初始化，省去 effect 重置 state。
+export function SpecsEditor(props: SpecsProps) {
+  const { editingLocale } = useProductLocale();
+  return <SpecsEditorInner key={editingLocale} {...props} />;
+}
+
+function SpecsEditorInner({
+  productId,
+  initialSpecs,
+  initialCerts,
+  attrDefs,
+  specsTranslations,
+}: SpecsProps) {
   const t = useTranslations();
-  const [rows, setRows] = useState<SpecRow[]>(initialSpecs);
+  const router = useRouter();
+  const { editingLocale, isBase } = useProductLocale();
+  // 主语言用主字段规格（带字典 key）；其余语言用该语言译文，缺则以源规格为起点（剥 key）
+  const [rows, setRows] = useState<SpecRow[]>(
+    isBase
+      ? initialSpecs
+      : (specsTranslations[editingLocale] ?? initialSpecs).map((r) => ({
+          ...r,
+          key: "",
+        })),
+  );
   const [certs, setCerts] = useState<string[]>(initialCerts);
   const [certDraft, setCertDraft] = useState("");
   const [pending, start] = useTransition();
@@ -40,7 +67,7 @@ export function SpecsEditor({
     ]);
   }
 
-  /** 从字典追加一行：label 统一写源语言名（与产品源 specs 语言一致），unit 带默认。 */
+  /** 从字典追加一行（仅主语言）：label 统一写源语言名，unit 带默认。 */
   function addFromDict(key: string) {
     const def = defByKey.get(key);
     if (!def) return;
@@ -56,7 +83,7 @@ export function SpecsEditor({
     ]);
   }
 
-  /** 行级认领 / 解除：选中字典项时用字典源名覆盖参数名、补默认单位；清空则解除关联。 */
+  /** 行级认领 / 解除（仅主语言）：选字典项用字典源名覆盖参数名、补默认单位；清空则解除。 */
   function linkRow(i: number, key: string) {
     const def = key ? defByKey.get(key) : undefined;
     setRows((r) =>
@@ -107,12 +134,15 @@ export function SpecsEditor({
       .filter((r) => r.label && r.value);
     start(async () => {
       try {
-        await saveProductSpecs({
-          productId,
-          specs: cleanSpecs,
-          certifications: certs,
-        });
+        if (isBase) {
+          await saveProductSpecs({ productId, specs: cleanSpecs, certifications: certs });
+        } else {
+          // specs 存该语言译文；认证语言无关，统一存主字段
+          await patchTranslation({ productId, locale: editingLocale, specs: cleanSpecs });
+          await saveProductCerts({ productId, certifications: certs });
+        }
         toast.success(t("prod.specsSaved"));
+        router.refresh();
       } catch (e) {
         toast.error(e instanceof Error ? e.message : t("admin.common.saveFail"));
       }
@@ -135,7 +165,7 @@ export function SpecsEditor({
         <div className="flex items-center justify-between gap-3">
           <label className={labelCls}>{t("prod.params")}</label>
           <div className="flex items-center gap-3">
-            {attrDefs.length > 0 && (
+            {isBase && attrDefs.length > 0 && (
               <div className="flex items-center gap-1 text-[var(--color-ink-muted)]">
                 <BookMarked className="h-3.5 w-3.5" />
                 <select
@@ -176,13 +206,15 @@ export function SpecsEditor({
               <span className={`${labelCls} w-40 shrink-0`}>{t("prod.paramName")}</span>
               <span className={`${labelCls} flex-1`}>{t("prod.paramValue")}</span>
               <span className={`${labelCls} w-20 shrink-0`}>{t("prod.unit")}</span>
-              <span className={`${labelCls} w-28 shrink-0`} title={t("prod.dictHint")}>
-                {t("prod.dict")}
-              </span>
+              {isBase && (
+                <span className={`${labelCls} w-28 shrink-0`} title={t("prod.dictHint")}>
+                  {t("prod.dict")}
+                </span>
+              )}
               <span className="w-16 shrink-0" />
             </div>
             {rows.map((r, i) => {
-              const def = r.key ? defByKey.get(r.key) : undefined;
+              const def = isBase && r.key ? defByKey.get(r.key) : undefined;
               return (
               <div key={i} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                 <input
@@ -224,23 +256,25 @@ export function SpecsEditor({
                   placeholder={t("prod.unit")}
                   className={`${inputBase} w-20 shrink-0`}
                 />
-                <select
-                  value={r.key}
-                  onChange={(e) => linkRow(i, e.target.value)}
-                  title={def ? `${def.label} · ${def.key}` : t("prod.dictHint")}
-                  className={`${inputBase} w-28 shrink-0 font-mono text-[11px] ${r.key ? "" : "text-[var(--color-ink-faint)]"}`}
-                >
-                  <option value="">—</option>
-                  {attrDefs.map((d) => (
-                    <option key={d.key} value={d.key}>
-                      {d.key}
-                    </option>
-                  ))}
-                  {/* 字典已删但行还挂着的 key：保留可见，可手动解除 */}
-                  {r.key && !defByKey.has(r.key) && (
-                    <option value={r.key}>{r.key}</option>
-                  )}
-                </select>
+                {isBase && (
+                  <select
+                    value={r.key}
+                    onChange={(e) => linkRow(i, e.target.value)}
+                    title={def ? `${def.label} · ${def.key}` : t("prod.dictHint")}
+                    className={`${inputBase} w-28 shrink-0 font-mono text-[11px] ${r.key ? "" : "text-[var(--color-ink-faint)]"}`}
+                  >
+                    <option value="">—</option>
+                    {attrDefs.map((d) => (
+                      <option key={d.key} value={d.key}>
+                        {d.key}
+                      </option>
+                    ))}
+                    {/* 字典已删但行还挂着的 key：保留可见，可手动解除 */}
+                    {r.key && !defByKey.has(r.key) && (
+                      <option value={r.key}>{r.key}</option>
+                    )}
+                  </select>
+                )}
                 <div className="flex shrink-0 items-center">
                   <button
                     type="button"
@@ -276,7 +310,7 @@ export function SpecsEditor({
         )}
       </div>
 
-      {/* 认证 */}
+      {/* 认证徽章：语言无关，所有语言统一展示、任意 tab 可增删（存主字段） */}
       <div className="mt-6">
         <label className={labelCls}>{t("prod.certs")}</label>
         <div className="mt-2 flex flex-wrap items-center gap-2">

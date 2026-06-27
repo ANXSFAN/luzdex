@@ -418,7 +418,9 @@
     "transDoneCount": "Przetłumaczono {ok}/{total} języków",
     "genDone": "Szkic AI wstawiony — przejrzyj, popraw i zapisz",
     "savedOk": "Treść zapisana",
-    "transSavedOk": "Zapisano tłumaczenie: {lang}"
+    "transSavedOk": "Zapisano tłumaczenie: {lang}",
+    "transFromConfirm": "Przetłumaczyć z {lang} i nadpisać wszystkie inne języki. Kontynuować?",
+    "editLangHint": "Edytuj w bieżącej karcie języka; „Tłumaczenie AI“ odświeża pozostałe języki na jego podstawie."
   },
   "pdf": {
     "title": "Automatyczne wypełnianie z PDF",

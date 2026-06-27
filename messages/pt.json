@@ -418,7 +418,9 @@
     "transDoneCount": "{ok}/{total} idiomas traduzidos",
     "genDone": "Rascunho de IA preenchido — revise, ajuste e salve",
     "savedOk": "Conteúdo salvo",
-    "transSavedOk": "Tradução {lang} salva"
+    "transSavedOk": "Tradução {lang} salva",
+    "transFromConfirm": "Traduzir de {lang} e substituir todos os outros idiomas. Continuar?",
+    "editLangHint": "Edite na aba do idioma atual; «Tradução IA» atualiza os outros idiomas a partir dele."
   },
   "pdf": {
     "title": "Preencher automaticamente do PDF",
