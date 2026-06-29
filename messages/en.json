@@ -600,7 +600,9 @@
     "subProducts": "products",
     "subCats": "categories",
     "subSeries": "series",
-    "emptyProducts": "No products yet for this factory. Click “Sync from main site” at the top right, or upload via “Import”."
+    "emptyProducts": "No products yet for this factory. Click “Sync from main site” at the top right, or upload via “Import”.",
+    "qrWhite": "White",
+    "qrTransparent": "Transparent"
   },
   "product": {
     "header": {

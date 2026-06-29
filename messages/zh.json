@@ -600,7 +600,9 @@
     "subProducts": "产品",
     "subCats": "分类",
     "subSeries": "系列",
-    "emptyProducts": "当前工厂还没有产品，点击右上角「从主站同步产品」或到「导入」上传"
+    "emptyProducts": "当前工厂还没有产品，点击右上角「从主站同步产品」或到「导入」上传",
+    "qrWhite": "白底",
+    "qrTransparent": "透明"
   },
   "product": {
     "header": {

@@ -600,7 +600,9 @@
     "subProducts": "producten",
     "subCats": "categorieën",
     "subSeries": "series",
-    "emptyProducts": "Nog geen producten voor deze fabriek. Klik rechtsboven op 'Synchroniseren vanaf hoofdsite' of upload via 'Importeren'."
+    "emptyProducts": "Nog geen producten voor deze fabriek. Klik rechtsboven op 'Synchroniseren vanaf hoofdsite' of upload via 'Importeren'.",
+    "qrWhite": "Wit",
+    "qrTransparent": "Transparant"
   },
   "product": {
     "header": {

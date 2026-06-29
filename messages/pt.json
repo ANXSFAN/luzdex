@@ -600,7 +600,9 @@
     "subProducts": "produtos",
     "subCats": "categorias",
     "subSeries": "séries",
-    "emptyProducts": "Ainda sem produtos para esta fábrica. Clique em «Sincronizar do site principal» no canto superior direito ou carregue via «Importar»."
+    "emptyProducts": "Ainda sem produtos para esta fábrica. Clique em «Sincronizar do site principal» no canto superior direito ou carregue via «Importar».",
+    "qrWhite": "Branco",
+    "qrTransparent": "Transparente"
   },
   "product": {
     "header": {

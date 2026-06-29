@@ -600,7 +600,9 @@
     "subProducts": "produits",
     "subCats": "catégories",
     "subSeries": "séries",
-    "emptyProducts": "Aucun produit pour cette usine. Cliquez sur « Synchroniser depuis le site principal » en haut à droite, ou importez via « Import »."
+    "emptyProducts": "Aucun produit pour cette usine. Cliquez sur « Synchroniser depuis le site principal » en haut à droite, ou importez via « Import ».",
+    "qrWhite": "Blanc",
+    "qrTransparent": "Transparent"
   },
   "product": {
     "header": {
